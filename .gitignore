@@ -1,7 +1,6 @@
-# Windows thumbnail cache files
+# Windows image file caches
 Thumbs.db
 ehthumbs.db
-ehthumbs_vista.db
 
 # Folder config file
 Desktop.ini
@@ -9,15 +8,38 @@ Desktop.ini
 # Recycle Bin used on file shares
 $RECYCLE.BIN/
 
-# Windows Installer files
-*.cab
-*.msi
-*.msm
-*.msp
-
 # Windows shortcuts
 *.lnk
 
-# =========================
-# Operating System Files
-# =========================
+# build files
+*.o
+*.d
+
+#binaries
+*.so
+
+#libs
+*.a
+
+#files created by build
+*.apk
+*.ap_
+*.class
+*.keystore
+projects/Android/build/*
+assets/oculussig*
+Projects/Android/.externalNativeBuild/ndkBuild/debug/arm64-v8a/android_gradle_build.json
+*.json
+Projects/Android/.externalNativeBuild/ndkBuild/debug/arm64-v8a/ndkBuild_build_command.txt
+Projects/Android/.externalNativeBuild/ndkBuild/debug/arm64-v8a/ndkBuild_build_output.txt
+Projects/Android/.externalNativeBuild/ndkBuild/release/arm64-v8a/ndkBuild_build_command.txt
+Projects/Android/.externalNativeBuild/ndkBuild/release/armeabi-v7a/ndkBuild_build_output.txt
+*.bin
+Projects/Android/.gradle/4.4/fileHashes/fileHashes.lock
+*.ser
+Projects/Android/.idea/codeStyles/Project.xml
+*.xml
+Projects/Android/.externalNativeBuild/ndkBuild/debug/armeabi-v7a/ndkBuild_build_command.txt
+Projects/Android/.externalNativeBuild/ndkBuild/release/armeabi-v7a/ndkBuild_build_command.txt
+Projects/Android/.externalNativeBuild/ndkBuild/debug/armeabi-v7a/ndkBuild_build_output.txt
+Projects/Android/.externalNativeBuild/ndkBuild/release/arm64-v8a/ndkBuild_build_output.txt
