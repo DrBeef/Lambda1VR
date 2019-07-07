@@ -20,7 +20,7 @@ ifeq ($(TARGET_ARCH_ABI),armeabi-v7a-hard)
 LOCAL_MODULE_FILENAME = libclient_hardfp
 endif
 
-LOCAL_CFLAGS += -DCLIENT_DLL=1
+LOCAL_CFLAGS += -DCLIENT_DLL=1 -DVR
 
 SRCS=
 SRCS_C=
