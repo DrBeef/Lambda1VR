@@ -839,6 +839,9 @@ void IN_JoyAppendMove( usercmd_t *cmd, float forwardmove, float sidemove )
 	}
 }
 
+void VR_GetMove( float *forward, float *side, float *yaw, float *pitch, float *roll );
+
+
 /*
 ================
 IN_EngineAppendMove
@@ -848,7 +851,11 @@ Called from cl_main.c after generating command in client
 */
 void IN_EngineAppendMove( float frametime, usercmd_t *cmd, qboolean active )
 {
+#ifdef VR
+	float forward, side, dpitch, dyaw, droll;
+#else
 	float forward, side, dpitch, dyaw;
+#endif
 
 	if( clgame.dllFuncs.pfnLookEvent )
 		return;
@@ -856,7 +863,11 @@ void IN_EngineAppendMove( float frametime, usercmd_t *cmd, qboolean active )
 	if( cls.key_dest != key_game || cl.refdef.paused || cl.refdef.intermission )
 		return;
 
+#ifdef VR
+	forward = side = dpitch = dyaw = droll = 0;
+#else
 	forward = side = dpitch = dyaw = 0;
+#endif
 
 	if(active)
 	{
@@ -880,7 +891,13 @@ void IN_EngineAppendMove( float frametime, usercmd_t *cmd, qboolean active )
 		}
 #endif
 		Joy_FinalizeMove( &forward, &side, &dyaw, &dpitch );
+
+#ifdef VR
+		VR_GetMove( &forward, &side, &dyaw, &dpitch, &droll );
+#else
 		Touch_GetMove( &forward, &side, &dyaw, &dpitch );
+#endif
+
 		IN_JoyAppendMove( cmd, forward, side );
 #ifdef USE_EVDEV
 		IN_EvdevMove( &dyaw, &dpitch );
@@ -896,6 +913,9 @@ void IN_EngineAppendMove( float frametime, usercmd_t *cmd, qboolean active )
 		cl.refdef.cl_viewangles[YAW] += dyaw * sensitivity;
 		cl.refdef.cl_viewangles[PITCH] += dpitch * sensitivity;
 		cl.refdef.cl_viewangles[PITCH] = bound( -90, cl.refdef.cl_viewangles[PITCH], 90 );
+#ifdef VR
+		cl.refdef.cl_viewangles[ROLL] += droll;
+#endif
 	}
 }
 /*
@@ -908,7 +928,12 @@ Called every frame, even if not generating commands
 void Host_InputFrame( void )
 {
 	qboolean	shutdownMouse = false;
+
+#ifdef VR
+	float forward = 0, side = 0, pitch = 0, yaw = 0, roll = 0;
+#else
 	float forward = 0, side = 0, pitch = 0, yaw = 0;
+#endif
 
 #ifdef USE_EVDEV
 	IN_EvdevFrame();
@@ -935,7 +960,13 @@ void Host_InputFrame( void )
 #endif
 
 		Joy_FinalizeMove( &forward, &side, &yaw, &pitch );
+
+#ifdef VR
+		VR_GetMove( &forward, &side, &yaw, &pitch, &roll );
+#else
 		Touch_GetMove( &forward, &side, &yaw, &pitch );
+#endif
+
 #ifdef USE_EVDEV
 		IN_EvdevMove( &yaw, &pitch );
 #endif
@@ -949,7 +980,11 @@ void Host_InputFrame( void )
 
 		if( cls.key_dest == key_game )
 		{
+#ifdef VR
+			clgame.dllFuncs.pfnLookEvent( yaw, pitch, roll );
+#else
 			clgame.dllFuncs.pfnLookEvent( yaw, pitch );
+#endif
 			clgame.dllFuncs.pfnMoveEvent( forward, side );
 		}
 	}

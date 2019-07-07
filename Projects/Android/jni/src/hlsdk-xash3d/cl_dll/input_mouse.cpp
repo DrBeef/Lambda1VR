@@ -21,10 +21,21 @@ extern "C"  void DLLEXPORT IN_ClientMoveEvent( float forwardmove, float sidemove
 	currentInput->IN_ClientMoveEvent(forwardmove, sidemove);
 }
 
+#ifdef VR
+
+extern "C" void DLLEXPORT IN_ClientLookEvent( float relyaw, float relpitch, float relroll )
+{
+	currentInput->IN_ClientLookEvent(relyaw, relpitch, relroll);
+}
+
+#else
+
 extern "C" void DLLEXPORT IN_ClientLookEvent( float relyaw, float relpitch )
 {
-	currentInput->IN_ClientLookEvent(relyaw, relpitch);
+	currentInput->IN_ClientLookEvent(relyaw, relpitch );
 }
+
+#endif
 
 void IN_Move( float frametime, usercmd_t *cmd )
 {

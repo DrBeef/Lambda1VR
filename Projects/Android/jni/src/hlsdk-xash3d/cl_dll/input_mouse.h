@@ -9,7 +9,11 @@ class AbstractInput
 {
 public:
 	virtual void IN_ClientMoveEvent( float forwardmove, float sidemove ) = 0;
+#ifdef VR
+	virtual void IN_ClientLookEvent( float relyaw, float relpitch, float relroll ) = 0;
+#else
 	virtual void IN_ClientLookEvent( float relyaw, float relpitch ) = 0;
+#endif
 	virtual void IN_Move( float frametime, usercmd_t *cmd ) = 0;
 	virtual void IN_MouseEvent( int mstate ) = 0;
 	virtual void IN_ClearStates( void ) = 0;
@@ -25,7 +29,12 @@ class FWGSInput : public AbstractInput
 {
 public:
 	virtual void IN_ClientMoveEvent( float forwardmove, float sidemove );
+
+#ifdef VR
+	virtual void IN_ClientLookEvent( float relyaw, float relpitch, float relroll );
+#else
 	virtual void IN_ClientLookEvent( float relyaw, float relpitch );
+#endif
 	virtual void IN_Move( float frametime, usercmd_t *cmd );
 	virtual void IN_MouseEvent( int mstate );
 	virtual void IN_ClearStates( void );
@@ -40,8 +49,10 @@ protected:
 	float ac_forwardmove;
 	float ac_sidemove;
 	int ac_movecount;
+	float old_yaw;
 	float rel_yaw;
 	float rel_pitch;
+	float rel_roll;
 };
 
 // No need for goldsource input support on the platforms that are not supported by GoldSource.
@@ -51,7 +62,11 @@ class GoldSourceInput : public AbstractInput
 {
 public:
 	virtual void IN_ClientMoveEvent( float forwardmove, float sidemove ) {}
+#ifdef VR
+	virtual void IN_ClientLookEvent( float relyaw, float relpitch, float relroll ) {}
+#else
 	virtual void IN_ClientLookEvent( float relyaw, float relpitch ) {}
+#endif
 	virtual void IN_Move( float frametime, usercmd_t *cmd );
 	virtual void IN_MouseEvent( int mstate );
 	virtual void IN_ClearStates( void );

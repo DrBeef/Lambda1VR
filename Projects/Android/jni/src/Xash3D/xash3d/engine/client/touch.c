@@ -111,6 +111,8 @@ struct touch_s
 	float side;
 	float yaw;
 	float pitch;
+	float x;
+	float y;
 
 	// editing
 	touch_button_t *edit;
@@ -1746,6 +1748,9 @@ static int Touch_ControlsEvent( touchEventType type, int fingerID, float x, floa
 
 int IN_TouchEvent( touchEventType type, int fingerID, float x, float y, float dx, float dy )
 {
+	//Store for rendering a simple pointer
+	touch.x = x;
+	touch.y = y;
 
 	// simulate menu mouse click
 	if( cls.key_dest != key_game && !touch_in_menu->integer )

@@ -415,7 +415,10 @@ void V_PostRender( void )
 
 	if( draw_2d )
 	{
-		//Touch_Draw();
+#ifndef VR
+	    //No touch controls in VR!
+	    Touch_Draw();
+#endif
 		SCR_RSpeeds();
 		SCR_NetSpeeds();
 		SCR_DrawFPS();

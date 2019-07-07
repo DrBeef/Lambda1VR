@@ -651,53 +651,39 @@ static void R_SetupProjectionMatrix( const ref_params_t *fd, matrix4x4 m )
 	Matrix4x4_CreateProjection( m, xMax, xMin, yMax, yMin, zNear, zFar );
 }
 
-
+#ifdef VR
 /*
 =============
 R_SetupModelviewMatrix
 =============
 */
-static float R_GetWorldScale()
-{
-	return 100.0f; //Change to use a cvar
-}
-
-/*
-=============
-R_SetupModelviewMatrix
-=============
-*/
+extern convar_t *r_worldscale;
 extern int r_stereo_side;
 static void R_SetupModelviewMatrix( const ref_params_t *fd, matrix4x4 m )
 {
-#ifndef ORIGINAL
     Matrix4x4_CreateModelview( m );
-    Matrix4x4_ConcatTranslate( m, 0, R_GetWorldScale() * (0.065f / 2.0f) * ((r_stereo_side - 0.5f) * 2.0f), 0 );
+    Matrix4x4_ConcatTranslate( m, 0, r_worldscale->value * (0.065f / 2.0f) * ((r_stereo_side - 0.5f) * 2.0f), 0 );
     Matrix4x4_ConcatRotate( m, -fd->viewangles[ROLL], 1, 0, 0 );
     Matrix4x4_ConcatRotate( m, -fd->viewangles[PITCH], 0, 1, 0 );
     Matrix4x4_ConcatRotate( m, -fd->viewangles[YAW], 0, 0, 1 );
     Matrix4x4_ConcatTranslate( m, -fd->vieworg[0], -fd->vieworg[1], -fd->vieworg[2] );
-#else
-    matrix4x4 original;
-    Matrix4x4_CreateModelview( original );
-    vec3_t vieworg;
-    VectorNegate(fd->vieworg, vieworg);
-    vec3_t viewangles;
-    VectorNegate(fd->viewangles, viewangles);
-
-    matrix4x4 translate;
-    Matrix4x4_CreateFromEntity(translate, viewangles, vieworg, 1.0f);
-
-    /* adjust for stereo display */
-    matrix4x4 offsetmatrix;
-    Matrix4x4_LoadIdentity(offsetmatrix);
-    //Matrix4x4_CreateTranslate(offsetmatrix, 0, (0.065f / 2.0f) * ((r_stereo_side - 0.5f) * 2.0f), 0);
-
-    matrix4x4 temp;
-    Matrix4x4_Concat(temp, original, translate);
-    Matrix4x4_Concat(m, m, offsetmatrix);
-#endif
 }
+#else
+static void R_SetupModelviewMatrix( const ref_params_t *fd, matrix4x4 m )
+{
+#if 0
+	Matrix4x4_LoadIdentity( m );
+	Matrix4x4_ConcatRotate( m, -90, 1, 0, 0 );
+	Matrix4x4_ConcatRotate( m, 90, 0, 0, 1 );
+#else
+	Matrix4x4_CreateModelview( m );
+#endif
+	Matrix4x4_ConcatRotate( m, -fd->viewangles[2], 1, 0, 0 );
+	Matrix4x4_ConcatRotate( m, -fd->viewangles[0], 0, 1, 0 );
+	Matrix4x4_ConcatRotate( m, -fd->viewangles[1], 0, 0, 1 );
+	Matrix4x4_ConcatTranslate( m, -fd->vieworg[0], -fd->vieworg[1], -fd->vieworg[2] );
+}
+#endif
 
 /*
 =============

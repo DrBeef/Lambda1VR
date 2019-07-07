@@ -133,10 +133,20 @@ void FWGSInput::IN_ClientMoveEvent( float forwardmove, float sidemove )
 	ac_movecount++;
 }
 
+#ifdef VR
+void FWGSInput::IN_ClientLookEvent( float relyaw, float relpitch, float relroll )
+#else
 void FWGSInput::IN_ClientLookEvent( float relyaw, float relpitch )
+#endif
 {
+#ifdef VR
+	rel_yaw = relyaw;
+	rel_pitch = relpitch;
+	rel_roll = relroll;
+#else
 	rel_yaw += relyaw;
 	rel_pitch += relpitch;
+#endif
 }
 
 // Rotate camera and add move values to usercmd
@@ -170,6 +180,8 @@ void FWGSInput::IN_Move( float frametime, usercmd_t *cmd )
 	{
 		gEngfuncs.GetViewAngles( viewangles );
 	}
+
+#ifndef VR
 	if( gHUD.GetSensitivity() != 0 )
 	{
 		rel_yaw *= gHUD.GetSensitivity();
@@ -180,17 +192,30 @@ void FWGSInput::IN_Move( float frametime, usercmd_t *cmd )
 		rel_yaw *= sensitivity->value;
 		rel_pitch *= sensitivity->value;
 	}
+#endif
+
+	viewangles[YAW] -= old_yaw;
 	viewangles[YAW] += rel_yaw;
+
+#ifndef VR
 	if( fLadder )
 	{
 		if( cl_laddermode->value == 1 )
 			viewangles[YAW] -= ac_sidemove * 5;
 		ac_sidemove = 0;
 	}
+#endif
+
 	if( gHUD.m_MOTD.m_bShow )
 		gHUD.m_MOTD.scroll += rel_pitch;
 	else
+#ifndef VR
 		viewangles[PITCH] += rel_pitch;
+#else
+		viewangles[PITCH] = rel_pitch;
+
+	viewangles[ROLL] = rel_roll;
+#endif //!VR
 
 	if( viewangles[PITCH] > cl_pitchdown->value )
 		viewangles[PITCH] = cl_pitchdown->value;
@@ -199,7 +224,10 @@ void FWGSInput::IN_Move( float frametime, usercmd_t *cmd )
 	
 	// HACKHACK: change viewangles directly in viewcode, 
 	// so viewangles when player is dead will not be changed on server
+
+#ifndef VR
 	if( !CL_IsDead() )
+#endif
 	{
 		gEngfuncs.SetViewAngles( viewangles );
 	}
@@ -220,7 +248,13 @@ void FWGSInput::IN_Move( float frametime, usercmd_t *cmd )
 		}
 	}
 
+#ifndef VR
 	ac_sidemove = ac_forwardmove = rel_pitch = rel_yaw = 0;
+#else
+    old_yaw = rel_yaw;
+	ac_sidemove = ac_forwardmove = rel_pitch = rel_roll = 0;
+#endif
+
 	ac_movecount = 0;
 }
 
@@ -281,5 +315,5 @@ void FWGSInput::IN_Init( void )
 	sensitivity = gEngfuncs.pfnRegisterVariable( "sensitivity", "3", FCVAR_ARCHIVE );
 	in_joystick = gEngfuncs.pfnRegisterVariable( "joystick", "0", FCVAR_ARCHIVE );
 	cl_laddermode = gEngfuncs.pfnRegisterVariable( "cl_laddermode", "2", FCVAR_ARCHIVE );
-	ac_forwardmove = ac_sidemove = rel_yaw = rel_pitch = 0;
+	ac_forwardmove = ac_sidemove = rel_yaw = rel_pitch = old_yaw = 0;
 }

@@ -13,6 +13,9 @@ include $(XASH3D_CONFIG)
 
 LOCAL_CFLAGS += -D__MULTITEXTURE_SUPPORT__ -DXASH_GLES -DXASH_GL4ES -DUSE_EVDEV -DXASH_DYNAMIC_DLADDR -DCRASHHANDLER -DXASH_OPENSL -DXASH_SKIPCRTLIB -DXASH_FORCEINLINE -DXASH_FASTSTR
 
+#enable VR compatibility
+LOCAL_CFLAGS += -DVR
+
 XASH_COMMIT := $(firstword $(shell cd $(LOCAL_PATH)&&git rev-parse --short=6 HEAD) unknown)
 
 LOCAL_CFLAGS += -DXASH_BUILD_COMMIT=\"$(XASH_COMMIT)\"
@@ -41,6 +44,7 @@ LOCAL_EXPORT_C_INCLUDES := $(LOCAL_C_INCLUDES)
 
 LOCAL_SRC_FILES := \
 		   $(LOCAL_PATH)/../../../Lambda1VR/L1VR_SurfaceView.c \
+		   $(LOCAL_PATH)/../../../Lambda1VR/VrCompositor.c \
 		   $(LOCAL_PATH)/../../../Lambda1VR/argtable3.c \
 		   client/cl_cmds.c \
            client/cl_demo.c \

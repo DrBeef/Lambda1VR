@@ -54,6 +54,10 @@ convar_t	*gl_msaa;
 convar_t	*gl_overbright;
 convar_t	*gl_overbright_studio;
 
+#ifdef VR
+convar_t	*r_worldscale;
+#endif
+
 convar_t	*r_xpos;
 convar_t	*r_ypos;
 convar_t	*r_speeds;
@@ -872,6 +876,10 @@ void GL_InitCommands( void )
 	r_ypos = Cvar_Get( "r_ypos", "48", CVAR_GLCONFIG, "window position by vertical" );
 	r_underwater_distortion = Cvar_Get( "r_underwater_distortion", "0.4", CVAR_ARCHIVE, "underwater distortion speed" );
 	mp_decals = Cvar_Get( "mp_decals", "300", CVAR_ARCHIVE, "sets the maximum number of decals in multiplayer" );
+
+#ifdef VR
+	r_worldscale = Cvar_Get( "r_worldscale", "30", CVAR_ARCHIVE, "Sets the world scale for stereo separation" );
+#endif
 
 	gl_picmip = Cvar_Get( "gl_picmip", "0", CVAR_GLCONFIG, "reduces resolution of textures by powers of 2" );
 	gl_skymip = Cvar_Get( "gl_skymip", "0", CVAR_GLCONFIG, "reduces resolution of skybox textures by powers of 2" );

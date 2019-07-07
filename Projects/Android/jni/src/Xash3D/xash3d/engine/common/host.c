@@ -258,6 +258,54 @@ Host_AbortCurrentFrame
 aborts the current host frame and goes on with the next one
 ================
 */
+
+#ifndef VR
+
+void Host_Frame( float time );
+void Host_RunFrame()
+{
+	static double	oldtime, newtime;
+
+	if( !oldtime )
+		oldtime = Sys_DoubleTime();
+
+#if XASH_INPUT == INPUT_SDL
+	SDLash_RunEvents();
+#elif XASH_INPUT == INPUT_ANDROID
+	Android_RunEvents();
+#endif
+
+	newtime = Sys_DoubleTime ();
+
+	Host_Frame( newtime - oldtime );
+
+	oldtime = newtime;
+#ifdef __EMSCRIPTEN__
+	#ifdef EMSCRIPTEN_ASYNC
+	emscripten_sleep(1);
+#else
+	if( host.crashed || host.shutdown_issued )
+		emscripten_cancel_main_loop();
+#endif
+#endif
+}
+
+void Host_FrameLoop()
+{
+#if defined __EMSCRIPTEN__ && !defined EMSCRIPTEN_ASYNC
+	emscripten_cancel_main_loop();
+	emscripten_set_main_loop( Host_RunFrame, 0, 0 );
+#else
+	// main window message loop
+	while( !host.crashed && !host.shutdown_issued )
+	{
+		Host_RunFrame();
+	}
+#endif
+}
+
+#endif // !VR
+
 void EXPORT Host_AbortCurrentFrame( void )
 {
 #ifndef NO_SJLJ
@@ -646,10 +694,12 @@ qboolean Host_FilterTime( float time )
 
 	host.realtime += time;
 
+	//Don't limit FPS in VR
+#ifndef VR
 	// dedicated's tic_rate regulates server frame rate.  Don't apply fps filter here.
 	fps = host_maxfps->value;
 
-	if( false )// fps != 0 )
+	if(  fps != 0 )
 	{
 		float	minframetime;
 
@@ -665,6 +715,7 @@ qboolean Host_FilterTime( float time )
 			return false;
 		}
 	}
+#endif
 
 	host.frametime = host.realtime - oldtime;
 	host.realframetime = bound( MIN_FRAMETIME, host.frametime, MAX_FRAMETIME );
@@ -724,6 +775,7 @@ void Host_Autosleep( void )
 Host_Frame
 =================
 */
+#ifdef VR
 
 void Host_Frame( int eye )
 {
@@ -732,6 +784,44 @@ void Host_Frame( int eye )
 
 	HTTP_Run();
 }
+#else
+
+void Host_Frame( float time )
+{
+#ifndef NO_SJLJ
+	if( setjmp( host.abortframe ))
+		return;
+#endif
+
+	Host_Autosleep();
+
+	// decide the simulation time
+	if( !Host_FilterTime( time ))
+		return;
+
+	rand (); // keep the random time dependent
+
+	Sys_SendKeyEvents (); // call WndProc on WIN32
+
+	Host_InputFrame ();	// input frame
+
+#ifndef XASH_DEDICATED
+	Host_ClientBegin(); // prepare client command
+#endif
+
+	Host_GetConsoleCommands ();
+
+	Host_ServerFrame (); // server frame
+
+	if ( !Host_IsDedicated() )
+		Host_ClientFrame (); // client frame
+
+	HTTP_Run();
+
+	host.framecount++;
+}
+
+#endif //VR
 
 /*
 ================
@@ -1162,6 +1252,7 @@ void Host_FreeCommon( void )
 	Mem_FreePool( &host.mempool );
 }
 
+#ifdef VR
 
 static double oldtime, newtime;
 void Host_BeginFrame() {
@@ -1215,6 +1306,8 @@ void Host_EndFrame()
 #endif
 }
 
+#endif //VR
+
 /*
 =================
 Host_Main
@@ -1238,7 +1331,7 @@ int EXPORT Host_Main( int argc, const char **argv, const char *progname, int bCh
 	}
 
 	host_cheats = Cvar_Get( "sv_cheats", "0", CVAR_LATCH, "allow usage of cheat commands and variables" );
-	host_maxfps = Cvar_Get( "fps_max", "150", CVAR_ARCHIVE, "host fps upper limit" );
+	host_maxfps = Cvar_Get( "fps_max", "72", CVAR_ARCHIVE, "host fps upper limit" );
 	host_sleeptime = Cvar_Get( "sleeptime", "1", CVAR_ARCHIVE, "higher value means lower accuracy" );
 	host_framerate = Cvar_Get( "host_framerate", "0", 0, "locks frame timing to this value in seconds" );  
 	host_serverstate = Cvar_Get( "host_serverstate", "0", CVAR_INIT, "displays current server state" );
@@ -1374,6 +1467,11 @@ int EXPORT Host_Main( int argc, const char **argv, const char *progname, int bCh
 	if( host.state == HOST_INIT )
 		host.state = HOST_FRAME; // initialization is finished
 
+#ifndef VR
+	Host_FrameLoop();
+
+	// never reached
+#endif
 	return 0;
 }
 

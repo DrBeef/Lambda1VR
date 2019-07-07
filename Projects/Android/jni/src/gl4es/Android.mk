@@ -78,7 +78,9 @@ LOCAL_CFLAGS += -g -std=c99 -funwind-tables -O3 -DBCMHOST -fvisibility=hidden -i
 LOCAL_CFLAGS += -DNOX11
 LOCAL_CFLAGS += -DNO_GBM
 LOCAL_CFLAGS += -DDEFAULT_ES=2
+LOCAL_CFLAGS += -DNO_INIT_CONSTRUCTOR
 
-LOCAL_LDLIBS := -ldl -llog
+
+LOCAL_LDLIBS := -ldl -llog -lEGL -lGLESv3
 
 include $(BUILD_SHARED_LIBRARY)

@@ -40,8 +40,6 @@ import static android.system.Os.setenv;
 	private SurfaceView mView;
 	private SurfaceHolder mSurfaceHolder;
 	private long mNativeHandle;
-
-	private final boolean m_asynchronousTracking = false;
 	
 	@Override protected void onCreate( Bundle icicle )
 	{

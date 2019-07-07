@@ -30,18 +30,14 @@ Copyright	:	Copyright 2015 Oculus VR, LLC. All Rights reserved.
 #include <GLES3/gl3.h>
 #include <GLES3/gl3ext.h>
 
-//GL4ES
-//#include <../src/gl/loader.h>
 
-//#include <common/mathlib.h>
 #include <common/common.h>
 #include <common/library.h>
 #include <common/cvardef.h>
 #include <common/xash3d_types.h>
 #include <engine/keydefs.h>
-//#include <menu.h>
-#include <VrApi_Types.h>
 #include <client/touch.h>
+#include <client/client.h>
 
 #if !defined( EGL_OPENGL_ES3_BIT_KHR )
 #define EGL_OPENGL_ES3_BIT_KHR		0x0040
@@ -79,20 +75,16 @@ PFNEGLGETSYNCATTRIBKHRPROC		eglGetSyncAttribKHR;
 #include "VrApi_Helpers.h"
 #include "VrApi_SystemUtils.h"
 #include "VrApi_Input.h"
+#include "VrApi_Types.h"
+
 #include "../gl4es/src/gl/loader.h"
+
+#include "VrCompositor.h"
 
 #ifndef NDEBUG
 #define DEBUG 1
 #endif
 
-#define LOG_TAG "Lambda1VR"
-
-#define ALOGE(...) __android_log_print( ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__ )
-#if DEBUG
-#define ALOGV(...) __android_log_print( ANDROID_LOG_VERBOSE, LOG_TAG, __VA_ARGS__ )
-#else
-#define ALOGV(...)
-#endif
 
 int CPU_LEVEL			= 2;
 int GPU_LEVEL			= 3;
@@ -156,6 +148,10 @@ static bool xash_initialised = false;
 typedef void (*pfnChangeGame)( const char *progname );
 extern int Host_Main( int argc, const char **argv, const char *progname, int bChangeGame, pfnChangeGame func );
 
+static bool useScreenLayer()
+{
+	return (cls.demoplayback || cls.state == ca_cinematic || cls.key_dest != key_game);
+}
 
 //Timing stuff for joypad control
 static long oldtime=0;
@@ -193,23 +189,6 @@ float weaponOffset[3];
 
 float horizFOV;
 float vertFOV;
-
-int bigScreen = 0;
-ovrMatrix4f modelScreen;
-ovrMatrix4f rotation;
-
-void BigScreenMode(int mode)
-{
-	if (mode == 1)// && key_consoleactive == 0) // bit of a hack, but only way rotation set when menu first invoked
-	{
-		rotation = ovrMatrix4f_CreateRotation( 0.0f, radians(hmdorientation[YAW]), 0.0f );
-	}
-
-	if (bigScreen != 2)
-	{
-		bigScreen = mode;
-	}
-}
 
 extern int stereoMode;
 qboolean demoplayback = false;
@@ -356,43 +335,6 @@ static const char * GlFrameBufferStatusString( GLenum status )
 	}
 }
 
-#define CHECK_GL_ERRORS
-#ifdef CHECK_GL_ERRORS
-
-static const char * GlErrorString( GLenum error )
-{
-	switch ( error )
-	{
-		case GL_NO_ERROR:						return "GL_NO_ERROR";
-		case GL_INVALID_ENUM:					return "GL_INVALID_ENUM";
-		case GL_INVALID_VALUE:					return "GL_INVALID_VALUE";
-		case GL_INVALID_OPERATION:				return "GL_INVALID_OPERATION";
-		case GL_INVALID_FRAMEBUFFER_OPERATION:	return "GL_INVALID_FRAMEBUFFER_OPERATION";
-		case GL_OUT_OF_MEMORY:					return "GL_OUT_OF_MEMORY";
-		default: return "unknown";
-	}
-}
-
-static void GLCheckErrors( int line )
-{
-	for ( int i = 0; i < 10; i++ )
-	{
-		const GLenum error = glGetError();
-		if ( error == GL_NO_ERROR )
-		{
-			break;
-		}
-		ALOGE( "GL error on line %d: %s", line, GlErrorString( error ) );
-	}
-}
-
-#define GL( func )		func; GLCheckErrors( __LINE__ );
-
-#else // CHECK_GL_ERRORS
-
-#define GL( func )		func;
-
-#endif // CHECK_GL_ERRORS
 
 /*
 ================================================================================
@@ -580,17 +522,6 @@ ovrFramebuffer
 ================================================================================
 */
 
-typedef struct
-{
-	int						Width;
-	int						Height;
-	int						Multisamples;
-	int						TextureSwapChainLength;
-	int						TextureSwapChainIndex;
-	ovrTextureSwapChain *	ColorTextureSwapChain;
-	GLuint *				DepthBuffers;
-	GLuint *				FrameBuffers;
-} ovrFramebuffer;
 
 static void ovrFramebuffer_Clear( ovrFramebuffer * frameBuffer )
 {
@@ -668,7 +599,7 @@ static bool ovrFramebuffer_Create( ovrFramebuffer * frameBuffer, const GLenum co
 	return true;
 }
 
-static void ovrFramebuffer_Destroy( ovrFramebuffer * frameBuffer )
+void ovrFramebuffer_Destroy( ovrFramebuffer * frameBuffer )
 {
     LOAD_GLES2(glDeleteFramebuffers);
     LOAD_GLES2(glDeleteRenderbuffers);
@@ -684,22 +615,20 @@ static void ovrFramebuffer_Destroy( ovrFramebuffer * frameBuffer )
 	ovrFramebuffer_Clear( frameBuffer );
 }
 
-static void ovrFramebuffer_SetCurrent( ovrFramebuffer * frameBuffer )
+void ovrFramebuffer_SetCurrent( ovrFramebuffer * frameBuffer )
 {
     LOAD_GLES2(glBindFramebuffer);
 	GL( gles_glBindFramebuffer( GL_DRAW_FRAMEBUFFER, frameBuffer->FrameBuffers[frameBuffer->TextureSwapChainIndex] ) );
 }
 
-static void ovrFramebuffer_SetNone()
+void ovrFramebuffer_SetNone()
 {
     LOAD_GLES2(glBindFramebuffer);
 	GL( gles_glBindFramebuffer( GL_DRAW_FRAMEBUFFER, 0 ) );
 }
 
-static void ovrFramebuffer_Resolve( ovrFramebuffer * frameBuffer )
+void ovrFramebuffer_Resolve( ovrFramebuffer * frameBuffer )
 {
-    LOAD_GLES2(glFlush);
-
 	// Discard the depth buffer, so the tiler won't need to write it back out to memory.
 	const GLenum depthAttachment[1] = { GL_DEPTH_ATTACHMENT };
 	glInvalidateFramebuffer( GL_DRAW_FRAMEBUFFER, 1, depthAttachment );
@@ -708,14 +637,14 @@ static void ovrFramebuffer_Resolve( ovrFramebuffer * frameBuffer )
     glFlush();
 }
 
-static void ovrFramebuffer_Advance( ovrFramebuffer * frameBuffer )
+void ovrFramebuffer_Advance( ovrFramebuffer * frameBuffer )
 {
 	// Advance to the next texture from the set.
 	frameBuffer->TextureSwapChainIndex = ( frameBuffer->TextureSwapChainIndex + 1 ) % frameBuffer->TextureSwapChainLength;
 }
 
 
-static void ovrFramebuffer_ClearEdgeTexels( ovrFramebuffer * frameBuffer )
+void ovrFramebuffer_ClearEdgeTexels( ovrFramebuffer * frameBuffer )
 {
     LOAD_GLES2(glEnable);
     LOAD_GLES2(glDisable);
@@ -758,148 +687,20 @@ ovrRenderer
 */
 
 
-typedef struct
-{
-	ovrFramebuffer	FrameBuffer[VRAPI_FRAME_LAYER_EYE_MAX];
-	ovrFramebuffer	L1VRFrameBuffer;
-	ovrMatrix4f		ProjectionMatrix;
-	int				NumBuffers;
-} ovrRenderer;
-
-static void ovrRenderer_Clear( ovrRenderer * renderer )
+void ovrRenderer_Clear( ovrRenderer * renderer )
 {
 	for ( int eye = 0; eye < VRAPI_FRAME_LAYER_EYE_MAX; eye++ )
 	{
 		ovrFramebuffer_Clear( &renderer->FrameBuffer[eye] );
 	}
-	ovrFramebuffer_Clear( &renderer->L1VRFrameBuffer );
 	renderer->ProjectionMatrix = ovrMatrix4f_CreateIdentity();
 	renderer->NumBuffers = VRAPI_FRAME_LAYER_EYE_MAX;
 }
 
 
-static const char VERTEX_SHADER[] =
-		"uniform mat4 u_MVPMatrix;"
-		"attribute vec4 a_Position;"
-		"attribute vec2 a_texCoord;"
-		"varying vec2 v_texCoord;"
-		"void main() {"
-		"  gl_Position = u_MVPMatrix * a_Position;"
-		"  v_texCoord = a_texCoord;"
-		"}";
-
-
-static const char FRAGMENT_SHADER[] =
-		"precision mediump float;"
-		"varying vec2 v_texCoord;"
-		"uniform sampler2D s_texture;"
-		"uniform sampler2D s_texture1;"
-		"void main() {"
-		"  gl_FragColor = texture2D( s_texture, v_texCoord )  *  texture2D( s_texture1, v_texCoord );"
-		"}";
-
-int loadShader(int type, const char * shaderCode){
-    LOAD_GLES2(glCreateShader);
-    LOAD_GLES2(glShaderSource);
-    LOAD_GLES2(glCompileShader);
-
-	int shader = gles_glCreateShader(type);
-	GL( gles_glShaderSource(shader, 1, &shaderCode, 0));
-	GL( gles_glCompileShader(shader));
-	return shader;
-}
-
-int BuildScreenVignetteTexture( )
+void ovrRenderer_Create( ovrRenderer * renderer, const ovrJava * java )
 {
-    LOAD_GLES2(glGenTextures);
-    LOAD_GLES2(glBindTexture);
-    LOAD_GLES2(glTexImage2D);
-    LOAD_GLES2(glTexParameteri);
-
-	static const int scale = 8;
-	static const int width = 10 * scale;
-	static const int height = 8 * scale;
-	unsigned char buffer[width * height];
-	memset( buffer, 255, sizeof( buffer ) );
-	for ( int i = 0; i < width; i++ )
-	{
-		buffer[i] = 0;
-		buffer[width*height - 1 - i] = 0;
-	}
-	for ( int i = 0; i < height; i++ )
-	{
-		buffer[i * width] = 0;
-		buffer[i * width + width - 1] = 0;
-	}
-	GLuint texId = 0;
-	gles_glGenTextures( 1, &texId );
-    gles_glBindTexture( GL_TEXTURE_2D, texId );
-    gles_glTexImage2D( GL_TEXTURE_2D, 0, GL_LUMINANCE, width, height, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, buffer );
-    gles_glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
-    gles_glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
-    gles_glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-    gles_glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
-    gles_glBindTexture( GL_TEXTURE_2D, 0 );
-
-	return texId;
-}
-
-static short indices[6] = {0, 1, 2, 0, 2, 3};
-
-static float uvs[8] = {
-		0.0f, 1.0f,
-		0.0f, 0.0f,
-		1.0f, 0.0f,
-		1.0f, 1.0f
-};
-
-static float SCREEN_COORDS[12] = {
-		-2.0f, 1.75f, 0.0f,
-		-2.0f, -1.75f, 0.0f,
-		2.0f, -1.75f, 0.0f,
-		2.0f, 1.75f, 0.0f
-};
-
-int vignetteTexture = 0;
-
-int sp_Image = 0;
-int positionParam = 0;
-int texCoordParam = 0;
-int samplerParam = 0;
-int vignetteParam = 0;
-int modelViewProjectionParam = 0;
-
-static void ovrRenderer_Create( ovrRenderer * renderer, const ovrJava * java )
-{
-    LOAD_GLES2(glCreateProgram);
-    LOAD_GLES2(glAttachShader);
-    LOAD_GLES2(glLinkProgram);
-    LOAD_GLES2(glGetAttribLocation);
-    LOAD_GLES2(glGetUniformLocation);
-
 	renderer->NumBuffers = VRAPI_FRAME_LAYER_EYE_MAX;
-
-	 // Create the shaders, images
-	int vertexShader = loadShader(GL_VERTEX_SHADER, VERTEX_SHADER);
-    int fragmentShader = loadShader(GL_FRAGMENT_SHADER, FRAGMENT_SHADER);
-
-
-	sp_Image = gles_glCreateProgram();             // create empty OpenGL ES Program
-	GL( gles_glAttachShader(sp_Image, vertexShader));   // add the vertex shader to program
-    GL( gles_glAttachShader(sp_Image, fragmentShader)); // add the fragment shader to program
-	GL( gles_glLinkProgram(sp_Image));                  // creates OpenGL ES program executable
-	positionParam = GL( gles_glGetAttribLocation(sp_Image, "a_Position"));
-	texCoordParam = GL( gles_glGetAttribLocation(sp_Image, "a_texCoord"));
-	modelViewProjectionParam = GL( gles_glGetUniformLocation(sp_Image, "u_MVPMatrix"));
-	samplerParam = GL( gles_glGetUniformLocation(sp_Image, "s_texture"));
-	vignetteParam = GL( gles_glGetUniformLocation(sp_Image, "s_texture1"));
-
-    vignetteTexture = BuildScreenVignetteTexture();
-
-    modelScreen = ovrMatrix4f_CreateIdentity();
-    rotation = ovrMatrix4f_CreateIdentity();
-    ovrMatrix4f translation = ovrMatrix4f_CreateTranslation( 0, 0, -3.0f );
-    modelScreen = ovrMatrix4f_Multiply( &modelScreen, &translation );
 
     horizFOV = vrapi_GetSystemPropertyInt( java, VRAPI_SYS_PROP_SUGGESTED_EYE_FOV_DEGREES_X);
     vertFOV = vrapi_GetSystemPropertyInt( java, VRAPI_SYS_PROP_SUGGESTED_EYE_FOV_DEGREES_Y);
@@ -914,12 +715,6 @@ static void ovrRenderer_Create( ovrRenderer * renderer, const ovrJava * java )
 							   NUM_MULTI_SAMPLES );
 	}
 
-	ovrFramebuffer_Create( &renderer->L1VRFrameBuffer,
-						   GL_RGBA8,
-						   vrapi_GetSystemPropertyInt( java, VRAPI_SYS_PROP_SUGGESTED_EYE_TEXTURE_WIDTH ),
-						   vrapi_GetSystemPropertyInt( java, VRAPI_SYS_PROP_SUGGESTED_EYE_TEXTURE_HEIGHT ),
-						   NUM_MULTI_SAMPLES );
-
 	// Setup the projection matrix.
 	renderer->ProjectionMatrix = ovrMatrix4f_CreateProjectionFov(
 			vrapi_GetSystemPropertyFloat( java, VRAPI_SYS_PROP_SUGGESTED_EYE_FOV_DEGREES_X ),
@@ -928,13 +723,12 @@ static void ovrRenderer_Create( ovrRenderer * renderer, const ovrJava * java )
 
 }
 
-static void ovrRenderer_Destroy( ovrRenderer * renderer )
+void ovrRenderer_Destroy( ovrRenderer * renderer )
 {
 	for ( int eye = 0; eye < renderer->NumBuffers; eye++ )
 	{
 		ovrFramebuffer_Destroy( &renderer->FrameBuffer[eye] );
 	}
-	ovrFramebuffer_Destroy( &renderer->L1VRFrameBuffer );
 	renderer->ProjectionMatrix = ovrMatrix4f_CreateIdentity();
 }
 
@@ -989,7 +783,7 @@ void setHMDPosition( float x, float y, float z )
 {
     hmdPosition[0] = x;
     hmdPosition[1] = y;
-    if (bigScreen)
+    if (useScreenLayer())
     {
         playerHeight = y;
     }
@@ -1000,99 +794,23 @@ void Host_BeginFrame();
 void Host_Frame(int eye);
 void Host_EndFrame();
 
-static ovrLayerProjection2 ovrRenderer_RenderFrame( ovrRenderer * renderer, const ovrJava * java,
+void VR_GetMove( float *forward, float *side, float *yaw, float *pitch, float *roll )
+{
+	*yaw = hmdorientation[YAW];
+	*pitch = hmdorientation[PITCH];
+	*roll = hmdorientation[ROLL];
+}
+
+void RenderFrame( ovrRenderer * renderer, const ovrJava * java,
 											const ovrTracking2 * tracking, ovrMobile * ovr )
 {
-    LOAD_GLES2(glEnable);
-    LOAD_GLES2(glDepthMask);
-    LOAD_GLES2(glDepthFunc);
-    LOAD_GLES2(glViewport);
-    LOAD_GLES2(glScissor);
-    LOAD_GLES2(glClearColor);
-    LOAD_GLES2(glClear);
-    LOAD_GLES2(glDisable);
-    LOAD_GLES2(glUseProgram);
-    LOAD_GLES2(glVertexAttribPointer);
-    LOAD_GLES2(glUniformMatrix4fv);
-    LOAD_GLES2(glActiveTexture);
-    LOAD_GLES2(glGetIntegerv);
-    LOAD_GLES2(glBindTexture);
-    LOAD_GLES2(glUniform1i);
-    LOAD_GLES2(glDrawElements);
-
-    ovrTracking2 updatedTracking = *tracking;
-
-    //Get orientation
-    // We extract Yaw, Pitch, Roll instead of directly using the orientation
-    // to allow "additional" yaw manipulation with mouse/controller.
-    const ovrQuatf quatHmd = tracking->HeadPose.Pose.Orientation;
-    const ovrVector3f positionHmd = tracking->HeadPose.Pose.Position;
-    QuatToYawPitchRoll(quatHmd, hmdorientation);
-    setHMDPosition(positionHmd.x, positionHmd.y, positionHmd.z);
-
-    //TODO: fix
-	if (true) { //cl_trackingmode.flags == 0) {
-		//Use hmd position for world position
-		setWorldPosition(positionHmd.x, positionHmd.y, positionHmd.z);
-	}
-
-    ALOGV("        HMD-Yaw: %f", hmdorientation[YAW]);
-    ALOGV("        HMD-Position: %f, %f, %f", positionHmd.x, positionHmd.y, positionHmd.z);
-
-    //Set move information - if showing menu, don't pass head orientation through
-//    QC_MoveEvent(hmdorientation[YAW], hmdorientation[PITCH], hmdorientation[ROLL]);
-
-    //Set everything up
-    Host_BeginFrame();
-
-	ovrMatrix4f eyeViewMatrixTransposed[2];
-	eyeViewMatrixTransposed[0] = ovrMatrix4f_Transpose( &updatedTracking.Eye[0].ViewMatrix );
-	eyeViewMatrixTransposed[1] = ovrMatrix4f_Transpose( &updatedTracking.Eye[1].ViewMatrix );
-
-	ovrMatrix4f projectionMatrixTransposed[2];
-	projectionMatrixTransposed[0] = ovrMatrix4f_Transpose( &updatedTracking.Eye[0].ProjectionMatrix );
-	projectionMatrixTransposed[1] = ovrMatrix4f_Transpose( &updatedTracking.Eye[1].ProjectionMatrix );
-
-
-	ovrLayerProjection2 layer = vrapi_DefaultLayerProjection2();
-	layer.HeadPose = updatedTracking.HeadPose;
-	for ( int eye = 0; eye < VRAPI_FRAME_LAYER_EYE_MAX; eye++ )
-	{
-		ovrFramebuffer * frameBuffer = &renderer->FrameBuffer[renderer->NumBuffers == 1 ? 0 : eye];
-		layer.Textures[eye].ColorSwapChain = frameBuffer->ColorTextureSwapChain;
-		layer.Textures[eye].SwapChainIndex = frameBuffer->TextureSwapChainIndex;
-
-        ovrMatrix4f projectionMatrix;
-		if (bigScreen) {
-            projectionMatrix = ovrMatrix4f_CreateProjectionFov(horizFOV, vertFOV,
-                                                                                 0.0f, 0.0f, 0.1f,
-                                                                                 0.0f);
-        } else{
-            projectionMatrix = ovrMatrix4f_CreateProjectionFov(horizFOV, vertFOV+4.0f,
-                                                                                 0.0f, 0.0f, 0.1f,
-                                                                                 0.0f);
-		}
-//        layer.Textures[eye].TexCoordsFromTanAngles = ovrMatrix4f_TanAngleMatrixFromProjection(
-//                &projectionMatrix);
-
-        //Gear VR
-        layer.Textures[eye].TexCoordsFromTanAngles = ovrMatrix4f_TanAngleMatrixFromProjection( &updatedTracking.Eye[eye].ProjectionMatrix );
-
-        layer.Textures[eye].TextureRect.x = 0;
-        layer.Textures[eye].TextureRect.y = 0;
-        layer.Textures[eye].TextureRect.width = 1.0f;
-        layer.Textures[eye].TextureRect.height = 1.0f;
-	}
-	layer.Header.Flags |= VRAPI_FRAME_LAYER_FLAG_CHROMATIC_ABERRATION_CORRECTION;
+	//Set everything up
+	Host_BeginFrame();
 
 	// Render the eye images.
 	for ( int eye = 0; eye < renderer->NumBuffers; eye++ )
 	{
-	    bool screen = false;
-		ovrFramebuffer * frameBuffer = &renderer->FrameBuffer[eye];
-		if (screen)//bigScreen != 0 || demoplayback)
-			frameBuffer = &renderer->L1VRFrameBuffer;
-
+		ovrFramebuffer * frameBuffer = &(renderer->FrameBuffer[eye]);
 		ovrFramebuffer_SetCurrent( frameBuffer );
 
 		{
@@ -1115,73 +833,6 @@ static ovrLayerProjection2 ovrRenderer_RenderFrame( ovrRenderer * renderer, cons
 
         //Clear edge to prevent smearing
         ovrFramebuffer_ClearEdgeTexels( frameBuffer );
-
-		if (screen)//bigScreen != 0 || demoplayback)// || key_consoleactive)
-		{
-			frameBuffer = &renderer->FrameBuffer[eye];
-			ovrFramebuffer_SetCurrent( frameBuffer );
-
-            // Apply the projection and view transformation
-            ovrMatrix4f modelView = ovrMatrix4f_Multiply( &updatedTracking.Eye[0].ViewMatrix, &rotation );
-            modelView = ovrMatrix4f_Multiply( &modelView, &modelScreen );
-            ovrMatrix4f modelViewProjection = ovrMatrix4f_Multiply( &renderer->ProjectionMatrix, &modelView );
-
-            GLint originalTex0 = 0;
-            GLint originalTex1 = 0;
-			GL( gles_glEnable( GL_SCISSOR_TEST ) );
-			GL( gles_glDepthMask( GL_TRUE ) );
-			GL( gles_glEnable( GL_DEPTH_TEST ) );
-			GL( gles_glDepthFunc( GL_LEQUAL ) );
-			GL( gles_glViewport( 0, 0, frameBuffer->Width, frameBuffer->Height ) );
-			GL( gles_glScissor( 0, 0, frameBuffer->Width, frameBuffer->Height ) );
-			GL( gles_glClearColor( 0.01f, 0.0f, 0.0f, 1.0f ) );
-			GL( gles_glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT ) );
-			GL( gles_glDisable(GL_SCISSOR_TEST));
-
-			GL( gles_glUseProgram(sp_Image));
-
-			// Set the position of the screen
-			GL( gles_glVertexAttribPointer(positionParam, 3, GL_FLOAT, GL_FALSE, 0, SCREEN_COORDS));
-
-			// Prepare the texture coordinates
-			GL( gles_glVertexAttribPointer(texCoordParam, 2, GL_FLOAT, GL_FALSE, 0, uvs) );
-
-			// Apply the projection and view transformation
-			modelView = ovrMatrix4f_Multiply( &modelView, &modelScreen );
-
-			GL( gles_glUniformMatrix4fv(modelViewProjectionParam, 1, GL_TRUE, (const GLfloat *)modelViewProjection.M[0]) );
-
-			GL( gles_glActiveTexture(GL_TEXTURE0) );
-
-			GLuint colorTexture = vrapi_GetTextureSwapChainHandle(
-					renderer->L1VRFrameBuffer.ColorTextureSwapChain,
-					renderer->L1VRFrameBuffer.TextureSwapChainIndex);
-            gles_glGetIntegerv(GL_TEXTURE_BINDING_2D, &originalTex0);
-			GL( gles_glBindTexture( GL_TEXTURE_2D, colorTexture ) );
-
-			// Set the sampler texture unit to our fbo's color texture
-			GL( gles_glUniform1i(samplerParam, 0) );
-
-			//Bind vignette texture to texture 1
-			GL( gles_glActiveTexture( GL_TEXTURE1 ) );
-            gles_glGetIntegerv(GL_TEXTURE_BINDING_2D, &originalTex1);
-			GL( gles_glBindTexture( GL_TEXTURE_2D,  vignetteTexture) );
-			GL( gles_glUniform1i(vignetteParam, 1) );
-
-			// Draw the triangles
-			GL( gles_glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, indices) );
-
-
-			//Restore previously active textures
-			GL( gles_glBindTexture(GL_TEXTURE_2D, originalTex1) );
-			GL( gles_glActiveTexture(GL_TEXTURE0) );
-			GL( gles_glBindTexture(GL_TEXTURE_2D, originalTex0) );
-
-
-            //Clear edge to prevent smearing
-            ovrFramebuffer_ClearEdgeTexels( frameBuffer );
-		}
-		
 		ovrFramebuffer_Resolve( frameBuffer );
 		ovrFramebuffer_Advance( frameBuffer );
 	}
@@ -1189,9 +840,8 @@ static ovrLayerProjection2 ovrRenderer_RenderFrame( ovrRenderer * renderer, cons
     Host_EndFrame();
 
 	ovrFramebuffer_SetNone();
-
-	return layer;
 }
+
 
 /*
 ================================================================================
@@ -1217,6 +867,7 @@ typedef struct
 	ANativeWindow *		NativeWindow;
 	bool				Resumed;
 	ovrMobile *			Ovr;
+    ovrScene			Scene;
 	long long			FrameIndex;
 	double 				DisplayTime;
 	int					SwapInterval;
@@ -1224,6 +875,8 @@ typedef struct
 	int					GpuLevel;
 	int					MainThreadTid;
 	int					RenderThreadTid;
+	ovrLayer_Union2		Layers[ovrMaxLayerCount];
+	int					LayerCount;
 	ovrRenderer			Renderer;
 } ovrApp;
 
@@ -1245,6 +898,7 @@ static void ovrApp_Clear( ovrApp * app )
 
 	ovrEgl_Clear( &app->Egl );
 
+	ovrScene_Clear( &app->Scene );
 	ovrRenderer_Clear( &app->Renderer );
 }
 
@@ -1374,104 +1028,6 @@ ovrTracking leftRemoteTracking;
 ovrInputStateTrackedRemote rightTrackedRemoteState_old;
 ovrInputStateTrackedRemote rightTrackedRemoteState_new;
 ovrTracking rightRemoteTracking;
-
-//Text Input stuff
-bool textInput = false;
-int shift = 0;
-int left_grid = 0;
-char left_lower[3][10] = {"bcfihgdae", "klorqpmjn", "tuwzyxvs "};
-char left_shift[3][10] = {"BCFIHGDAE", "KLORQPMJN", "TUWZYXVS "};
-int right_grid = 0;
-char right_lower[2][10] = {"236987415", "+-)]&[(?0"};
-char right_shift[2][10] = {"\"*:|._~/#", "%^}>,<{\\@"};
-
-char left_grid_map[2][3][3][8] = {
-    {
-        {
-                "a  b  c", "j  k  l", "s  t  u"
-        },
-        {
-                "d  e  f", "m  n  o", "v     w"
-        },
-        {
-                "g  h  i", "p  q  r", "x  y  z"
-        },
-    },
-    {
-        {
-                "A  B  C", "J  K  L", "S  T  U"
-        },
-        {
-                "D  E  F", "M  N  O", "V     W"
-        },
-        {
-                "G  H  I", "P  Q  R", "X  Y  Z"
-        },
-
-    }
-};
-
-
-char right_grid_map[2][3][2][8] = {
-        {
-                {
-                        "1  2  3", "?  +  -"
-                },
-                {
-                        "4  5  6", "(  0  )"
-                },
-                {
-                        "7  8  9", "[  &  ]"
-                },
-        },
-        {
-                {
-                        "/  \"  *", "\\  %  ^"
-                },
-                {
-                        "~  #  :", "{  @  }"
-                },
-                {
-                        "_  .  |", "<  ,  >"
-                },
-        }
-};
-
-
-static int getCharacter(float x, float y)
-{
-    int c = 8;
-    if (x < -0.3f || x > 0.3f || y < -0.3f || y > 0.3f)
-    {
-        if (x == 0.0f)
-        {
-            if (y > 0.0f)
-            {
-                c = 0;
-            }
-            else
-            {
-                c = 4;
-            }
-        }
-        else
-        {
-            float angle = atanf(y / x) / ((float)M_PI / 180.0f);
-            if (x > 0.0f)
-            {
-                c = (int)(((90.0f - angle) + 22.5f) / 45.0f);
-            }
-            else
-            {
-                c = (int)(((90.0f - angle) + 22.5f) / 45.0f) + 4;
-                if (c == 8)
-                    c = 0;
-            }
-        }
-    }
-
-    return c;
-}
 
 extern int IN_TouchEvent( touchEventType type, int fingerID, float x, float y, float dx, float dy );
 
@@ -1644,9 +1200,7 @@ static void ovrApp_HandleInput( ovrApp * app )
             const ovrQuatf quatRemote = rightRemoteTracking.HeadPose.Pose.Orientation;
             float remoteAngles[3];
             QuatToYawPitchRoll(quatRemote, remoteAngles);
-            bool touchingTrackpad = (rightTrackedRemoteState_new.TrackpadStatus != 0);
-            if (touchingTrackpad &&
-                remoteAngles[YAW] > -30.0f && remoteAngles[YAW] < 30.0f &&
+            if (remoteAngles[YAW] > -30.0f && remoteAngles[YAW] < 30.0f &&
                 remoteAngles[PITCH] > -30.0f && remoteAngles[PITCH] < 30.0f) {
 
                 int newRemoteTrigState = (rightTrackedRemoteState_new.Buttons & ovrButton_A) != 0;
@@ -1654,7 +1208,7 @@ static void ovrApp_HandleInput( ovrApp * app )
 
                 touchEventType t = event_motion;
 
-                float touchX = (remoteAngles[YAW] + 30.0f) / 60.0f;
+                float touchX = (-remoteAngles[YAW] + 30.0f) / 60.0f;
                 float touchY = (remoteAngles[PITCH] + 30.0f) / 60.0f;
                 if (newRemoteTrigState != prevRemoteTrigState)
                 {
@@ -1723,20 +1277,6 @@ static void ovrApp_HandleInput( ovrApp * app )
 
             controllerYawHeading = controllerAngles[YAW] - gunangles[YAW] + yawOffset;
             hmdYawHeading = hmdorientation[YAW] - gunangles[YAW] + yawOffset;
-
-#ifndef NDEBUG
-            //Change heading mode on click of off=hand joystick
-            if ((offHandTrackedRemoteState->Buttons & ovrButton_Joystick) && bigScreen == 0 &&
-                (offHandTrackedRemoteState->Buttons & ovrButton_Joystick) !=
-                (offHandTrackedRemoteStateOld->Buttons & ovrButton_Joystick)) {
-//                Cvar_SetValueQuick(&cl_walkdirection, 1 - cl_walkdirection.flags);
-//                if (cl_walkdirection.flags == 1) {
-//                    SCR_CenterPrint("Heading Mode: Direction of HMD");
-//                } else {
-//                    SCR_CenterPrint("Heading Mode: Direction of off-hand controller");
-//                }
-            }
-#endif
         }
 
         //Right-hand specific stuff
@@ -1767,41 +1307,10 @@ static void ovrApp_HandleInput( ovrApp * app )
 //            QC_MotionEvent(delta, rightTrackedRemoteState_new.Joystick.x,
 //                           rightTrackedRemoteState_new.Joystick.y);
 
-            if (bigScreen != 0) {
 
-                int rightJoyState = (rightTrackedRemoteState_new.Joystick.x > 0.7f ? 1 : 0);
-                if (rightJoyState != (rightTrackedRemoteState_old.Joystick.x > 0.7f ? 1 : 0)) {
-                    Key_Event('d', rightJoyState);
-                    //QC_KeyEvent(rightJoyState, 'd', 0);
-                }
-                rightJoyState = (rightTrackedRemoteState_new.Joystick.x < -0.7f ? 1 : 0);
-                if (rightJoyState != (rightTrackedRemoteState_old.Joystick.x < -0.7f ? 1 : 0)) {
-                    Key_Event('a', rightJoyState);
-                    //QC_KeyEvent(rightJoyState, 'a', 0);
-                }
-                rightJoyState = (rightTrackedRemoteState_new.Joystick.y < -0.7f ? 1 : 0);
-                if (rightJoyState != (rightTrackedRemoteState_old.Joystick.y < -0.7f ? 1 : 0)) {
-                    Key_Event(K_DOWNARROW, rightJoyState);
-                    //QC_KeyEvent(rightJoyState, K_DOWNARROW, 0);
-                }
-                rightJoyState = (rightTrackedRemoteState_new.Joystick.y > 0.7f ? 1 : 0);
-                if (rightJoyState != (rightTrackedRemoteState_old.Joystick.y > 0.7f ? 1 : 0)) {
-                    Key_Event(K_UPARROW, rightJoyState);
-                    //QC_KeyEvent(rightJoyState, K_UPARROW, 0);
-                }
-
-                //Click an option
-                handleTrackedControllerButton(&rightTrackedRemoteState_new,
-                                              &rightTrackedRemoteState_old, ovrButton_A, K_ENTER);
-
-                //Back button
-                handleTrackedControllerButton(&rightTrackedRemoteState_new,
-                                              &rightTrackedRemoteState_old, ovrButton_B, K_ESCAPE);
-            } else {
-                //Jump
-                handleTrackedControllerButton(&rightTrackedRemoteState_new,
-                                              &rightTrackedRemoteState_old, ovrButton_A, K_SPACE);
-            }
+            //Jump
+            handleTrackedControllerButton(&rightTrackedRemoteState_new,
+                                          &rightTrackedRemoteState_old, ovrButton_A, K_SPACE);
 
             if (cl_righthanded.flags) {
                 //Fire
@@ -1847,29 +1356,6 @@ static void ovrApp_HandleInput( ovrApp * app )
             handleTrackedControllerButton(&leftTrackedRemoteState_new, &leftTrackedRemoteState_old,
                                           ovrButton_Enter, K_ESCAPE);
 
-            if (bigScreen != 0) {
-                int leftJoyState = (leftTrackedRemoteState_new.Joystick.x > 0.7f ? 1 : 0);
-                if (leftJoyState != (leftTrackedRemoteState_old.Joystick.x > 0.7f ? 1 : 0)) {
-                    Key_Event('d', leftJoyState);
-                    //QC_KeyEvent(leftJoyState, 'd', 0);
-                }
-                leftJoyState = (leftTrackedRemoteState_new.Joystick.x < -0.7f ? 1 : 0);
-                if (leftJoyState != (leftTrackedRemoteState_old.Joystick.x < -0.7f ? 1 : 0)) {
-                    Key_Event('a', leftJoyState);
-                    //QC_KeyEvent(leftJoyState, 'a', 0);
-                }
-                leftJoyState = (leftTrackedRemoteState_new.Joystick.y < -0.7f ? 1 : 0);
-                if (leftJoyState != (leftTrackedRemoteState_old.Joystick.y < -0.7f ? 1 : 0)) {
-                    Key_Event(K_DOWNARROW, leftJoyState);
-                    //                   QC_KeyEvent(leftJoyState, K_DOWNARROW, 0);
-                }
-                leftJoyState = (leftTrackedRemoteState_new.Joystick.y > 0.7f ? 1 : 0);
-                if (leftJoyState != (leftTrackedRemoteState_old.Joystick.y > 0.7f ? 1 : 0)) {
-                    Key_Event(K_UPARROW, leftJoyState);
-//                    QC_KeyEvent(leftJoyState, K_UPARROW, 0);
-                }
-            }
-
 
             //Adjust to be off-hand controller oriented
             vec2_t v;
@@ -1896,23 +1382,6 @@ static void ovrApp_HandleInput( ovrApp * app )
             //Prev Weapon
             handleTrackedControllerButton(&leftTrackedRemoteState_new, &leftTrackedRemoteState_old,
                                           ovrButton_GripTrigger, '#');
-
-#ifndef NDEBUG
-            //Give all weapons and all ammo and god mode
-            if ((leftTrackedRemoteState_new.Buttons & ovrButton_X) &&
-                (leftTrackedRemoteState_new.Buttons & ovrButton_X) !=
-                (leftTrackedRemoteState_old.Buttons & ovrButton_X)) {
-//                Cbuf_InsertText("God\n");
-//                Cbuf_InsertText("Impulse 9\n");
-            }
-#endif
-
-            //Toggle text input
-            if ((leftTrackedRemoteState_new.Buttons & ovrButton_Y) &&
-                (leftTrackedRemoteState_new.Buttons & ovrButton_Y) !=
-                (leftTrackedRemoteState_old.Buttons & ovrButton_Y)) {
-                textInput = !textInput;
-            }
 
 
             leftTrackedRemoteState_old = leftTrackedRemoteState_new;
@@ -2154,6 +1623,8 @@ void Android_MessageBox(const char *title, const char *text)
     ALOGE("%s %s", title, text);
 }
 
+void initialize_gl4es();
+
 void * AppThreadFunction( void * parm )
 {
 	ovrAppThread * appThread = (ovrAppThread *)parm;
@@ -2198,9 +1669,6 @@ void * AppThreadFunction( void * parm )
 	//Always use this folder
 	chdir("/sdcard/xash");
 
-	//Initialise gl4es
-    Com_LoadLibrary("gl4es", 0);
-
 	const double startTime = GetTimeInSeconds();
 
 	for ( bool destroyed = false; destroyed == false; )
@@ -2230,28 +1698,16 @@ void * AppThreadFunction( void * parm )
 
 						if (arg)
 						{
-//							QC_SetResolution(vrapi_GetSystemPropertyInt( &java, VRAPI_SYS_PROP_SUGGESTED_EYE_TEXTURE_WIDTH ) * SS_MULTIPLIER,
-//											 vrapi_GetSystemPropertyInt( &java, VRAPI_SYS_PROP_SUGGESTED_EYE_TEXTURE_HEIGHT ) * SS_MULTIPLIER);
-
                             Host_Main(argc, argv, "valve", false, NULL);
-							//main(argc, argv);
 						}
 						else
 						{
 							int argc = 1; char *argv[] = { "xash3d" };
 
                             Host_Main(argc, argv, "valve", false, NULL);
-
-							//QC_SetResolution(vrapi_GetSystemPropertyInt( &java, VRAPI_SYS_PROP_SUGGESTED_EYE_TEXTURE_WIDTH ) * SS_MULTIPLIER,
-							//				 vrapi_GetSystemPropertyInt( &java, VRAPI_SYS_PROP_SUGGESTED_EYE_TEXTURE_HEIGHT ) * SS_MULTIPLIER);
-
-							//main(argc, argv);
 						}
 
 						xash_initialised = true;
-
-						//Ensure game starts with credits active
-						//MR_ToggleMenu(2);
 					}
 					break;
 				}
@@ -2288,6 +1744,13 @@ void * AppThreadFunction( void * parm )
 		if ( appState.Ovr == NULL )
 		{
 			continue;
+		}
+
+		// Create the scene if not yet created.
+		// The scene is created here to be able to show a loading icon.
+		if ( !ovrScene_IsCreated( &appState.Scene ) )
+		{
+			ovrScene_Create( m_width, m_height, &appState.Scene, &java );
 		}
 
         // This is the only place the frame index is incremented, right before
@@ -2333,40 +1796,133 @@ void * AppThreadFunction( void * parm )
                 runStatus = 0;
             }
 #endif
-            // Get the HMD pose, predicted for the middle of the time period during which
-            // the new eye images will be displayed. The number of frames predicted ahead
-            // depends on the pipeline depth of the engine and the synthesis rate.
-            // The better the prediction, the less black will be pulled in at the edges.
-            const double predictedDisplayTime = vrapi_GetPredictedDisplayTime(appState.Ovr,
-                                                                              appState.FrameIndex);
-            const ovrTracking2 tracking = vrapi_GetPredictedTracking2(appState.Ovr,
-                                                                      predictedDisplayTime);
 
-            appState.DisplayTime = predictedDisplayTime;
+			// Get the HMD pose, predicted for the middle of the time period during which
+			// the new eye images will be displayed. The number of frames predicted ahead
+			// depends on the pipeline depth of the engine and the synthesis rate.
+			// The better the prediction, the less black will be pulled in at the edges.
+			const double predictedDisplayTime = vrapi_GetPredictedDisplayTime(appState.Ovr,
+																			  appState.FrameIndex);
+			const ovrTracking2 tracking = vrapi_GetPredictedTracking2(appState.Ovr,
+																	  predictedDisplayTime);
 
-            ovrApp_HandleInput(&appState);
+			appState.DisplayTime = predictedDisplayTime;
+
+			ovrApp_HandleInput(&appState);
+
+			//Get orientation
+			// We extract Yaw, Pitch, Roll instead of directly using the orientation
+			// to allow "additional" yaw manipulation with mouse/controller.
+			const ovrQuatf quatHmd = tracking.HeadPose.Pose.Orientation;
+			const ovrVector3f positionHmd = tracking.HeadPose.Pose.Position;
+			QuatToYawPitchRoll(quatHmd, hmdorientation);
+			setHMDPosition(positionHmd.x, positionHmd.y, positionHmd.z);
+
+			//TODO: fix - set to use HMD position for world position
+			if (true) {
+				setWorldPosition(positionHmd.x, positionHmd.y, positionHmd.z);
+			}
+
+			ALOGV("        HMD-Position: %f, %f, %f", positionHmd.x, positionHmd.y, positionHmd.z);
+
+			ovrSubmitFrameDescription2 frameDesc = { 0 };
+			if (!useScreenLayer()) {
+
+                ovrLayerProjection2 layer = vrapi_DefaultLayerProjection2();
+                layer.HeadPose = tracking.HeadPose;
+                for ( int eye = 0; eye < VRAPI_FRAME_LAYER_EYE_MAX; eye++ )
+                {
+                    ovrFramebuffer * frameBuffer = &appState.Renderer.FrameBuffer[appState.Renderer.NumBuffers == 1 ? 0 : eye];
+                    layer.Textures[eye].ColorSwapChain = frameBuffer->ColorTextureSwapChain;
+                    layer.Textures[eye].SwapChainIndex = frameBuffer->TextureSwapChainIndex;
+
+#define OCULUS_QUEST
+#ifdef OCULUS_QUEST
+                    ovrMatrix4f projectionMatrix;
+                    projectionMatrix = ovrMatrix4f_CreateProjectionFov(horizFOV, vertFOV,
+                                                                       0.0f, 0.0f, 0.1f,
+                                                                       0.0f);
+
+                    layer.Textures[eye].TexCoordsFromTanAngles = ovrMatrix4f_TanAngleMatrixFromProjection(
+                        &projectionMatrix);
+#else
+
+                    //Gear VR
+                    layer.Textures[eye].TexCoordsFromTanAngles = ovrMatrix4f_TanAngleMatrixFromProjection( &tracking.Eye[eye].ProjectionMatrix );
+#endif
+
+                    layer.Textures[eye].TextureRect.x = 0;
+                    layer.Textures[eye].TextureRect.y = 0;
+                    layer.Textures[eye].TextureRect.width = 1.0f;
+                    layer.Textures[eye].TextureRect.height = 1.0f;
+                }
+                layer.Header.Flags |= VRAPI_FRAME_LAYER_FLAG_CHROMATIC_ABERRATION_CORRECTION;
+
+                //Call the game drawing code to populate the cylinder layer texture
+                RenderFrame(&appState.Renderer,
+                            &appState.Java,
+                            &tracking,
+                            appState.Ovr);
+
+                // Set up the description for this frame.
+                const ovrLayerHeader2 *layers[] =
+                        {
+                                &layer.Header
+                        };
+
+                ovrSubmitFrameDescription2 frameDesc = {};
+                frameDesc.Flags = 0;
+                frameDesc.SwapInterval = appState.SwapInterval;
+                frameDesc.FrameIndex = appState.FrameIndex;
+                frameDesc.DisplayTime = appState.DisplayTime;
+                frameDesc.LayerCount = 1;
+                frameDesc.Layers = layers;
+
+                // Hand over the eye images to the time warp.
+                vrapi_SubmitFrame2(appState.Ovr, &frameDesc);
+
+			} else {
+				// Set-up the compositor layers for this frame.
+				// NOTE: Multiple independent layers are allowed, but they need to be added
+				// in a depth consistent order.
+				memset( appState.Layers, 0, sizeof( ovrLayer_Union2 ) * ovrMaxLayerCount );
+				appState.LayerCount = 0;
+
+				// Render the world-view layer (simple ground plane)
+//				appState.Layers[appState.LayerCount++].Projection =
+//						ovrRenderer_RenderGroundPlaneToEyeBuffer( &appState.Renderer, &appState.Java,
+//																  &appState.Scene, &tracking );
+
+				// Add a simple cylindrical layer
+				appState.Layers[appState.LayerCount++].Cylinder =
+						BuildCylinderLayer( &appState.Scene.CylinderRenderer,
+											appState.Scene.CylinderWidth, appState.Scene.CylinderHeight, &tracking );
+
+				//Call the game drawing code to populate the cylinder layer texture
+				RenderFrame(&appState.Scene.CylinderRenderer,
+										&appState.Java,
+										&tracking,
+										appState.Ovr);
 
 
-            // Render eye images and setup the primary layer using ovrTracking2.
-            const ovrLayerProjection2 worldLayer = ovrRenderer_RenderFrame(&appState.Renderer,
-                                                                           &appState.Java,
-                                                                           &tracking, appState.Ovr);
+				// Compose the layers for this frame.
+				const ovrLayerHeader2 * layerHeaders[ovrMaxLayerCount] = { 0 };
+				for ( int i = 0; i < appState.LayerCount; i++ )
+				{
+					layerHeaders[i] = &appState.Layers[i].Header;
+				}
 
-            const ovrLayerHeader2 *layers[] =
-                    {
-                            &worldLayer.Header
-                    };
+				// Set up the description for this frame.
+				frameDesc.Flags = 0;
+				frameDesc.SwapInterval = appState.SwapInterval;
+				frameDesc.FrameIndex = appState.FrameIndex;
+				frameDesc.DisplayTime = appState.DisplayTime;
+				frameDesc.LayerCount = appState.LayerCount;
+				frameDesc.Layers = layerHeaders;
 
-            ovrSubmitFrameDescription2 frameDesc = {};
-            frameDesc.Flags = 0;
-            frameDesc.SwapInterval = appState.SwapInterval;
-            frameDesc.FrameIndex = appState.FrameIndex;
-            frameDesc.DisplayTime = appState.DisplayTime;
-            frameDesc.LayerCount = 1;
-            frameDesc.Layers = layers;
-
-            // Hand over the eye images to the time warp.
-            vrapi_SubmitFrame2(appState.Ovr, &frameDesc);
+                // Hand over the eye images to the time warp.
+                vrapi_SubmitFrame2(appState.Ovr, &frameDesc);
+            }
         }
         else
 		{
@@ -2496,6 +2052,7 @@ JNIEXPORT jlong JNICALL Java_com_drbeef_lambda1vr_GLES3JNILib_onCreate( JNIEnv *
         }
 	}
 
+	initialize_gl4es();
 
 	ovrAppThread * appThread = (ovrAppThread *) malloc( sizeof( ovrAppThread ) );
 	ovrAppThread_Create( appThread, env, activity );

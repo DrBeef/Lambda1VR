@@ -1097,7 +1097,12 @@ void CL_ClearState( void )
 	Cvar_FullSet( "cl_background", "0", CVAR_READ_ONLY );
 	cl.refdef.movevars = &clgame.movevars;
 	cl.maxclients = 1; // allow to drawing player in menu
+
+#ifdef VR
+	cl.scr_fov = 110.0f;
+#else
 	cl.scr_fov = 90.0f;
+#endif
 
 	Cvar_SetFloat( "scr_download", 0.0f );
 	Cvar_SetFloat( "scr_loading", 0.0f );
@@ -2263,13 +2268,19 @@ Host_ClientFrame
 
 ==================
 */
+#ifdef VR
 int r_stereo_side; // Move this.. this is bad placement
 void Host_ClientFrame( int eye )
+#else
+void Host_ClientFrame(  )
+#endif
 {
 	// if client is not active, skip render functions
 
 	// decide the simulation time
-	if (eye == 0) {
+#ifdef VR
+	if (eye == VR_EYE_MONO || eye == VR_EYE_LEFT ) {
+#endif
 		cl.oldtime = cl.time;
 		cl.time += host.frametime;
 
@@ -2305,13 +2316,18 @@ void Host_ClientFrame( int eye )
 				CL_PredictMovement();
 			}
 		}
+#ifdef VR
 	}
 
-	// update the screen
 	r_stereo_side = eye;
+#endif
+
+	// update the screen
 	SCR_UpdateScreen ();
 
-	if (eye == 1)
+#ifdef VR
+	if (eye == VR_EYE_MONO || eye == VR_EYE_RIGHT)
+#endif
 	{
 		if( cls.initialized )
 		{
@@ -2327,7 +2343,9 @@ void Host_ClientFrame( int eye )
 		Con_RunConsole();
 
 		cls.framecount++;
+#ifdef VR
 	}
+#endif
 }
 
 

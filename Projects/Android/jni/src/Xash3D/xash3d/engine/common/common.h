@@ -179,6 +179,12 @@ typedef enum
 #define MIN_FPS         	15.0		// host minimum fps value for maxfps.
 #define MAX_FPS         	500.0		// upper limit for maxfps.
 
+#ifdef VR
+#define VR_EYE_MONO		-1
+#define VR_EYE_LEFT 		0
+#define VR_EYE_RIGHT 		1
+#endif
+
 #define MAX_FRAMETIME	0.1
 #define MIN_FRAMETIME	0.000001
 
@@ -797,7 +803,11 @@ CLIENT / SERVER SYSTEMS
 */
 void CL_Init( void );
 void CL_Shutdown( void );
+#ifdef VR
 void Host_ClientFrame( int eye );
+#else
+void Host_ClientFrame( );
+#endif
 void Host_RenderFrame( void );
 void Host_ClientBegin( void );
 qboolean CL_Active( void );

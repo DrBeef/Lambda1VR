@@ -71,7 +71,12 @@ typedef struct cldll_func_s
 	// More extenstions for the extensions god! (SDL Xash port)
 	int (*pfnTouchEvent)( int type, int fingerID, float x, float y, float dx, float dy );
 	void (*pfnMoveEvent)( float forwardmove, float sidemove );
+
+#ifdef VR
+	void (*pfnLookEvent)( float relyaw, float relpitch, float relroll );
+#else
 	void (*pfnLookEvent)( float relyaw, float relpitch );
+#endif
 } cldll_func_t;
 
 #endif//CDLL_EXP_H

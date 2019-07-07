@@ -338,6 +338,8 @@ void *Com_FunctionFromName( void *hInstance, const char *pName )
 	{
 #ifdef __ANDROID__
 		// Shitty Android's dlsym don't resolve weak symbols
+
+		//Had to remove as support for the methods in dlsym_weak has been removed in the required SDK version
 		//if( !( function = dlsym_weak( hInstance, pName ) ) )
 #endif
 		{
