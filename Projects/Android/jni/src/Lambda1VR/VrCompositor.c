@@ -564,12 +564,12 @@ ovrLayerProjection2 ovrRenderer_RenderGroundPlaneToEyeBuffer( ovrRenderer * rend
 }
 
 // Assumes landscape cylinder shape.
-ovrMatrix4f CylinderModelMatrix( const int texWidth, const int texHeight,
-	const ovrVector3f translation,
-	const float rotateYaw,
-	const float rotatePitch,
-	const float radius,
-	const float density )
+static ovrMatrix4f CylinderModelMatrix( const int texWidth, const int texHeight,
+										const ovrVector3f translation,
+										const float rotateYaw,
+										const float rotatePitch,
+										const float radius,
+										const float density )
 {
 	const ovrMatrix4f scaleMatrix = ovrMatrix4f_CreateScale( radius, radius * (float)texHeight * VRAPI_PI / density, radius );
 	const ovrMatrix4f transMatrix = ovrMatrix4f_CreateTranslation( translation.x, translation.y, translation.z );
@@ -604,8 +604,8 @@ ovrLayerCylinder2 BuildCylinderLayer( ovrRenderer * cylinderRenderer,
 	const float density = 4500.0f;
 	const float rotateYaw = 0.0f;
 	const float rotatePitch = 0.0f;
-	const float radius = 3.0f;
-	const ovrVector3f translation = { 0.0f, 0.0f, 0.0f };
+	const float radius = 2.0f;
+	const ovrVector3f translation = { 0.0f, 0.0f, -2.0f };
 
 	ovrMatrix4f cylinderTransform = 
 		CylinderModelMatrix( textureWidth, textureHeight, translation,
@@ -628,13 +628,13 @@ ovrLayerCylinder2 BuildCylinderLayer( ovrRenderer * cylinderRenderer,
 
 		const float texScaleX = circScale;
 		const float texBiasX = circBias;
-		const float texScaleY = 0.5f;
-		const float texBiasY = -texScaleY * ( 0.5f * ( 1.0f - ( 1.0f / texScaleY ) ) );
+		const float texScaleY = -0.6f;
+		const float texBiasY = texScaleY * ( 0.5f * ( 1.0f - ( 1.0f / texScaleY ) ) );
 
 		layer.Textures[eye].TextureMatrix.M[0][0] = texScaleX;
 		layer.Textures[eye].TextureMatrix.M[0][2] = texBiasX;
 		layer.Textures[eye].TextureMatrix.M[1][1] = texScaleY;
-		layer.Textures[eye].TextureMatrix.M[1][2] = texBiasY;
+		layer.Textures[eye].TextureMatrix.M[1][2] = -texBiasY;
 
 		layer.Textures[eye].TextureRect.width = 1.0f;
 		layer.Textures[eye].TextureRect.height = 1.0f;

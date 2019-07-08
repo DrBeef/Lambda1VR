@@ -1025,6 +1025,22 @@ qboolean Touch_IsVisible( touch_button_t *button )
 	 */
 }
 
+void Touch_DrawTouchPoint()
+{
+    if( !touch.initialized || (!touch_enable->integer && !touch.clientonly) )
+        return;
+
+    if( cls.key_dest == key_game )
+        return;
+
+    pglColor4ub( 255, 255, 255, 255 );
+	R_DrawStretchPic( TO_SCRN_X(touch.x-0.004f),
+					  TO_SCRN_Y(touch.y-0.004f),
+					  TO_SCRN_X(0.008f),
+					  TO_SCRN_Y(0.008f),
+					  0, 0, 1, 1, cls.fillImage );
+}
+
 void Touch_DrawTexture ( float x1, float y1, float x2, float y2, int texture, byte r, byte g, byte b, byte a )
 {
 	if( x1 >= x2 )

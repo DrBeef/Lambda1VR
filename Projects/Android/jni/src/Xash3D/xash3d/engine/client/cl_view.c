@@ -439,6 +439,10 @@ void V_PostRender( void )
 #endif
 		Con_DrawDebug(); // must be last
 		S_ExtraUpdate();
+
+#ifdef VR
+		Touch_DrawTouchPoint ( );
+#endif
 	}
 
 	SCR_MakeScreenShot();

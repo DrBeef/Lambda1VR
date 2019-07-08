@@ -190,9 +190,6 @@ float weaponOffset[3];
 float horizFOV;
 float vertFOV;
 
-extern int stereoMode;
-qboolean demoplayback = false;
-
 static void UnEscapeQuotes( char *arg )
 {
 	char *last = NULL;
@@ -1839,12 +1836,11 @@ void * AppThreadFunction( void * parm )
 #define OCULUS_QUEST
 #ifdef OCULUS_QUEST
                     ovrMatrix4f projectionMatrix;
-                    projectionMatrix = ovrMatrix4f_CreateProjectionFov(horizFOV, vertFOV,
+                    projectionMatrix = ovrMatrix4f_CreateProjectionFov(horizFOV+1.0f, vertFOV+4.0f,
                                                                        0.0f, 0.0f, 0.1f,
                                                                        0.0f);
 
-                    layer.Textures[eye].TexCoordsFromTanAngles = ovrMatrix4f_TanAngleMatrixFromProjection(
-                        &projectionMatrix);
+                    layer.Textures[eye].TexCoordsFromTanAngles = ovrMatrix4f_TanAngleMatrixFromProjection(&projectionMatrix);
 #else
 
                     //Gear VR

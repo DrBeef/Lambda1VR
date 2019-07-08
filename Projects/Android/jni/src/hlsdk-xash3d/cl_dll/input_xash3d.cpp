@@ -208,24 +208,25 @@ void FWGSInput::IN_Move( float frametime, usercmd_t *cmd )
 
 	if( gHUD.m_MOTD.m_bShow )
 		gHUD.m_MOTD.scroll += rel_pitch;
-	else
+	else {
 #ifndef VR
-		viewangles[PITCH] += rel_pitch;
+        viewangles[PITCH] += rel_pitch;
 #else
-		viewangles[PITCH] = rel_pitch;
+        viewangles[PITCH] = rel_pitch;
+    }
 
-	viewangles[ROLL] = rel_roll;
+    viewangles[ROLL] = rel_roll;
 #endif //!VR
 
 	if( viewangles[PITCH] > cl_pitchdown->value )
 		viewangles[PITCH] = cl_pitchdown->value;
 	if( viewangles[PITCH] < -cl_pitchup->value )
 		viewangles[PITCH] = -cl_pitchup->value;
-	
-	// HACKHACK: change viewangles directly in viewcode, 
-	// so viewangles when player is dead will not be changed on server
 
 #ifndef VR
+	// HACKHACK: change viewangles directly in viewcode,
+	// so viewangles when player is dead will not be changed on server
+
 	if( !CL_IsDead() )
 #endif
 	{
