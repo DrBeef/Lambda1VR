@@ -13,16 +13,13 @@ https://github.com/the-expanse/SideQuest/releases
 IMPORTANT NOTE:
 ---------------
 
-This is just an engine port
+This is just an engine port, no game assets are included whatsoever.
 
 
-Copying the Full Game PAK files to your Oculus Quest
-----------------------------------------------------
-Copy the PAK files from the installed Quake game folder on your PC to the Lambda1VR/id1 folder on your Oculus Quest when it is connected to the PC. You have to have run Lambda1VR at least once for the folder to be created and if you don't see it when you connect your Quest to the PC you might have to restart the Quest.
+Copying the Full Game files to your Oculus Quest
+------------------------------------------------
 
-This port DOES support mods, an excellent resource for finding out what you can do is here: https://www.reddit.com/r/quakegearvr/
 
-Bear in mind that the above sub-reddit is for the Gear VR version, which is not dramatically different, but the folder in which game data/saves etc resides is now Lambda1VR instead of QGVR.
 
 
 Controls:
