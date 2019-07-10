@@ -97,11 +97,13 @@ float hmdPosition[3];
 float playerHeight;
 float positionDeltaThisFrame[3];
 
-static float radians(float deg) {
+vec2_t cylinderSize = {1024, 576};
+
+static inline float radians(float deg) {
 	return (deg * M_PI) / 180.0;
 }
 
-static float degrees(float rad) {
+static inline float degrees(float rad) {
 	return (rad * 180.0) / M_PI;
 }
 
@@ -117,6 +119,11 @@ char **argv;
 int argc=0;
 
 cvar_t cl_righthanded;
+extern cvar_t	*cl_forwardspeed;
+
+//Define our own cvars
+convar_t	*cl_snapturn_angle;
+
 
 /*
 ================================================================================
@@ -695,7 +702,7 @@ void ovrRenderer_Clear( ovrRenderer * renderer )
 }
 
 
-void ovrRenderer_Create( ovrRenderer * renderer, const ovrJava * java )
+void ovrRenderer_Create( int width, int height, ovrRenderer * renderer, const ovrJava * java )
 {
 	renderer->NumBuffers = VRAPI_FRAME_LAYER_EYE_MAX;
 
@@ -707,15 +714,15 @@ void ovrRenderer_Create( ovrRenderer * renderer, const ovrJava * java )
 	{
 		ovrFramebuffer_Create( &renderer->FrameBuffer[eye],
 							   GL_RGBA8,
-							   vrapi_GetSystemPropertyInt( java, VRAPI_SYS_PROP_SUGGESTED_EYE_TEXTURE_WIDTH ),
-							   vrapi_GetSystemPropertyInt( java, VRAPI_SYS_PROP_SUGGESTED_EYE_TEXTURE_HEIGHT ),
+							   width,
+							   height,
 							   NUM_MULTI_SAMPLES );
 	}
 
 	// Setup the projection matrix.
 	renderer->ProjectionMatrix = ovrMatrix4f_CreateProjectionFov(
-			vrapi_GetSystemPropertyFloat( java, VRAPI_SYS_PROP_SUGGESTED_EYE_FOV_DEGREES_X ),
-			vrapi_GetSystemPropertyFloat( java, VRAPI_SYS_PROP_SUGGESTED_EYE_FOV_DEGREES_Y ),
+			horizFOV,
+			vertFOV,
 			0.0f, 0.0f, 1.0f, 0.0f );
 
 }
@@ -791,9 +798,17 @@ void Host_BeginFrame();
 void Host_Frame(int eye);
 void Host_EndFrame();
 
+float remote_movementSideways = 0.0f;
+float remote_movementForward = 0.0f;
+float positional_movementSideways = 0.0f;
+float positional_movementForward = 0.0f;
+float snapTurn = 0.0f;
+
 void VR_GetMove( float *forward, float *side, float *yaw, float *pitch, float *roll )
 {
-	*yaw = hmdorientation[YAW];
+    *forward = remote_movementForward + positional_movementForward;
+    *side = remote_movementSideways + positional_movementSideways;
+	*yaw = hmdorientation[YAW] + snapTurn;
 	*pitch = hmdorientation[PITCH];
 	*roll = hmdorientation[ROLL];
 }
@@ -804,8 +819,14 @@ void RenderFrame( ovrRenderer * renderer, const ovrJava * java,
 	//Set everything up
 	Host_BeginFrame();
 
+	int buffersToRender = renderer->NumBuffers;
+	if (useScreenLayer())
+	{
+		buffersToRender = 1;
+	}
+
 	// Render the eye images.
-	for ( int eye = 0; eye < renderer->NumBuffers; eye++ )
+	for ( int eye = 0; eye < buffersToRender; eye++ )
 	{
 		ovrFramebuffer * frameBuffer = &(renderer->FrameBuffer[eye]);
 		ovrFramebuffer_SetCurrent( frameBuffer );
@@ -993,7 +1014,15 @@ static void handleTrackedControllerButton(ovrInputStateTrackedRemote * trackedRe
         Key_Event(key, (trackedRemoteState->Buttons & button) > 0 ? 1 : 0);
     }
 }
-/*
+
+
+static void Matrix4x4_Transform (const matrix4x4 *in, const float v[3], float out[3])
+{
+	out[0] = v[0] * (*in)[0][0] + v[1] * (*in)[0][1] + v[2] * (*in)[0][2] + (*in)[0][3];
+	out[1] = v[0] * (*in)[1][0] + v[1] * (*in)[1][1] + v[2] * (*in)[1][2] + (*in)[1][3];
+	out[2] = v[0] * (*in)[2][0] + v[1] * (*in)[2][1] + v[2] * (*in)[2][2] + (*in)[2][3];
+}
+
 static void rotateAboutOrigin(float v1, float v2, float rotation, vec2_t out)
 {
     vec3_t temp;
@@ -1001,8 +1030,10 @@ static void rotateAboutOrigin(float v1, float v2, float rotation, vec2_t out)
     temp[1] = v2;
 
     vec3_t v;
-    matrix4x4_t matrix;
-    Matrix4x4_CreateFromQuakeEntity(&matrix, 0.0f, 0.0f, 0.0f, 0.0f, rotation, 0.0f, 1.0f);
+    matrix4x4 matrix;
+	vec3_t angles = {0.0f, rotation, 0.0f};
+	vec3_t origin = {0.0f, 0.0f, 0.0f};
+    Matrix4x4_CreateFromEntity(matrix, angles, origin, 1.0f);
     Matrix4x4_Transform(&matrix, temp, v);
 
     out[0] = v[0];
@@ -1010,15 +1041,6 @@ static void rotateAboutOrigin(float v1, float v2, float rotation, vec2_t out)
 }
 
 
-static void rotateAboutOrigin2(vec3_t in, float pitch, float yaw, vec3_t out)
-{
-    vec3_t v;
-    matrix4x4_t matrix;
-    Matrix4x4_CreateFromQuakeEntity(&matrix, 0.0f, 0.0f, 0.0f, pitch, yaw, 0.0f, 1.0f);
-    Matrix4x4_Transform(&matrix, in, v);
-    Vector2Copy(out, v);
-}
-*/
 ovrInputStateTrackedRemote leftTrackedRemoteState_old;
 ovrInputStateTrackedRemote leftTrackedRemoteState_new;
 ovrTracking leftRemoteTracking;
@@ -1026,23 +1048,20 @@ ovrInputStateTrackedRemote rightTrackedRemoteState_old;
 ovrInputStateTrackedRemote rightTrackedRemoteState_new;
 ovrTracking rightRemoteTracking;
 
-extern int IN_TouchEvent( touchEventType type, int fingerID, float x, float y, float dx, float dy );
+int IN_TouchEvent( touchEventType type, int fingerID, float x, float y, float dx, float dy );
+void Touch_Motion( touchEventType type, int fingerID, float x, float y, float dx, float dy );
 
 float initialTouchX, initialTouchY;
 
 static void ovrApp_HandleInput( ovrApp * app )
 {
-    float remote_movementSideways = 0.0f;
-    float remote_movementForward = 0.0f;
-    float positional_movementSideways = 0.0f;
-    float positional_movementForward = 0.0f;
     float controllerAngles[3];
 
     //The amount of yaw changed by controller
     //TODO: fixme
     float yawOffset = 0.0f;//cl.viewangles[YAW] - hmdorientation[YAW];
 
-		float trackepadMaxX,trackepadMaxY;
+	float trackepadMaxX,trackepadMaxY;
 
 	for ( int i = 0; ; i++ ) {
 		ovrInputCapabilityHeader cap;
@@ -1086,127 +1105,22 @@ static void ovrApp_HandleInput( ovrApp * app )
 	ovrInputStateTrackedRemote *offHandTrackedRemoteStateOld = !cl_righthanded.flags ? &rightTrackedRemoteState_old : &leftTrackedRemoteState_old;
 	ovrTracking *offHandRemoteTracking = !cl_righthanded.flags ? &rightRemoteTracking : &leftRemoteTracking;
 
-/*	if (textInput)
     {
-        //Toggle text input
-        if ((leftTrackedRemoteState_new.Buttons & ovrButton_Y) &&
-            (leftTrackedRemoteState_new.Buttons & ovrButton_Y) !=
-            (leftTrackedRemoteState_old.Buttons & ovrButton_Y)) {
-            textInput = !textInput;
-//            SCR_CenterPrint("Text Input: Disabled");
-        }
-
-        int left_char_index = getCharacter(leftTrackedRemoteState_new.Joystick.x, leftTrackedRemoteState_new.Joystick.y);
-        int right_char_index = getCharacter(rightTrackedRemoteState_new.Joystick.x, rightTrackedRemoteState_new.Joystick.y);
-
-        //Toggle Shift
-        if ((leftTrackedRemoteState_new.Buttons & ovrButton_X) &&
-            (leftTrackedRemoteState_new.Buttons & ovrButton_X) !=
-            (leftTrackedRemoteState_old.Buttons & ovrButton_X)) {
-            shift = 1 - shift;
-        }
-
-        //Cycle Left Grid
-        if ((leftTrackedRemoteState_new.Buttons & ovrButton_GripTrigger) &&
-            (leftTrackedRemoteState_new.Buttons & ovrButton_GripTrigger) !=
-            (leftTrackedRemoteState_old.Buttons & ovrButton_GripTrigger)) {
-            left_grid = (++left_grid) % 3;
-        }
-
-        //Cycle Right Grid
-        if ((rightTrackedRemoteState_new.Buttons & ovrButton_GripTrigger) &&
-            (rightTrackedRemoteState_new.Buttons & ovrButton_GripTrigger) !=
-            (rightTrackedRemoteState_old.Buttons & ovrButton_GripTrigger)) {
-            right_grid = (++right_grid) % 2;
-        }
-
-        char left_char;
-        char right_char;
-        if (shift)
-        {
-            left_char = left_shift[left_grid][left_char_index];
-            right_char = right_shift[right_grid][right_char_index];
-        } else{
-            left_char = left_lower[left_grid][left_char_index];
-            right_char = right_lower[right_grid][right_char_index];
-        }
-
-        //Enter
-        if ((rightTrackedRemoteState_new.Buttons & ovrButton_A) !=
-            (rightTrackedRemoteState_old.Buttons & ovrButton_A)) {
-            //QC_KeyEvent((rightTrackedRemoteState_new.Buttons & ovrButton_A) > 0 ? 1 : 0, K_ENTER, 0);
-        }
-
-        //Delete
-        if ((rightTrackedRemoteState_new.Buttons & ovrButton_B) !=
-            (rightTrackedRemoteState_old.Buttons & ovrButton_B)) {
-            //QC_KeyEvent((rightTrackedRemoteState_new.Buttons & ovrButton_B) > 0 ? 1 : 0, K_BACKSPACE, 0);
-        }
-
-        //Use Left Character
-        if ((leftTrackedRemoteState_new.Buttons & ovrButton_Trigger) !=
-            (leftTrackedRemoteState_old.Buttons & ovrButton_Trigger)) {
-            if (left_char == ' ')
-            {
-                Key_Event();
-                QC_KeyEvent((leftTrackedRemoteState_new.Buttons & ovrButton_Trigger) > 0 ? 1 : 0,
-                            0, left_char);
-
-            } else
-                {
-                    QC_KeyEvent((leftTrackedRemoteState_new.Buttons & ovrButton_Trigger) > 0 ? 1 : 0,
-                                left_char, left_char);
-
-            }
-        }
-
-        //Use Right Character
-        if ((rightTrackedRemoteState_new.Buttons & ovrButton_Trigger) !=
-            (rightTrackedRemoteState_old.Buttons & ovrButton_Trigger)) {
-            QC_KeyEvent((rightTrackedRemoteState_new.Buttons & ovrButton_Trigger) > 0 ? 1 : 0,
-                        right_char, right_char);
-        }
-
-        //Menu button
-        handleTrackedControllerButton(&leftTrackedRemoteState_new, &leftTrackedRemoteState_old,
-                                      ovrButton_Enter, K_ESCAPE);
-
-
-        if (textInput) {
-            //Draw grid maps to screen
-            char buffer[256];
-
-            //Give the user an idea of what the buttons are
-            dpsnprintf(buffer, 256,
-                       " %s       %s\n %s       %s\n %s       %s\n\nText Input:   %c    %c",
-                       left_grid_map[shift][0][left_grid], right_grid_map[shift][0][right_grid],
-                       left_grid_map[shift][1][left_grid], right_grid_map[shift][1][right_grid],
-                       left_grid_map[shift][2][left_grid], right_grid_map[shift][2][right_grid],
-                       left_char, right_char);
-            SCR_CenterPrint(buffer);
-        }
-
-        //Save state
-        leftTrackedRemoteState_old = leftTrackedRemoteState_new;
-        rightTrackedRemoteState_old = rightTrackedRemoteState_new;
-
-    } else */
-    {
-        //Hacky menu control
+        //Hacky menu control - Does the trick for now though
         {
             const ovrQuatf quatRemote = rightRemoteTracking.HeadPose.Pose.Orientation;
             float remoteAngles[3];
             QuatToYawPitchRoll(quatRemote, remoteAngles);
             if (remoteAngles[YAW] > -30.0f && remoteAngles[YAW] < 30.0f &&
-                remoteAngles[PITCH] > -30.0f && remoteAngles[PITCH] < 30.0f) {
+                remoteAngles[PITCH] > -20.0f && remoteAngles[PITCH] < 20.0f) {
 
-                int newRemoteTrigState = (rightTrackedRemoteState_new.Buttons & ovrButton_A) != 0;
-                int prevRemoteTrigState = (rightTrackedRemoteState_old.Buttons & ovrButton_A) != 0;
+                int newRemoteTrigState = (rightTrackedRemoteState_new.Buttons & ovrButton_Trigger) != 0;
+                int prevRemoteTrigState = (rightTrackedRemoteState_old.Buttons & ovrButton_Trigger) != 0;
 
                 touchEventType t = event_motion;
 
                 float touchX = (-remoteAngles[YAW] + 30.0f) / 60.0f;
-                float touchY = (remoteAngles[PITCH] + 30.0f) / 60.0f;
+                float touchY = (remoteAngles[PITCH] + 20.0f) / 40.0f;
                 if (newRemoteTrigState != prevRemoteTrigState)
                 {
                     t = newRemoteTrigState ? event_down : event_up;
@@ -1228,41 +1142,19 @@ static void ovrApp_HandleInput( ovrApp * app )
             weaponOffset[1] = dominantRemoteTracking->HeadPose.Pose.Position.y - hmdPosition[1];
             weaponOffset[2] = dominantRemoteTracking->HeadPose.Pose.Position.z - hmdPosition[2];
 
-            if (false) {//cl_trackingmode.flags == 1) {
-				//Use controller position for world position
-				setWorldPosition(dominantRemoteTracking->HeadPose.Pose.Position.x,
-								 dominantRemoteTracking->HeadPose.Pose.Position.y,
-								 dominantRemoteTracking->HeadPose.Pose.Position.z);
-			}
-
             ///Weapon location relative to view
-/*            vec2_t v;
+           	vec2_t v;
             rotateAboutOrigin(weaponOffset[0], weaponOffset[2], -yawOffset, v);
             weaponOffset[0] = v[0];
             weaponOffset[2] = v[1];
-*/
+
             //Set gun angles
             const ovrQuatf quatRemote = dominantRemoteTracking->HeadPose.Pose.Orientation;
             QuatToYawPitchRoll(quatRemote, gunangles);
 
-            //TODO: THIS NEEDS WORK!! - can't get it working and it is doing my head in!!
-            /*        // Adjust right (+ve), adjust Back (+ve), up (+ve)
-                    vec3_t adjustment;
-                    //VectorSet(adjustment, cl_weapon_offset_lr.value, cl_weapon_offset_ud.value, cl_weapon_offset_fb.value);
-                    VectorSet(adjustment, 0.0f, 0.2f, 0.2f);
-                    rotateAboutOrigin2(adjustment,  gunangles[PITCH], gunangles[YAW]-yawOffset, adjustment);
-                    VectorAdd(adjustment, weaponOffset, weaponOffset);*/
-
             //Adjust gun pitch for user preference
 //            gunangles[PITCH] += cl_weaponpitchadjust.value;
             gunangles[YAW] += yawOffset;
-
-            //Change laser sight on joystick click
-            if ((dominantTrackedRemoteState->Buttons & ovrButton_Joystick) &&
-                (dominantTrackedRemoteState->Buttons & ovrButton_Joystick) !=
-                (dominantTrackedRemoteStateOld->Buttons & ovrButton_Joystick)) {
-//                Cvar_SetValueQuick(&r_lasersight, (r_lasersight.flags + 1) % 3);
-            }
         }
 
         //off-hand stuff
@@ -1286,23 +1178,14 @@ static void ovrApp_HandleInput( ovrApp * app )
             //This section corrects for the fact that the controller actually controls direction of movement, but we want to move relative to the direction the
             //player is facing for positional tracking
             //TODO: fixme!
-            float multiplier = 1.0f;/*arbitrary value that works ->*/
-                    //2200.0f / cl_forwardspeed.value;
+            float multiplier = /*arbitrary value that works ->*/
+                    2300.0f / cl_forwardspeed->value;
 
-/*            vec2_t v;
+            vec2_t v;
             rotateAboutOrigin(-positionDeltaThisFrame[0] * multiplier,
                               positionDeltaThisFrame[2] * multiplier, -hmdorientation[YAW], v);
             positional_movementSideways = v[0];
             positional_movementForward = v[1];
-*/
-
-            long t = Sys_Milliseconds();
-            delta = t - oldtime;
-            oldtime = t;
-            if (delta > 1000)
-                delta = 1000;
-//            QC_MotionEvent(delta, rightTrackedRemoteState_new.Joystick.x,
-//                           rightTrackedRemoteState_new.Joystick.y);
 
 
             //Jump
@@ -1325,17 +1208,18 @@ static void ovrApp_HandleInput( ovrApp * app )
             handleTrackedControllerButton(&rightTrackedRemoteState_new,
                                           &rightTrackedRemoteState_old, ovrButton_GripTrigger, '/');
 
-            //Adjust weapon aim pitch
-            if ((rightTrackedRemoteState_new.Buttons & ovrButton_B) &&
-                (rightTrackedRemoteState_new.Buttons & ovrButton_B) !=
+            //Duck with B
+            if ((rightTrackedRemoteState_new.Buttons & ovrButton_B) !=
                 (rightTrackedRemoteState_old.Buttons & ovrButton_B)) {
-//                float newPitchAdjust = cl_weaponpitchadjust.value + 1.0f;
-//                if (newPitchAdjust > 23.0f) {
-//                    newPitchAdjust = -7.0f;
-//                }
 
-//                Cvar_SetValueQuick(&cl_weaponpitchadjust, newPitchAdjust);
-//                ALOGV("Pitch Adjust: %f", newPitchAdjust);
+                const char* action = "+duck";
+                char command[256];
+                Q_snprintf( command, sizeof( command ), "%s\n", action );
+                if (!(rightTrackedRemoteState_new.Buttons & ovrButton_B))
+                {
+                    command[0] = '-';
+                }
+                Cbuf_AddText( command );
             }
 
             rightTrackedRemoteState_old = rightTrackedRemoteState_new;
@@ -1356,12 +1240,13 @@ static void ovrApp_HandleInput( ovrApp * app )
 
             //Adjust to be off-hand controller oriented
             vec2_t v;
-/*            rotateAboutOrigin(leftTrackedRemoteState_new.Joystick.x,
+            rotateAboutOrigin(leftTrackedRemoteState_new.Joystick.x,
                               leftTrackedRemoteState_new.Joystick.y,
                               //cl_walkdirection.flags == 1 ? hmdYawHeading :
                               controllerYawHeading,
                               v);
-*/            remote_movementSideways = v[0];
+
+            remote_movementSideways = v[0];
             remote_movementForward = v[1];
 
             if (cl_righthanded.flags) {
@@ -1376,24 +1261,53 @@ static void ovrApp_HandleInput( ovrApp * app )
                                               ovrButton_Trigger, K_MOUSE1);
             }
 
+            static increaseSnap = true;
+			if (rightTrackedRemoteState_new.Joystick.x > 0.6f)
+			{
+				if (increaseSnap)
+				{
+					snapTurn -= cl_snapturn_angle->value;
+                    if (cl_snapturn_angle->value > 10.0f) {
+                        increaseSnap = false;
+                    }
+
+                    if (snapTurn < -180.0f)
+                    {
+                        snapTurn += 360.f;
+                    }
+                }
+			} else if (rightTrackedRemoteState_new.Joystick.x < 0.4f) {
+				increaseSnap = true;
+			}
+
+			static decreaseSnap = true;
+			if (rightTrackedRemoteState_new.Joystick.x < -0.6f)
+			{
+				if (decreaseSnap)
+				{
+					snapTurn += cl_snapturn_angle->value;
+
+					//If snap turn configured for less than 10 degrees
+					if (cl_snapturn_angle->value > 10.0f) {
+                        decreaseSnap = false;
+                    }
+
+                    if (snapTurn > 180.0f)
+                    {
+                        snapTurn -= 360.f;
+                    }
+				}
+			} else if (rightTrackedRemoteState_new.Joystick.x > -0.4f)
+			{
+				decreaseSnap = true;
+			}
+
             //Prev Weapon
             handleTrackedControllerButton(&leftTrackedRemoteState_new, &leftTrackedRemoteState_old,
                                           ovrButton_GripTrigger, '#');
 
 
             leftTrackedRemoteState_old = leftTrackedRemoteState_new;
-        }
-
-//        QC_Analog(true, remote_movementSideways + positional_movementSideways,
-//                  remote_movementForward + positional_movementForward);
-
-
-	    //if (bullettime.flags)
-        {
-            float speed = powf(sqrtf(powf(leftTrackedRemoteState_new.Joystick.x, 2) + powf(leftTrackedRemoteState_new.Joystick.y, 2)), 1.1f);
-            float movement = sqrtf(powf(positionDeltaThisFrame[0] * 30.0f, 2) + powf(positionDeltaThisFrame[1] * 30.0f, 2) + powf(positionDeltaThisFrame[2] * 30.0f, 2));
-//            speed = bound(0.12f, (speed > movement) ? speed : movement, 1.0f);
-//            Cvar_SetValueQuick(&slowmo, speed);
         }
     }
 }
@@ -1609,10 +1523,19 @@ long shutdownCountdown;
 
 int m_width;
 int m_height;
+
+void R_ChangeDisplaySettings( int width, int height, qboolean fullscreen );
+
 void Android_GetScreenRes(int *width, int *height)
 {
-    *width=m_width;
-    *height=m_height;
+    if (useScreenLayer())
+    {
+        *width = cylinderSize[0];
+        *height = cylinderSize[1];
+    } else {
+        *width = m_width;
+        *height = m_height;
+    }
 }
 
 void Android_MessageBox(const char *title, const char *text)
@@ -1621,6 +1544,11 @@ void Android_MessageBox(const char *title, const char *text)
 }
 
 void initialize_gl4es();
+
+static void initializeVRCvars()
+{
+	cl_snapturn_angle = Cvar_Get( "cl_snapturn_angle", "45", CVAR_ARCHIVE, "Sets the angle for snap-turn, set to < 10.0 to enable smooth turning" );
+}
 
 void * AppThreadFunction( void * parm )
 {
@@ -1661,7 +1589,7 @@ void * AppThreadFunction( void * parm )
 	appState.GpuLevel = GPU_LEVEL;
 	appState.MainThreadTid = gettid();
 
-	ovrRenderer_Create( &appState.Renderer, &java );
+	ovrRenderer_Create( m_width, m_height, &appState.Renderer, &java );
 
 	//Always use this folder
 	chdir("/sdcard/xash");
@@ -1703,6 +1631,9 @@ void * AppThreadFunction( void * parm )
 
                             Host_Main(argc, argv, "valve", false, NULL);
 						}
+
+						//Initialise our cvars here
+						initializeVRCvars();
 
 						xash_initialised = true;
 					}
@@ -1747,7 +1678,7 @@ void * AppThreadFunction( void * parm )
 		// The scene is created here to be able to show a loading icon.
 		if ( !ovrScene_IsCreated( &appState.Scene ) )
 		{
-			ovrScene_Create( m_width, m_height, &appState.Scene, &java );
+			ovrScene_Create( cylinderSize[0], cylinderSize[1], &appState.Scene, &java );
 		}
 
         // This is the only place the frame index is incremented, right before
@@ -1790,7 +1721,7 @@ void * AppThreadFunction( void * parm )
             if (appState.FrameIndex > 10800)
             {
                 //Trigger shutdown after a couple of minutes in debug mode
-                runStatus = 0;
+                //runStatus = 0;
             }
 #endif
 
@@ -1816,11 +1747,22 @@ void * AppThreadFunction( void * parm )
 			setHMDPosition(positionHmd.x, positionHmd.y, positionHmd.z);
 
 			//TODO: fix - set to use HMD position for world position
-			if (true) {
-				setWorldPosition(positionHmd.x, positionHmd.y, positionHmd.z);
-			}
+			setWorldPosition(positionHmd.x, positionHmd.y, positionHmd.z);
 
 			ALOGV("        HMD-Position: %f, %f, %f", positionHmd.x, positionHmd.y, positionHmd.z);
+
+			static usingScreenLayer = true; //Starts off using the screen layer
+			if (usingScreenLayer != useScreenLayer())
+			{
+				if (usingScreenLayer = useScreenLayer())
+				{
+					R_ChangeDisplaySettings(cylinderSize[0], cylinderSize[1], true);
+				}
+				else
+				{
+					R_ChangeDisplaySettings(m_width, m_height, false);
+				}
+			}
 
 			ovrSubmitFrameDescription2 frameDesc = { 0 };
 			if (!useScreenLayer()) {

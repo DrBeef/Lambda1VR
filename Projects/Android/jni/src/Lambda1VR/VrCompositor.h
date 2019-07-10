@@ -95,7 +95,7 @@ typedef struct
 
 
 void ovrRenderer_Clear( ovrRenderer * renderer );
-void ovrRenderer_Create( ovrRenderer * renderer, const ovrJava * java );
+void ovrRenderer_Create( int width, int height, ovrRenderer * renderer, const ovrJava * java );
 void ovrRenderer_Destroy( ovrRenderer * renderer );
 
 

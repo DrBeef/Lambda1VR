@@ -465,7 +465,7 @@ void ovrScene_Create( int width, int height, ovrScene * scene, const ovrJava * j
 		scene->CylinderHeight = height;
 		
 		//Create cylinder renderer
-		ovrRenderer_Create( &scene->CylinderRenderer, java );
+		ovrRenderer_Create( width, height, &scene->CylinderRenderer, java );
 	}
 	
 	scene->CreatedScene = true;
@@ -605,7 +605,7 @@ ovrLayerCylinder2 BuildCylinderLayer( ovrRenderer * cylinderRenderer,
 	const float rotateYaw = 0.0f;
 	const float rotatePitch = 0.0f;
 	const float radius = 2.0f;
-	const ovrVector3f translation = { 0.0f, 0.0f, -2.0f };
+	const ovrVector3f translation = { 0.0f, 0.0f, -1.0f };
 
 	ovrMatrix4f cylinderTransform = 
 		CylinderModelMatrix( textureWidth, textureHeight, translation,
@@ -616,7 +616,7 @@ ovrLayerCylinder2 BuildCylinderLayer( ovrRenderer * cylinderRenderer,
 
 	for ( int eye = 0; eye < VRAPI_FRAME_LAYER_EYE_MAX; eye++ )
 	{
-		ovrFramebuffer * cylinderFrameBuffer = &cylinderRenderer->FrameBuffer[eye];
+		ovrFramebuffer * cylinderFrameBuffer = &cylinderRenderer->FrameBuffer[VRAPI_EYE_LEFT];
 		
 		ovrMatrix4f modelViewMatrix = ovrMatrix4f_Multiply( &tracking->Eye[eye].ViewMatrix, &cylinderTransform );
 		layer.Textures[eye].TexCoordsFromTanAngles = ovrMatrix4f_Inverse( &modelViewMatrix );
@@ -628,7 +628,7 @@ ovrLayerCylinder2 BuildCylinderLayer( ovrRenderer * cylinderRenderer,
 
 		const float texScaleX = circScale;
 		const float texBiasX = circBias;
-		const float texScaleY = -0.6f;
+		const float texScaleY = -0.5f;
 		const float texBiasY = texScaleY * ( 0.5f * ( 1.0f - ( 1.0f / texScaleY ) ) );
 
 		layer.Textures[eye].TextureMatrix.M[0][0] = texScaleX;

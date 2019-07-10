@@ -407,6 +407,9 @@ V_CalcRefdef
 
 ==================
 */
+
+
+
 void V_CalcNormalRefdef( struct ref_params_s *pparams )
 {
 	cl_entity_t *ent, *view;

@@ -33,6 +33,13 @@ V_SetupRefDef
 update refdef values each frame
 ===============
 */
+
+#ifdef VR
+extern float playerHeight;
+extern float hmdPosition[3];
+extern cvar_t *r_worldscale;
+#endif
+
 void V_SetupRefDef( void )
 {
 	cl_entity_t	*clent;
@@ -115,6 +122,11 @@ void V_SetupRefDef( void )
 		cl.refdef.onground   = cl.frame.client.flags & FL_ONGROUND ? 1 : 0;
 		cl.refdef.waterlevel = cl.frame.client.waterlevel;
 	}
+
+#ifdef VR
+    //Only reasonable place to do this
+	cl.refdef.viewheight[2] += ((hmdPosition[1] - playerHeight) * r_worldscale->value);
+#endif
 }
 
 /*

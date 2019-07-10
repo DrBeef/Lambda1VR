@@ -172,7 +172,8 @@ LOCAL_SRC_FILES := \
 	   common/soundlib/libmpg/tabinit.c \
 	   common/Sequence.c \
            platform/android/vid_android.c \
-           platform/android/android_nosdl.c
+           platform/android/android_nosdl.c \
+           platform/android/dlsym-weak.cpp
 
 #LOCAL_STATIC_LIBRARIES := GL
 LOCAL_LDLIBS			:= -ldl -llog -landroid -lGLESv3 -lEGL		# include default libraries

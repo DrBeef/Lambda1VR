@@ -26,26 +26,31 @@
  * SUCH DAMAGE.
  */
 
-#ifdef __ANDROID__
+#if defined __ANDROID__ && !defined XASH_64BIT
 #include <android/log.h>
 #include "linker.h"
+
+#include <string>
 
 static Elf_Sym* soinfo_elf_lookup(soinfo* si, unsigned hash, const char* name) {
     Elf_Sym* symtab = si->symtab;
     const char* strtab = si->strtab;
 
+    if( si->nbucket == 0 )
+        return NULL;
+
     for (unsigned n = si->bucket[hash % si->nbucket]; n != 0; n = si->chain[n]) {
         Elf_Sym* s = symtab + n;
         if (strcmp(strtab + s->st_name, name)) continue;
 
-            /* only concern ourselves with global and weak symbol definitions */
+        /* only concern ourselves with global and weak symbol definitions */
         switch (ELF_ST_BIND(s->st_info)) {
-        case STB_GLOBAL:
-        case STB_WEAK:
-            if (s->st_shndx == SHN_UNDEF) {
-                continue;
-            }
-            return s;
+            case STB_GLOBAL:
+            case STB_WEAK:
+                if (s->st_shndx == SHN_UNDEF) {
+                    continue;
+                }
+                return s;
         }
     }
 
@@ -74,21 +79,21 @@ static unsigned elfhash(const char* _name) {
    Binary Interface) where in Chapter 5 it discuss resolving "Shared
    Object Dependencies" in breadth first search order.
  */
-Elf_Sym* dlsym_handle_lookup(soinfo* si, const char* name) {
+static Elf_Sym* dlsym_handle_lookup(soinfo* si, const char* name) {
     return soinfo_elf_lookup(si, elfhash(name), name);
 }
 
 extern "C" void* dlsym_weak(void* handle, const char* symbol) {
 
-  soinfo* found = NULL;
-  Elf_Sym* sym = NULL;
-  found = reinterpret_cast<soinfo*>(handle);
-  sym = dlsym_handle_lookup(found, symbol);
+    soinfo* found = NULL;
+    Elf_Sym* sym = NULL;
+    found = reinterpret_cast<soinfo*>(handle);
+    sym = dlsym_handle_lookup(found, symbol);
 
-  if (sym != NULL) {
-    return reinterpret_cast<void*>(sym->st_value + found->base/*load_bias*/);
-  }
-  __android_log_print(ANDROID_LOG_ERROR, "dlsym-weak", "Failed when looking up %s\n", symbol);
-  return NULL;
+    if (sym != NULL) {
+        return reinterpret_cast<void*>(sym->st_value + found->base/*load_bias*/);
+    }
+    __android_log_print(ANDROID_LOG_ERROR, "dlsym-weak", "Failed when looking up %s\n", symbol);
+    return NULL;
 }
 #endif

@@ -1034,10 +1034,10 @@ void Touch_DrawTouchPoint()
         return;
 
     pglColor4ub( 255, 255, 255, 255 );
-	R_DrawStretchPic( TO_SCRN_X(touch.x-0.004f),
-					  TO_SCRN_Y(touch.y-0.004f),
-					  TO_SCRN_X(0.008f),
-					  TO_SCRN_Y(0.008f),
+	R_DrawStretchPic( TO_SCRN_X(touch.x+0.002f),
+					  TO_SCRN_Y(touch.y+0.003f),
+					  TO_SCRN_X(0.004f),
+					  TO_SCRN_Y(0.006f),
 					  0, 0, 1, 1, cls.fillImage );
 }
 

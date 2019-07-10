@@ -340,7 +340,7 @@ void *Com_FunctionFromName( void *hInstance, const char *pName )
 		// Shitty Android's dlsym don't resolve weak symbols
 
 		//Had to remove as support for the methods in dlsym_weak has been removed in the required SDK version
-		//if( !( function = dlsym_weak( hInstance, pName ) ) )
+		if( !( function = dlsym_weak( hInstance, pName ) ) )
 #endif
 		{
 			MsgDev(D_ERROR, "FunctionFromName: Can't get symbol %s: %s\n", pName, dlerror());
