@@ -2537,18 +2537,17 @@ void CL_UpdateFlashlight( cl_entity_t *pEnt )
 		AngleVectors( v_angle, forward, NULL, NULL );
 	}
 
+	VectorClear( view_ofs );
 
+	if(( pEnt->index - 1 ) == cl.playernum ) {
 #ifdef VR
-	if(( pEnt->index - 1 ) == cl.playernum )
-		VectorCopy( cl.refdef.rcontrollerorg, vecSrc );
+		VectorAdd(cl.refdef.lcontrollerorg, cl.refdef.viewheight, view_ofs);
 #else
-    VectorClear( view_ofs );
-
-	if(( pEnt->index - 1 ) == cl.playernum )
 		VectorCopy( cl.refdef.viewheight, view_ofs );
+#endif
+	}
 
 	VectorAdd( pEnt->origin, view_ofs, vecSrc );
-#endif
 
 	VectorMA( vecSrc, FLASHLIGHT_DISTANCE, forward, vecEnd );
 

@@ -118,11 +118,11 @@ struct arg_end *end;
 char **argv;
 int argc=0;
 
-cvar_t cl_righthanded;
 extern cvar_t	*cl_forwardspeed;
 
 //Define our own cvars
 convar_t	*cl_snapturn_angle;
+convar_t    *cl_righthanded;
 
 
 /*
@@ -1092,12 +1092,12 @@ static void ovrApp_HandleInput( ovrApp * app )
 		}
 	}
 
-    ovrInputStateTrackedRemote *dominantTrackedRemoteState = cl_righthanded.flags ? &rightTrackedRemoteState_new : &leftTrackedRemoteState_new;
-    ovrInputStateTrackedRemote *dominantTrackedRemoteStateOld = cl_righthanded.flags ? &rightTrackedRemoteState_old : &leftTrackedRemoteState_old;
-	ovrTracking *dominantRemoteTracking = cl_righthanded.flags ? &rightRemoteTracking : &leftRemoteTracking;
-	ovrInputStateTrackedRemote *offHandTrackedRemoteState = !cl_righthanded.flags ? &rightTrackedRemoteState_new : &leftTrackedRemoteState_new;
-	ovrInputStateTrackedRemote *offHandTrackedRemoteStateOld = !cl_righthanded.flags ? &rightTrackedRemoteState_old : &leftTrackedRemoteState_old;
-	ovrTracking *offHandRemoteTracking = !cl_righthanded.flags ? &rightRemoteTracking : &leftRemoteTracking;
+    ovrInputStateTrackedRemote *dominantTrackedRemoteState = cl_righthanded->flags ? &rightTrackedRemoteState_new : &leftTrackedRemoteState_new;
+    ovrInputStateTrackedRemote *dominantTrackedRemoteStateOld = cl_righthanded->flags ? &rightTrackedRemoteState_old : &leftTrackedRemoteState_old;
+	ovrTracking *dominantRemoteTracking = cl_righthanded->flags ? &rightRemoteTracking : &leftRemoteTracking;
+	ovrInputStateTrackedRemote *offHandTrackedRemoteState = !cl_righthanded->flags ? &rightTrackedRemoteState_new : &leftTrackedRemoteState_new;
+	ovrInputStateTrackedRemote *offHandTrackedRemoteStateOld = !cl_righthanded->flags ? &rightTrackedRemoteState_old : &leftTrackedRemoteState_old;
+	ovrTracking *offHandRemoteTracking = !cl_righthanded->flags ? &rightRemoteTracking : &leftRemoteTracking;
 
     {
         //Hacky menu control - Does the trick for now though
@@ -1199,7 +1199,7 @@ static void ovrApp_HandleInput( ovrApp * app )
             handleTrackedControllerButton(&rightTrackedRemoteState_new,
                                           &rightTrackedRemoteState_old, ovrButton_A, K_SPACE);
 
-            if (cl_righthanded.flags) {
+            if (cl_righthanded->flags) {
                 //Fire
                 handleTrackedControllerButton(&rightTrackedRemoteState_new,
                                               &rightTrackedRemoteState_old,
@@ -1256,7 +1256,7 @@ static void ovrApp_HandleInput( ovrApp * app )
             remote_movementSideways = v[0];
             remote_movementForward = v[1];
 
-            if (cl_righthanded.flags) {
+            if (cl_righthanded->flags) {
                 //Run
                 handleTrackedControllerButton(&leftTrackedRemoteState_new,
                                               &leftTrackedRemoteState_old,
@@ -1550,6 +1550,7 @@ void initialize_gl4es();
 static void initializeVRCvars()
 {
 	cl_snapturn_angle = Cvar_Get( "cl_snapturn_angle", "45", CVAR_ARCHIVE, "Sets the angle for snap-turn, set to < 10.0 to enable smooth turning" );
+    cl_righthanded = Cvar_Get( "cl_righthanded", "1", CVAR_ARCHIVE, "Sets right-handed mode" );
 }
 
 void * AppThreadFunction( void * parm )

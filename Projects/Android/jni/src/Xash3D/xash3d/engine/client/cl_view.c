@@ -39,7 +39,9 @@ extern float playerHeight;
 extern float hmdPosition[3];
 extern cvar_t *r_worldscale;
 extern float gunangles[3];
+extern float flashlightangles[3];
 extern float weaponOffset[3];
+extern float flashlightOffset[3];
 #endif
 
 void V_SetupRefDef( void )
@@ -131,6 +133,8 @@ void V_SetupRefDef( void )
 
     VectorAdd( cl.refdef.viewheight, weaponOffset, cl.refdef.rcontrollerorg );
     VectorCopy( gunangles, cl.refdef.rcontrollerangles );
+	VectorAdd( cl.refdef.viewheight, flashlightOffset, cl.refdef.lcontrollerorg );
+    VectorCopy( flashlightangles, cl.refdef.lcontrollerangles );
 #endif
 }
 
