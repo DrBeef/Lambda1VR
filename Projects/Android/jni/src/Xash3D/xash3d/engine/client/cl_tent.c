@@ -2519,7 +2519,11 @@ void CL_UpdateFlashlight( cl_entity_t *pEnt )
 	if(( pEnt->index - 1 ) == cl.playernum )
 	{
 		// get the predicted angles
+#ifdef VR
+        AngleVectors( cl.refdef.lcontrollerangles, forward, NULL, NULL );
+#else
 		AngleVectors( cl.refdef.cl_viewangles, forward, NULL, NULL );
+#endif
 	}
 	else
 	{
@@ -2533,12 +2537,19 @@ void CL_UpdateFlashlight( cl_entity_t *pEnt )
 		AngleVectors( v_angle, forward, NULL, NULL );
 	}
 
-	VectorClear( view_ofs );
+
+#ifdef VR
+	if(( pEnt->index - 1 ) == cl.playernum )
+		VectorCopy( cl.refdef.rcontrollerorg, vecSrc );
+#else
+    VectorClear( view_ofs );
 
 	if(( pEnt->index - 1 ) == cl.playernum )
 		VectorCopy( cl.refdef.viewheight, view_ofs );
 
 	VectorAdd( pEnt->origin, view_ofs, vecSrc );
+#endif
+
 	VectorMA( vecSrc, FLASHLIGHT_DISTANCE, forward, vecEnd );
 
 	trace = CL_TraceLine( vecSrc, vecEnd, PM_STUDIO_BOX );
@@ -2577,7 +2588,7 @@ void CL_TestLights( void )
 	dlight_t	*dl;
 
 	if( !cl_testlights->integer ) return;
-	
+
 	for( i = 0; i < bound( 1, cl_testlights->integer, MAX_DLIGHTS ); i++ )
 	{
 		dl = &cl_dlights[i];
@@ -2723,7 +2734,7 @@ remove all decals with specified texture
 */
 void GAME_EXPORT CL_DecalRemoveAll( int textureIndex )
 {
-	int id = bound( 0, textureIndex, MAX_DECALS - 1 );	
+	int id = bound( 0, textureIndex, MAX_DECALS - 1 );
 	R_DecalRemoveAll( cl.decal_index[id] );
 }
 
@@ -2753,7 +2764,7 @@ void CL_ClearEfrags( void )
 		clgame.free_efrags[i].entnext = &clgame.free_efrags[i+1];
 	clgame.free_efrags[i].entnext = NULL;
 }
-	
+
 /*
 ==============
 CL_ClearEffects

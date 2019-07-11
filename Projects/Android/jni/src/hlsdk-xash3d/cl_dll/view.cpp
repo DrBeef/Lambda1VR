@@ -289,6 +289,11 @@ void V_CalcGunAngle( struct ref_params_s *pparams )
 	if( !viewent )
 		return;
 
+#ifdef VR
+	viewent->angles[YAW] = pparams->rcontrollerangles[YAW];
+	viewent->angles[PITCH] = pparams->rcontrollerangles[PITCH];
+	viewent->angles[ROLL] = pparams->rcontrollerangles[ROLL];
+#else
 	viewent->angles[YAW] = pparams->viewangles[YAW] + pparams->crosshairangle[YAW];
 	viewent->angles[PITCH] = -pparams->viewangles[PITCH] + pparams->crosshairangle[PITCH] * 0.25;
 	viewent->angles[ROLL] -= v_idlescale * sin( pparams->time * v_iroll_cycle.value ) * v_iroll_level.value;
@@ -296,6 +301,7 @@ void V_CalcGunAngle( struct ref_params_s *pparams )
 	// don't apply all of the v_ipitch to prevent normally unseen parts of viewmodel from coming into view.
 	viewent->angles[PITCH] -= v_idlescale * sin( pparams->time * v_ipitch_cycle.value ) * ( v_ipitch_level.value * 0.5 );
 	viewent->angles[YAW] -= v_idlescale * sin( pparams->time * v_iyaw_cycle.value ) * v_iyaw_level.value;
+#endif
 
 	VectorCopy( viewent->angles, viewent->curstate.angles );
 	VectorCopy( viewent->angles, viewent->latched.prevangles );
@@ -331,6 +337,8 @@ void V_CalcViewRoll( struct ref_params_s *pparams )
 	if( !viewentity )
 		return;
 
+	//Don't roll view when dead in VR!
+#ifndef VR
 	side = V_CalcRoll( viewentity->angles, pparams->simvel, pparams->movevars->rollangle, pparams->movevars->rollspeed );
 
 	pparams->viewangles[ROLL] += side;
@@ -342,6 +350,7 @@ void V_CalcViewRoll( struct ref_params_s *pparams )
 		pparams->viewangles[ROLL] = 80;	// dead view angle
 		return;
 	}
+#endif
 }
 
 /*

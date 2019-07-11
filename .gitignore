@@ -38,8 +38,10 @@ Projects/Android/.externalNativeBuild/ndkBuild/release/armeabi-v7a/ndkBuild_buil
 Projects/Android/.gradle/4.4/fileHashes/fileHashes.lock
 *.ser
 Projects/Android/.idea/codeStyles/Project.xml
-*.xml
 Projects/Android/.externalNativeBuild/ndkBuild/debug/armeabi-v7a/ndkBuild_build_command.txt
 Projects/Android/.externalNativeBuild/ndkBuild/release/armeabi-v7a/ndkBuild_build_command.txt
 Projects/Android/.externalNativeBuild/ndkBuild/debug/armeabi-v7a/ndkBuild_build_output.txt
 Projects/Android/.externalNativeBuild/ndkBuild/release/arm64-v8a/ndkBuild_build_output.txt
+Projects/Android/.idea/libraries/Gradle__android_android_21.xml
+Projects/Android/.idea/gradle.xml
+Projects/Android/.idea/modules.xml

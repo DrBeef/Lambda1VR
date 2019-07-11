@@ -60,22 +60,25 @@ import static android.system.Os.setenv;
 		params.screenBrightness = 1.0f;
 		getWindow().setAttributes( params );
 
+		copy_asset(getFilesDir().getPath(), "extras.pak");
+
+
 		//Set default environment
 		try {
 			setenv("XASH3D_BASEDIR", "/sdcard/xash/", true);
 			setenv("XASH3D_ENGLIBDIR", getFilesDir().getParentFile().getPath() + "/lib", true);
 			setenv("XASH3D_GAMELIBDIR", getFilesDir().getParentFile().getPath() + "/lib", true);
 			setenv("XASH3D_GAMEDIR", "valve", true);
+			setenv( "XASH3D_EXTRAS_PAK1", getFilesDir().getPath() + "/extras.pak", true );
 		}
 		catch (Exception e)
 		{
 
 		}
 		
-		//GLES3JNILib.setCallbackObjects(mAudio, this);
 
 		//Read these from a file and pass through
-		commandLineParams = new String("quake");
+		commandLineParams = new String("-dev 3 -log");
 
 		//See if user is trying to use command line params
 		if(new File("/sdcard/xash/commandline.txt").exists()) // should exist!

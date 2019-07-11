@@ -90,14 +90,14 @@ int CPU_LEVEL			= 2;
 int GPU_LEVEL			= 3;
 int NUM_MULTI_SAMPLES	= 1;
 
-float SS_MULTIPLIER    = 1.0f;
+float SS_MULTIPLIER    = 1.3f;
 
 float worldPosition[3];
 float hmdPosition[3];
 float playerHeight;
 float positionDeltaThisFrame[3];
 
-vec2_t cylinderSize = {1024, 576};
+vec2_t cylinderSize = {1280, 720};
 
 static inline float radians(float deg) {
 	return (deg * M_PI) / 180.0;
@@ -193,6 +193,8 @@ void QC_exit(int exitCode)
 vec3_t hmdorientation;
 float gunangles[3];
 float weaponOffset[3];
+float flashlightangles[3];
+float flashlightOffset[3];
 
 float horizFOV;
 float vertFOV;
@@ -552,8 +554,8 @@ static bool ovrFramebuffer_Create( ovrFramebuffer * frameBuffer, const GLenum co
     LOAD_GLES2(glFramebufferTexture2D);
     LOAD_GLES2(glCheckFramebufferStatus);
 
-    frameBuffer->Width = width * SS_MULTIPLIER;
-	frameBuffer->Height = height * SS_MULTIPLIER;
+    frameBuffer->Width = width;
+	frameBuffer->Height = height;
 	frameBuffer->Multisamples = multisamples;
 
 	frameBuffer->ColorTextureSwapChain = vrapi_CreateTextureSwapChain3( VRAPI_TEXTURE_TYPE_2D, colorFormat, frameBuffer->Width, frameBuffer->Height, 1, 3 );
@@ -819,14 +821,8 @@ void RenderFrame( ovrRenderer * renderer, const ovrJava * java,
 	//Set everything up
 	Host_BeginFrame();
 
-	int buffersToRender = renderer->NumBuffers;
-	if (useScreenLayer())
-	{
-		buffersToRender = 1;
-	}
-
 	// Render the eye images.
-	for ( int eye = 0; eye < buffersToRender; eye++ )
+	for ( int eye = 0; eye < renderer->NumBuffers; eye++ )
 	{
 		ovrFramebuffer * frameBuffer = &(renderer->FrameBuffer[eye]);
 		ovrFramebuffer_SetCurrent( frameBuffer );
@@ -1055,8 +1051,6 @@ float initialTouchX, initialTouchY;
 
 static void ovrApp_HandleInput( ovrApp * app )
 {
-    float controllerAngles[3];
-
     //The amount of yaw changed by controller
     //TODO: fixme
     float yawOffset = 0.0f;//cl.viewangles[YAW] - hmdorientation[YAW];
@@ -1137,7 +1131,6 @@ static void ovrApp_HandleInput( ovrApp * app )
 
         //dominant hand stuff first
         {
-
             weaponOffset[0] = dominantRemoteTracking->HeadPose.Pose.Position.x - hmdPosition[0];
             weaponOffset[1] = dominantRemoteTracking->HeadPose.Pose.Position.y - hmdPosition[1];
             weaponOffset[2] = dominantRemoteTracking->HeadPose.Pose.Position.z - hmdPosition[2];
@@ -1161,11 +1154,25 @@ static void ovrApp_HandleInput( ovrApp * app )
         float controllerYawHeading;
         float hmdYawHeading;
         {
-            QuatToYawPitchRoll(offHandRemoteTracking->HeadPose.Pose.Orientation,
-                               controllerAngles);
+            flashlightOffset[0] = offHandRemoteTracking->HeadPose.Pose.Position.x - hmdPosition[0];
+            flashlightOffset[1] = offHandRemoteTracking->HeadPose.Pose.Position.y - hmdPosition[1];
+            flashlightOffset[2] = offHandRemoteTracking->HeadPose.Pose.Position.z - hmdPosition[2];
 
-            controllerYawHeading = controllerAngles[YAW] - gunangles[YAW] + yawOffset;
+            QuatToYawPitchRoll(offHandRemoteTracking->HeadPose.Pose.Orientation, flashlightangles);
+
+            controllerYawHeading = flashlightangles[YAW] - gunangles[YAW] + yawOffset;
             hmdYawHeading = hmdorientation[YAW] - gunangles[YAW] + yawOffset;
+
+            //flashlight on/off
+            if ((offHandTrackedRemoteState->Buttons & ovrButton_Joystick) &&
+                ((offHandTrackedRemoteState->Buttons & ovrButton_Joystick) !=
+						(offHandTrackedRemoteStateOld->Buttons & ovrButton_Joystick))) {
+
+				const char* action = "impulse 100";
+				char command[256];
+				Q_snprintf( command, sizeof( command ), "%s\n", action );
+				Cbuf_AddText( command );
+            }
         }
 
         //Right-hand specific stuff
@@ -1301,11 +1308,6 @@ static void ovrApp_HandleInput( ovrApp * app )
 			{
 				decreaseSnap = true;
 			}
-
-            //Prev Weapon
-            handleTrackedControllerButton(&leftTrackedRemoteState_new, &leftTrackedRemoteState_old,
-                                          ovrButton_GripTrigger, '#');
-
 
             leftTrackedRemoteState_old = leftTrackedRemoteState_new;
         }

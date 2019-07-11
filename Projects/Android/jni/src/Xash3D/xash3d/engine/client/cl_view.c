@@ -38,6 +38,8 @@ update refdef values each frame
 extern float playerHeight;
 extern float hmdPosition[3];
 extern cvar_t *r_worldscale;
+extern float gunangles[3];
+extern float weaponOffset[3];
 #endif
 
 void V_SetupRefDef( void )
@@ -126,6 +128,9 @@ void V_SetupRefDef( void )
 #ifdef VR
     //Only reasonable place to do this
 	cl.refdef.viewheight[2] += ((hmdPosition[1] - playerHeight) * r_worldscale->value);
+
+    VectorAdd( cl.refdef.viewheight, weaponOffset, cl.refdef.rcontrollerorg );
+    VectorCopy( gunangles, cl.refdef.rcontrollerangles );
 #endif
 }
 

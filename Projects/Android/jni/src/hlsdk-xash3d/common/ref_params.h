@@ -22,6 +22,16 @@ typedef struct ref_params_s
 	vec3_t		vieworg;
 	vec3_t		viewangles;
 
+#ifdef VR
+	//left controller
+	vec3_t		lcontrollerorg;
+	vec3_t		lcontrollerangles;
+
+	//right controller
+	vec3_t		rcontrollerorg;
+	vec3_t		rcontrollerangles;
+#endif
+
 	vec3_t		forward;
 	vec3_t		right;
 	vec3_t		up;

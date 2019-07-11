@@ -6,13 +6,8 @@ LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_MODULE := client
-#ifeq ($(XASH_SDL),1)
-#APP_PLATFORM := android-12
-#LOCAL_SHARED_LIBRARIES += SDL2 
-#LOCAL_CFLAGS += -DXASH_SDL
-#else
-APP_PLATFORM := android-8
-#endif
+
+APP_PLATFORM := android-19
 
 include $(XASH3D_CONFIG)
 
@@ -20,7 +15,7 @@ ifeq ($(TARGET_ARCH_ABI),armeabi-v7a-hard)
 LOCAL_MODULE_FILENAME = libclient_hardfp
 endif
 
-LOCAL_CFLAGS += -DCLIENT_DLL=1 -DVR
+LOCAL_CFLAGS += -DVR -DCLIENT_DLL=1
 
 SRCS=
 SRCS_C=
@@ -92,7 +87,7 @@ SRCS+=./input_xash3d.cpp
 SRCS+=./scoreboard.cpp
 SRCS+=./MOTD.cpp
 INCLUDES =  -I../common -I. -I../game_shared -I../pm_shared -I../engine -I../dlls -I../utils/false_vgui/include
-DEFINES = -Wno-write-strings -DLINUX -D_LINUX -Dstricmp=strcasecmp -Dstrnicmp=strncasecmp -DCLIENT_WEAPONS -DCLIENT_DLL -w -D_snprintf=snprintf -DVR
+DEFINES = -Wno-write-strings -DLINUX -D_LINUX -Dstricmp=strcasecmp -Dstrnicmp=strncasecmp -DCLIENT_WEAPONS -DCLIENT_DLL -w -D_snprintf=snprintf
 
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/. \
 		 $(LOCAL_PATH)/../common \

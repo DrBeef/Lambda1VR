@@ -605,7 +605,7 @@ ovrLayerCylinder2 BuildCylinderLayer( ovrRenderer * cylinderRenderer,
 	const float rotateYaw = 0.0f;
 	const float rotatePitch = 0.0f;
 	const float radius = 2.0f;
-	const ovrVector3f translation = { 0.0f, 0.0f, -1.0f };
+	const ovrVector3f translation = { 0.0f, 0.0f, -0.5f };
 
 	ovrMatrix4f cylinderTransform = 
 		CylinderModelMatrix( textureWidth, textureHeight, translation,
@@ -616,7 +616,7 @@ ovrLayerCylinder2 BuildCylinderLayer( ovrRenderer * cylinderRenderer,
 
 	for ( int eye = 0; eye < VRAPI_FRAME_LAYER_EYE_MAX; eye++ )
 	{
-		ovrFramebuffer * cylinderFrameBuffer = &cylinderRenderer->FrameBuffer[VRAPI_EYE_LEFT];
+		ovrFramebuffer * cylinderFrameBuffer = &cylinderRenderer->FrameBuffer[eye];
 		
 		ovrMatrix4f modelViewMatrix = ovrMatrix4f_Multiply( &tracking->Eye[eye].ViewMatrix, &cylinderTransform );
 		layer.Textures[eye].TexCoordsFromTanAngles = ovrMatrix4f_Inverse( &modelViewMatrix );
