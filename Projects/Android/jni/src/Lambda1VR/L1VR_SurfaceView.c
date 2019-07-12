@@ -1099,36 +1099,37 @@ static void ovrApp_HandleInput( ovrApp * app )
 	ovrInputStateTrackedRemote *offHandTrackedRemoteStateOld = !cl_righthanded->flags ? &rightTrackedRemoteState_old : &leftTrackedRemoteState_old;
 	ovrTracking *offHandRemoteTracking = !cl_righthanded->flags ? &rightRemoteTracking : &leftRemoteTracking;
 
+    //Hacky menu control - Does the trick for now though
+    if (useScreenLayer())
     {
-        //Hacky menu control - Does the trick for now though
-        {
-            const ovrQuatf quatRemote = rightRemoteTracking.HeadPose.Pose.Orientation;
-            float remoteAngles[3];
-            QuatToYawPitchRoll(quatRemote, remoteAngles);
-            if (remoteAngles[YAW] > -40.0f && remoteAngles[YAW] < 40.0f &&
-                remoteAngles[PITCH] > -20.0f && remoteAngles[PITCH] < 20.0f) {
+        const ovrQuatf quatRemote = rightRemoteTracking.HeadPose.Pose.Orientation;
+        float remoteAngles[3];
+        QuatToYawPitchRoll(quatRemote, remoteAngles);
+        if (remoteAngles[YAW] > -40.0f && remoteAngles[YAW] < 40.0f &&
+            remoteAngles[PITCH] > -20.0f && remoteAngles[PITCH] < 20.0f) {
 
-                int newRemoteTrigState = (rightTrackedRemoteState_new.Buttons & ovrButton_Trigger) != 0;
-                int prevRemoteTrigState = (rightTrackedRemoteState_old.Buttons & ovrButton_Trigger) != 0;
+            int newRemoteTrigState = (rightTrackedRemoteState_new.Buttons & ovrButton_Trigger) != 0;
+            int prevRemoteTrigState = (rightTrackedRemoteState_old.Buttons & ovrButton_Trigger) != 0;
 
-                touchEventType t = event_motion;
+            touchEventType t = event_motion;
 
-                float touchX = (-remoteAngles[YAW] + 40.0f) / 80.0f;
-                float touchY = (remoteAngles[PITCH] + 20.0f) / 40.0f;
-                if (newRemoteTrigState != prevRemoteTrigState)
+            float touchX = (-remoteAngles[YAW] + 40.0f) / 80.0f;
+            float touchY = (remoteAngles[PITCH] + 20.0f) / 40.0f;
+            if (newRemoteTrigState != prevRemoteTrigState)
+            {
+                t = newRemoteTrigState ? event_down : event_up;
+                if (newRemoteTrigState)
                 {
-                    t = newRemoteTrigState ? event_down : event_up;
-                    if (newRemoteTrigState)
-                    {
-                        initialTouchX = touchX;
-                        initialTouchY = touchY;
-                    }
+                    initialTouchX = touchX;
+                    initialTouchY = touchY;
                 }
-
-                IN_TouchEvent(t, 0, touchX, touchY, initialTouchX - touchX, initialTouchY - touchY);
             }
-        }
 
+            IN_TouchEvent(t, 0, touchX, touchY, initialTouchX - touchX, initialTouchY - touchY);
+        }
+    }
+    else
+    {
         //dominant hand stuff first
         {
             weaponOffset[0] = dominantRemoteTracking->HeadPose.Pose.Position.x - hmdPosition[0];
@@ -1228,9 +1229,6 @@ static void ovrApp_HandleInput( ovrApp * app )
                 }
                 Cbuf_AddText( command );
             }
-
-            rightTrackedRemoteState_old = rightTrackedRemoteState_new;
-
         }
 
         //Left-hand specific stuff
@@ -1308,10 +1306,12 @@ static void ovrApp_HandleInput( ovrApp * app )
 			{
 				decreaseSnap = true;
 			}
-
-            leftTrackedRemoteState_old = leftTrackedRemoteState_new;
         }
     }
+
+    //Save state
+    rightTrackedRemoteState_old = rightTrackedRemoteState_new;
+    leftTrackedRemoteState_old = leftTrackedRemoteState_new;
 }
 
 /*
