@@ -1007,7 +1007,7 @@ static void handleTrackedControllerButton(ovrInputStateTrackedRemote * trackedRe
 {
     if ((trackedRemoteState->Buttons & button) != (prevTrackedRemoteState->Buttons & button))
     {
-        Key_Event(key, (trackedRemoteState->Buttons & button) > 0 ? 1 : 0);
+        Key_Event(key, (trackedRemoteState->Buttons & button) != 0);
     }
 }
 
@@ -1105,7 +1105,7 @@ static void ovrApp_HandleInput( ovrApp * app )
             const ovrQuatf quatRemote = rightRemoteTracking.HeadPose.Pose.Orientation;
             float remoteAngles[3];
             QuatToYawPitchRoll(quatRemote, remoteAngles);
-            if (remoteAngles[YAW] > -30.0f && remoteAngles[YAW] < 30.0f &&
+            if (remoteAngles[YAW] > -40.0f && remoteAngles[YAW] < 40.0f &&
                 remoteAngles[PITCH] > -20.0f && remoteAngles[PITCH] < 20.0f) {
 
                 int newRemoteTrigState = (rightTrackedRemoteState_new.Buttons & ovrButton_Trigger) != 0;
@@ -1113,7 +1113,7 @@ static void ovrApp_HandleInput( ovrApp * app )
 
                 touchEventType t = event_motion;
 
-                float touchX = (-remoteAngles[YAW] + 30.0f) / 60.0f;
+                float touchX = (-remoteAngles[YAW] + 40.0f) / 80.0f;
                 float touchY = (remoteAngles[PITCH] + 20.0f) / 40.0f;
                 if (newRemoteTrigState != prevRemoteTrigState)
                 {

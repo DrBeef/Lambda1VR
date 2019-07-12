@@ -45,3 +45,13 @@ Projects/Android/.externalNativeBuild/ndkBuild/release/arm64-v8a/ndkBuild_build_
 Projects/Android/.idea/libraries/Gradle__android_android_21.xml
 Projects/Android/.idea/gradle.xml
 Projects/Android/.idea/modules.xml
+Projects/Android/.idea/misc.xml
+Projects/Android/.idea/workspace.xml
+Projects/Android/jni/src/gl4es/spec/xml/glxext.xml
+Projects/Android/jni/src/gl4es/spec/xml/wgl.xml
+Projects/Android/jni/src/gl4es/spec/xml/egl.xml
+Projects/Android/jni/src/gl4es/spec/xml/opengl.xml
+Projects/Android/jni/src/gl4es/spec/xml/gles-2.0.xml
+Projects/Android/.idea/vcs.xml
+Projects/Android/jni/src/gl4es/spec/xml/glx.xml
+Projects/Android/.idea/runConfigurations.xml
