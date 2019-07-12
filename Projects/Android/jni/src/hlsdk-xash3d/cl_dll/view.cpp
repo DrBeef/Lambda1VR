@@ -293,6 +293,10 @@ void V_CalcGunAngle( struct ref_params_s *pparams )
 	viewent->angles[YAW] = pparams->rcontrollerangles[YAW];
 	viewent->angles[PITCH] = pparams->rcontrollerangles[PITCH];
 	viewent->angles[ROLL] = pparams->rcontrollerangles[ROLL];
+
+	//Special case for gun origin
+	VectorAdd( pparams->rcontrollerorg, pparams->vieworg, viewent->curstate.origin );
+	VectorAdd( pparams->rcontrollerorg, pparams->vieworg, viewent->latched.prevorigin );
 #else
 	viewent->angles[YAW] = pparams->viewangles[YAW] + pparams->crosshairangle[YAW];
 	viewent->angles[PITCH] = -pparams->viewangles[PITCH] + pparams->crosshairangle[PITCH] * 0.25;

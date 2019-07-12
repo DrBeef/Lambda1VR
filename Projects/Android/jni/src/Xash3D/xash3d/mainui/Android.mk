@@ -12,7 +12,7 @@ ifeq ($(TARGET_ARCH_ABI),armeabi-v7a-hard)
 endif
 
 LOCAL_MODULE := menu
-LOCAL_CPPFLAGS := -std=gnu++11 -DMAINUI_USE_STB -DMAINUI_USE_CUSTOM_FONT_RENDER -DNO_STL -fno-rtti -fno-exceptions
+LOCAL_CPPFLAGS := -std=gnu++11 -DMAINUI_USE_STB -DMAINUI_USE_CUSTOM_FONT_RENDER -DNO_STL -fno-rtti -fno-exceptions -DVR
 
 LOCAL_C_INCLUDES := \
 	$(SDL_PATH)/include				\

@@ -197,14 +197,14 @@ void FWGSInput::IN_Move( float frametime, usercmd_t *cmd )
 	viewangles[YAW] -= old_yaw;
 	viewangles[YAW] += rel_yaw;
 
-#ifndef VR
 	if( fLadder )
 	{
+#ifndef VR
 		if( cl_laddermode->value == 1 )
 			viewangles[YAW] -= ac_sidemove * 5;
+#endif
 		ac_sidemove = 0;
 	}
-#endif
 
 	if( gHUD.m_MOTD.m_bShow )
 		gHUD.m_MOTD.scroll += rel_pitch;
