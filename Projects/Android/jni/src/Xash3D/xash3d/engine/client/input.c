@@ -742,9 +742,15 @@ void IN_Init( void )
 {
 	IN_StartupMouse( );
 
+#ifdef VR
+    cl_forwardspeed	= Cvar_Get( "cl_forwardspeed", "120", CVAR_ARCHIVE | CVAR_CLIENTDLL, "Default forward move speed" );
+    cl_backspeed	= Cvar_Get( "cl_backspeed", "120", CVAR_ARCHIVE | CVAR_CLIENTDLL, "Default back move speed"  );
+    cl_sidespeed	= Cvar_Get( "cl_sidespeed", "120", CVAR_ARCHIVE | CVAR_CLIENTDLL, "Default side move speed"  );
+#else
 	cl_forwardspeed	= Cvar_Get( "cl_forwardspeed", "400", CVAR_ARCHIVE | CVAR_CLIENTDLL, "Default forward move speed" );
 	cl_backspeed	= Cvar_Get( "cl_backspeed", "400", CVAR_ARCHIVE | CVAR_CLIENTDLL, "Default back move speed"  );
 	cl_sidespeed	= Cvar_Get( "cl_sidespeed", "400", CVAR_ARCHIVE | CVAR_CLIENTDLL, "Default side move speed"  );
+#endif
 
 	if( !Host_IsDedicated() )
 		Joy_Init(); // common joystick support init

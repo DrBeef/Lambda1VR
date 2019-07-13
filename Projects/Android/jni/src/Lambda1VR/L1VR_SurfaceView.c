@@ -81,11 +81,6 @@ PFNEGLGETSYNCATTRIBKHRPROC		eglGetSyncAttribKHR;
 
 #include "VrCompositor.h"
 
-#ifndef NDEBUG
-#define DEBUG 1
-#endif
-
-
 int CPU_LEVEL			= 2;
 int GPU_LEVEL			= 3;
 int NUM_MULTI_SAMPLES	= 1;
@@ -1021,11 +1016,11 @@ static void Matrix4x4_Transform (const matrix4x4 *in, const float v[3], float ou
 
 static void rotateAboutOrigin(float v1, float v2, float rotation, vec2_t out)
 {
-    vec3_t temp;
+    vec3_t temp = {0.0f, 0.0f, 0.0f};
     temp[0] = v1;
     temp[1] = v2;
 
-    vec3_t v;
+    vec3_t v = {0.0f, 0.0f, 0.0f};
     matrix4x4 matrix;
 	vec3_t angles = {0.0f, rotation, 0.0f};
 	vec3_t origin = {0.0f, 0.0f, 0.0f};
@@ -1092,13 +1087,13 @@ static void ovrApp_HandleInput( ovrApp * app )
 		}
 	}
 
-    ovrInputStateTrackedRemote *dominantTrackedRemoteState = r_lefthand->integer ? &rightTrackedRemoteState_new : &leftTrackedRemoteState_new;
-    ovrInputStateTrackedRemote *dominantTrackedRemoteStateOld = r_lefthand->integer ? &rightTrackedRemoteState_old : &leftTrackedRemoteState_old;
-	ovrTracking *dominantRemoteTracking = r_lefthand->integer ? &rightRemoteTracking : &leftRemoteTracking;
+    ovrInputStateTrackedRemote *dominantTrackedRemoteState = !r_lefthand->integer ? &rightTrackedRemoteState_new : &leftTrackedRemoteState_new;
+    ovrInputStateTrackedRemote *dominantTrackedRemoteStateOld = !r_lefthand->integer ? &rightTrackedRemoteState_old : &leftTrackedRemoteState_old;
+	ovrTracking *dominantRemoteTracking = !r_lefthand->integer ? &rightRemoteTracking : &leftRemoteTracking;
 	
-	ovrInputStateTrackedRemote *offHandTrackedRemoteState = !r_lefthand->integer ? &rightTrackedRemoteState_new : &leftTrackedRemoteState_new;
-	ovrInputStateTrackedRemote *offHandTrackedRemoteStateOld = !r_lefthand->integer ? &rightTrackedRemoteState_old : &leftTrackedRemoteState_old;
-	ovrTracking *offHandRemoteTracking = !r_lefthand->integer ? &rightRemoteTracking : &leftRemoteTracking;
+	ovrInputStateTrackedRemote *offHandTrackedRemoteState = r_lefthand->integer ? &rightTrackedRemoteState_new : &leftTrackedRemoteState_new;
+	ovrInputStateTrackedRemote *offHandTrackedRemoteStateOld = r_lefthand->integer ? &rightTrackedRemoteState_old : &leftTrackedRemoteState_old;
+	ovrTracking *offHandRemoteTracking = r_lefthand->integer ? &rightRemoteTracking : &leftRemoteTracking;
 
     //Hacky menu control - Does the trick for now though
     if (useScreenLayer())
@@ -1107,7 +1102,7 @@ static void ovrApp_HandleInput( ovrApp * app )
         float remoteAngles[3];
         QuatToYawPitchRoll(quatRemote, remoteAngles);
         if (remoteAngles[YAW] > -40.0f && remoteAngles[YAW] < 40.0f &&
-            remoteAngles[PITCH] > -20.0f && remoteAngles[PITCH] < 20.0f) {
+            remoteAngles[PITCH] > -22.5f && remoteAngles[PITCH] < 22.5f) {
 
             int newRemoteTrigState = (rightTrackedRemoteState_new.Buttons & ovrButton_Trigger) != 0;
             int prevRemoteTrigState = (rightTrackedRemoteState_old.Buttons & ovrButton_Trigger) != 0;
@@ -1115,7 +1110,7 @@ static void ovrApp_HandleInput( ovrApp * app )
             touchEventType t = event_motion;
 
             float touchX = (-remoteAngles[YAW] + 40.0f) / 80.0f;
-            float touchY = (remoteAngles[PITCH] + 20.0f) / 40.0f;
+            float touchY = (remoteAngles[PITCH] + 22.5f) / 45.0f;
             if (newRemoteTrigState != prevRemoteTrigState)
             {
                 t = newRemoteTrigState ? event_down : event_up;
@@ -1153,8 +1148,8 @@ static void ovrApp_HandleInput( ovrApp * app )
         }
 
         //off-hand stuff
-        float controllerYawHeading;
-        float hmdYawHeading;
+        float controllerYawHeading = 0.0f;
+        float hmdYawHeading = 0.0f;
         {
             flashlightOffset[0] = offHandRemoteTracking->HeadPose.Pose.Position.x - hmdPosition[0];
             flashlightOffset[1] = offHandRemoteTracking->HeadPose.Pose.Position.y - hmdPosition[1];
@@ -1179,7 +1174,7 @@ static void ovrApp_HandleInput( ovrApp * app )
 
         //Right-hand specific stuff
         {
-            ALOGE("        Right-Controller-Position: %f, %f, %f",
+            ALOGV("        Right-Controller-Position: %f, %f, %f",
                   rightRemoteTracking.HeadPose.Pose.Position.x,
                   rightRemoteTracking.HeadPose.Pose.Position.y,
                   rightRemoteTracking.HeadPose.Pose.Position.z);
@@ -1188,7 +1183,7 @@ static void ovrApp_HandleInput( ovrApp * app )
             //player is facing for positional tracking
             //TODO: fixme!
             float multiplier = /*arbitrary value that works ->*/
-                    2300.0f / cl_forwardspeed->value;
+                    2500.0f / cl_forwardspeed->value;
 
             vec2_t v;
             rotateAboutOrigin(-positionDeltaThisFrame[0] * multiplier,
@@ -1196,6 +1191,9 @@ static void ovrApp_HandleInput( ovrApp * app )
             positional_movementSideways = v[0];
             positional_movementForward = v[1];
 
+            ALOGV("        positional_movementSideways: %f, positional_movementForward: %f",
+                  positional_movementSideways,
+                  positional_movementForward);
 
             //Jump
             handleTrackedControllerButton(&rightTrackedRemoteState_new,
@@ -1234,7 +1232,7 @@ static void ovrApp_HandleInput( ovrApp * app )
 
         //Left-hand specific stuff
         {
-            ALOGE("        Left-Controller-Position: %f, %f, %f",
+            ALOGV("        Left-Controller-Position: %f, %f, %f",
                   leftRemoteTracking.HeadPose.Pose.Position.x,
                   leftRemoteTracking.HeadPose.Pose.Position.y,
                   leftRemoteTracking.HeadPose.Pose.Position.z);
@@ -1242,7 +1240,6 @@ static void ovrApp_HandleInput( ovrApp * app )
             //Menu button
             handleTrackedControllerButton(&leftTrackedRemoteState_new, &leftTrackedRemoteState_old,
                                           ovrButton_Enter, K_ESCAPE);
-
 
             //Adjust to be off-hand controller oriented
             vec2_t v;
@@ -1254,6 +1251,10 @@ static void ovrApp_HandleInput( ovrApp * app )
 
             remote_movementSideways = v[0];
             remote_movementForward = v[1];
+
+            ALOGV("        remote_movementSideways: %f, remote_movementForward: %f",
+                  remote_movementSideways,
+                  remote_movementForward);
 
             if (!r_lefthand->integer) {
                 //Run

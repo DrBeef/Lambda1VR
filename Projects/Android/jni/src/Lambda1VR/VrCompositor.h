@@ -5,7 +5,12 @@ Filename	:	VrCompositor.h
 *************************************************************************************/
 #define LOG_TAG "Lambda1VR"
 
+#ifndef NDEBUG
+#define DEBUG 1
+#endif
+
 #define ALOGE(...) __android_log_print( ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__ )
+
 #if DEBUG
 #define ALOGV(...) __android_log_print( ANDROID_LOG_VERBOSE, LOG_TAG, __VA_ARGS__ )
 #else

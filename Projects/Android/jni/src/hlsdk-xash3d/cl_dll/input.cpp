@@ -1092,11 +1092,21 @@ void InitInput( void )
 	cl_anglespeedkey	= gEngfuncs.pfnRegisterVariable( "cl_anglespeedkey", "0.67", 0 );
 	cl_yawspeed		= gEngfuncs.pfnRegisterVariable( "cl_yawspeed", "210", 0 );
 	cl_pitchspeed		= gEngfuncs.pfnRegisterVariable( "cl_pitchspeed", "225", 0 );
+
+#ifdef VR
+	cl_upspeed		= gEngfuncs.pfnRegisterVariable( "cl_upspeed", "150", 0 );
+	cl_forwardspeed		= gEngfuncs.pfnRegisterVariable( "cl_forwardspeed", "150", FCVAR_ARCHIVE );
+	cl_backspeed		= gEngfuncs.pfnRegisterVariable( "cl_backspeed", "150", FCVAR_ARCHIVE );
+	cl_sidespeed		= gEngfuncs.pfnRegisterVariable( "cl_sidespeed", "150", 0 );
+	cl_movespeedkey		= gEngfuncs.pfnRegisterVariable( "cl_movespeedkey", "3.0", 0 );
+#else
 	cl_upspeed		= gEngfuncs.pfnRegisterVariable( "cl_upspeed", "320", 0 );
 	cl_forwardspeed		= gEngfuncs.pfnRegisterVariable( "cl_forwardspeed", "400", FCVAR_ARCHIVE );
 	cl_backspeed		= gEngfuncs.pfnRegisterVariable( "cl_backspeed", "400", FCVAR_ARCHIVE );
 	cl_sidespeed		= gEngfuncs.pfnRegisterVariable( "cl_sidespeed", "400", 0 );
 	cl_movespeedkey		= gEngfuncs.pfnRegisterVariable( "cl_movespeedkey", "0.3", 0 );
+#endif
+
 	cl_pitchup		= gEngfuncs.pfnRegisterVariable( "cl_pitchup", "89", 0 );
 	cl_pitchdown		= gEngfuncs.pfnRegisterVariable( "cl_pitchdown", "89", 0 );
 
