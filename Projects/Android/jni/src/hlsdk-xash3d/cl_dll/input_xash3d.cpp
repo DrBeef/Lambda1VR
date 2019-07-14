@@ -46,11 +46,26 @@ cvar_t	*cl_laddermode;
 int CL_IsDead( void );
 extern Vector dead_viewangles;
 
+#ifdef VR
+//We have to use this because in VR the tiniest positional movement means forwardmove and sidem0ve never go to
+//zero, which means the button flags _never_ get reset. As long as we are close to zero then we should accept that
+//as being close enough, and therefore button flags can be reset. I have arbitrariliy picked 0.05f as "close".
+//This was preventing the use of ladders
+static inline bool valueCloseToZero(float value)
+{
+    return (value > -0.05f && value < 0.05f);
+}
+#endif
+
 void IN_ToggleButtons( float forwardmove, float sidemove )
 {
 	static unsigned int moveflags = T | S;
 
-	if( forwardmove )
+#ifdef VR
+	if( !valueCloseToZero( forwardmove ))
+#else
+    if( forwardmove )
+#endif
 		moveflags &= ~T;
 	else
 	{
@@ -65,8 +80,12 @@ void IN_ToggleButtons( float forwardmove, float sidemove )
 			moveflags |= T;
 		}
 	}
-	if( sidemove )
-		moveflags &= ~S;
+#ifdef VR
+    if( !valueCloseToZero( sidemove ))
+#else
+        if( sidemove )
+#endif
+        moveflags &= ~S;
 	else
 	{
 		//gEngfuncs.Con_Printf("l%d r%d\n", in_moveleft.state, in_moveright.state);
