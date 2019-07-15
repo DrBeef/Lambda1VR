@@ -85,7 +85,7 @@ int CPU_LEVEL			= 2;
 int GPU_LEVEL			= 3;
 int NUM_MULTI_SAMPLES	= 1;
 
-float SS_MULTIPLIER    = 1.3f;
+float SS_MULTIPLIER    = 1.5f;
 
 float worldPosition[3];
 float hmdPosition[3];
@@ -120,6 +120,7 @@ extern convar_t	*r_lefthand;
 convar_t	*vr_snapturn_angle;
 convar_t	*vr_reloadtimeoutms;
 convar_t	*vr_positionalMultiplier;
+convar_t	*vr_walkdirection;
 
 
 /*
@@ -1069,9 +1070,7 @@ static void ovrApp_HandleInput( ovrApp * app )
 {
     //The amount of yaw changed by controller
     //TODO: fixme
-    float yawOffset = 0.0f;//cl.viewangles[YAW] - hmdorientation[YAW];
-
-	float trackepadMaxX,trackepadMaxY;
+    float yawOffset = cl.refdef.cl_viewangles[YAW] - hmdorientation[YAW];
 
 	for ( int i = 0; ; i++ ) {
 		ovrInputCapabilityHeader cap;
@@ -1093,9 +1092,6 @@ static void ovrApp_HandleInput( ovrApp * app )
 
 				result = vrapi_GetInputTrackingState(app->Ovr, i, app->DisplayTime,
 													 &remoteTracking);
-
-				trackepadMaxX = remoteCapabilities.TrackpadMaxX;
-				trackepadMaxY = remoteCapabilities.TrackpadMaxY;
 
 				if (remoteCapabilities.ControllerCapabilities & ovrControllerCaps_RightHand) {
 					rightTrackedRemoteState_new = trackedRemoteState;
@@ -1167,6 +1163,7 @@ static void ovrApp_HandleInput( ovrApp * app )
             QuatToYawPitchRoll(quatRemote, gunangles);
 
             //Adjust gun pitch for user preference
+            gunangles[PITCH] *= -1.0f;
 //            gunangles[PITCH] += cl_weaponpitchadjust.value;
             gunangles[YAW] += yawOffset;
 
@@ -1205,9 +1202,10 @@ static void ovrApp_HandleInput( ovrApp * app )
             flashlightOffset[2] = offHandRemoteTracking->HeadPose.Pose.Position.z - hmdPosition[2];
 
             QuatToYawPitchRoll(offHandRemoteTracking->HeadPose.Pose.Orientation, flashlightangles);
+            flashlightangles[YAW] += yawOffset;
 
-            controllerYawHeading = flashlightangles[YAW] - gunangles[YAW] + yawOffset;
-            hmdYawHeading = hmdorientation[YAW] - gunangles[YAW] + yawOffset;
+            controllerYawHeading = flashlightangles[YAW] - yawOffset;
+            hmdYawHeading = hmdorientation[YAW];
 
 			//Run
 			handleTrackedControllerButton(offHandTrackedRemoteState,
@@ -1286,8 +1284,7 @@ static void ovrApp_HandleInput( ovrApp * app )
             vec2_t v;
             rotateAboutOrigin(leftTrackedRemoteState_new.Joystick.x,
                               leftTrackedRemoteState_new.Joystick.y,
-                              //cl_walkdirection.flags == 1 ? hmdYawHeading :
-                              controllerYawHeading,
+                              vr_walkdirection->integer == 1 ? hmdYawHeading : controllerYawHeading,
                               v);
 
             remote_movementSideways = v[0];
@@ -1620,6 +1617,7 @@ static void initializeVRCvars()
 	vr_snapturn_angle = Cvar_Get( "vr_snapturn_angle", "45", CVAR_ARCHIVE, "Sets the angle for snap-turn, set to < 10.0 to enable smooth turning" );
 	vr_reloadtimeoutms = Cvar_Get( "vr_reloadtimeoutms", "150", CVAR_ARCHIVE, "How quickly the grip trigger needs to be release to initiate a reload" );
 	vr_positionalMultiplier = Cvar_Get( "vr_positionalMultiplier", "2600", CVAR_ARCHIVE, "Arbitrary number that makes positional tracking work well" );
+    vr_walkdirection = Cvar_Get( "vr_walkdirection", "1", CVAR_ARCHIVE, "1 - Use HMD for direction, 0 - Use off-hand controller for direction" );
 }
 
 void * AppThreadFunction( void * parm )
@@ -1824,7 +1822,8 @@ void * AppThreadFunction( void * parm )
 			static usingScreenLayer = true; //Starts off using the screen layer
 			if (usingScreenLayer != useScreenLayer())
 			{
-				if (usingScreenLayer = useScreenLayer())
+                usingScreenLayer = useScreenLayer();
+				if (usingScreenLayer)
 				{
 					R_ChangeDisplaySettings(cylinderSize[0], cylinderSize[1], true);
 				}
