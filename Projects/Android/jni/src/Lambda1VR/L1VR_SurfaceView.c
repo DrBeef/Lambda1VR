@@ -117,22 +117,24 @@ extern cvar_t	*cl_forwardspeed;
 extern convar_t	*r_lefthand;
 
 //Define our own cvars
-convar_t	*cl_snapturn_angle;
+convar_t	*vr_snapturn_angle;
+convar_t	*vr_reloadtimeoutms;
+convar_t	*vr_positionalMultiplier;
 
 
 /*
 ================================================================================
 
-System Clock Time
+System Clock Time in millis
 
 ================================================================================
 */
 
-static double GetTimeInSeconds()
+static double GetTimeInMilliSeconds()
 {
 	struct timespec now;
 	clock_gettime( CLOCK_MONOTONIC, &now );
-	return ( now.tv_sec * 1e9 + now.tv_nsec ) * 0.000000001;
+	return ( now.tv_sec * 1e9 + now.tv_nsec ) * (double)(1e-6);
 }
 
 /*
@@ -832,7 +834,7 @@ void RenderFrame( ovrRenderer * renderer, const ovrJava * java,
 			GL( glViewport( 0, 0, frameBuffer->Width, frameBuffer->Height ) );
 			GL( glScissor( 0, 0, frameBuffer->Width, frameBuffer->Height ) );
 
-			GL( glClearColor( 0.3f, 0.0f, 0.0f, 1.0f ) );
+			GL( glClearColor( 0.0f, 0.0f, 0.0f, 1.0f ) );
 			GL( glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT ) );
 			GL( glDisable(GL_SCISSOR_TEST));
 
@@ -1044,6 +1046,25 @@ void Touch_Motion( touchEventType type, int fingerID, float x, float y, float dx
 
 float initialTouchX, initialTouchY;
 
+static inline sendButtonAction(const char* action, long buttonDown)
+{
+    char command[256];
+    Q_snprintf( command, sizeof( command ), "%s\n", action );
+    if (!buttonDown)
+    {
+        command[0] = '-';
+    }
+    Cbuf_AddText( command );
+
+}
+
+static inline sendButtonActionSimple(const char* action)
+{
+    char command[256];
+    Q_snprintf( command, sizeof( command ), "%s\n", action );
+    Cbuf_AddText( command );
+}
+
 static void ovrApp_HandleInput( ovrApp * app )
 {
     //The amount of yaw changed by controller
@@ -1095,7 +1116,10 @@ static void ovrApp_HandleInput( ovrApp * app )
 	ovrInputStateTrackedRemote *offHandTrackedRemoteStateOld = r_lefthand->integer ? &rightTrackedRemoteState_old : &leftTrackedRemoteState_old;
 	ovrTracking *offHandRemoteTracking = r_lefthand->integer ? &rightRemoteTracking : &leftRemoteTracking;
 
-    //Hacky menu control - Does the trick for now though
+	static bool dominantGripPushed = false;
+	static float dominantGripPushTime = 0.0f;
+
+    //Menu control - Uses "touch"
     if (useScreenLayer())
     {
         const ovrQuatf quatRemote = rightRemoteTracking.HeadPose.Pose.Orientation;
@@ -1145,6 +1169,31 @@ static void ovrApp_HandleInput( ovrApp * app )
             //Adjust gun pitch for user preference
 //            gunangles[PITCH] += cl_weaponpitchadjust.value;
             gunangles[YAW] += yawOffset;
+
+            //Use (Action)
+            if ((dominantTrackedRemoteState->Buttons & ovrButton_Joystick) !=
+                 (dominantTrackedRemoteStateOld->Buttons & ovrButton_Joystick)) {
+
+                sendButtonAction("+use", (dominantTrackedRemoteState->Buttons & ovrButton_Joystick));
+            }
+
+            if ((dominantTrackedRemoteState->Buttons & ovrButton_GripTrigger) !=
+                (dominantTrackedRemoteStateOld->Buttons & ovrButton_GripTrigger)) {
+
+                dominantGripPushed = (dominantTrackedRemoteState->Buttons & ovrButton_GripTrigger);
+
+                if (dominantGripPushed)
+                {
+                    dominantGripPushTime = GetTimeInMilliSeconds();
+                }
+                else
+                {
+                    if ((GetTimeInMilliSeconds() - dominantGripPushTime) < vr_reloadtimeoutms->integer)
+                    {
+                        sendButtonActionSimple("+reload");
+                    }
+                }
+            }
         }
 
         //off-hand stuff
@@ -1160,16 +1209,10 @@ static void ovrApp_HandleInput( ovrApp * app )
             controllerYawHeading = flashlightangles[YAW] - gunangles[YAW] + yawOffset;
             hmdYawHeading = hmdorientation[YAW] - gunangles[YAW] + yawOffset;
 
-            //flashlight on/off
-            if ((offHandTrackedRemoteState->Buttons & ovrButton_Joystick) &&
-                ((offHandTrackedRemoteState->Buttons & ovrButton_Joystick) !=
-						(offHandTrackedRemoteStateOld->Buttons & ovrButton_Joystick))) {
-
-				const char* action = "impulse 100";
-				char command[256];
-				Q_snprintf( command, sizeof( command ), "%s\n", action );
-				Cbuf_AddText( command );
-            }
+			//Run
+			handleTrackedControllerButton(offHandTrackedRemoteState,
+                                          offHandTrackedRemoteStateOld,
+										  ovrButton_GripTrigger, K_SHIFT);
         }
 
         //Right-hand specific stuff
@@ -1181,9 +1224,7 @@ static void ovrApp_HandleInput( ovrApp * app )
 
             //This section corrects for the fact that the controller actually controls direction of movement, but we want to move relative to the direction the
             //player is facing for positional tracking
-            //TODO: fixme!
-            float multiplier = /*arbitrary value that works ->*/
-                    2500.0f / cl_forwardspeed->value;
+            float multiplier = vr_positionalMultiplier->value / cl_forwardspeed->value;
 
             vec2_t v;
             rotateAboutOrigin(-positionDeltaThisFrame[0] * multiplier,
@@ -1200,33 +1241,33 @@ static void ovrApp_HandleInput( ovrApp * app )
                                           &rightTrackedRemoteState_old, ovrButton_A, K_SPACE);
 
             if (!r_lefthand->integer) {
-                //Fire
-                handleTrackedControllerButton(&rightTrackedRemoteState_new,
-                                              &rightTrackedRemoteState_old,
-                                              ovrButton_Trigger, K_MOUSE1);
+                if (dominantGripPushed && (GetTimeInMilliSeconds() - dominantGripPushTime) > vr_reloadtimeoutms->integer)
+                {
+                    //Fire Secondary
+                    handleTrackedControllerButton(&rightTrackedRemoteState_new,
+                                                  &rightTrackedRemoteState_old,
+                                                  ovrButton_Trigger, K_MOUSE2);
+                } else {
+                    //Fire Primary
+                    handleTrackedControllerButton(&rightTrackedRemoteState_new,
+                                                  &rightTrackedRemoteState_old,
+                                                  ovrButton_Trigger, K_MOUSE1);
+                }
             } else {
-                //Run
-                handleTrackedControllerButton(&rightTrackedRemoteState_new,
-                                              &rightTrackedRemoteState_old,
-                                              ovrButton_Trigger, K_SHIFT);
-            }
+				//flashlight on/off
+				if ((rightTrackedRemoteState_new.Buttons & ovrButton_Trigger) &&
+					((rightTrackedRemoteState_new.Buttons & ovrButton_Trigger) !=
+					 (rightTrackedRemoteState_old.Buttons & ovrButton_Trigger))) {
 
-            //Next Weapon
-            handleTrackedControllerButton(&rightTrackedRemoteState_new,
-                                          &rightTrackedRemoteState_old, ovrButton_GripTrigger, '/');
+					sendButtonActionSimple("impulse 100");
+				}
+            }
 
             //Duck with B
             if ((rightTrackedRemoteState_new.Buttons & ovrButton_B) !=
                 (rightTrackedRemoteState_old.Buttons & ovrButton_B)) {
 
-                const char* action = "+duck";
-                char command[256];
-                Q_snprintf( command, sizeof( command ), "%s\n", action );
-                if (!(rightTrackedRemoteState_new.Buttons & ovrButton_B))
-                {
-                    command[0] = '-';
-                }
-                Cbuf_AddText( command );
+                sendButtonAction("+duck", (rightTrackedRemoteState_new.Buttons & ovrButton_B));
             }
         }
 
@@ -1257,15 +1298,26 @@ static void ovrApp_HandleInput( ovrApp * app )
                   remote_movementForward);
 
             if (!r_lefthand->integer) {
-                //Run
-                handleTrackedControllerButton(&leftTrackedRemoteState_new,
-                                              &leftTrackedRemoteState_old,
-                                              ovrButton_Trigger, K_SHIFT);
+				//flashlight on/off
+				if ((leftTrackedRemoteState_new.Buttons & ovrButton_Trigger) &&
+					((leftTrackedRemoteState_new.Buttons & ovrButton_Trigger) !=
+					 (leftTrackedRemoteState_old.Buttons & ovrButton_Trigger))) {
+
+					sendButtonActionSimple("impulse 100");
+				}
             } else {
-                //Fire
-                handleTrackedControllerButton(&leftTrackedRemoteState_new,
-                                              &leftTrackedRemoteState_old,
-                                              ovrButton_Trigger, K_MOUSE1);
+				if (dominantGripPushed && (GetTimeInMilliSeconds() - dominantGripPushTime) > vr_reloadtimeoutms->integer)
+				{
+					//Fire Secondary
+					handleTrackedControllerButton(&leftTrackedRemoteState_new,
+												  &leftTrackedRemoteState_old,
+												  ovrButton_Trigger, K_MOUSE2);
+				} else {
+					//Fire Primary
+					handleTrackedControllerButton(&leftTrackedRemoteState_new,
+												  &leftTrackedRemoteState_old,
+												  ovrButton_Trigger, K_MOUSE1);
+				}
             }
 
             static increaseSnap = true;
@@ -1273,8 +1325,8 @@ static void ovrApp_HandleInput( ovrApp * app )
 			{
 				if (increaseSnap)
 				{
-					snapTurn -= cl_snapturn_angle->value;
-                    if (cl_snapturn_angle->value > 10.0f) {
+					snapTurn -= vr_snapturn_angle->value;
+                    if (vr_snapturn_angle->value > 10.0f) {
                         increaseSnap = false;
                     }
 
@@ -1292,10 +1344,10 @@ static void ovrApp_HandleInput( ovrApp * app )
 			{
 				if (decreaseSnap)
 				{
-					snapTurn += cl_snapturn_angle->value;
+					snapTurn += vr_snapturn_angle->value;
 
 					//If snap turn configured for less than 10 degrees
-					if (cl_snapturn_angle->value > 10.0f) {
+					if (vr_snapturn_angle->value > 10.0f) {
                         decreaseSnap = false;
                     }
 
@@ -1308,6 +1360,20 @@ static void ovrApp_HandleInput( ovrApp * app )
 			{
 				decreaseSnap = true;
 			}
+
+            //Next Weapon
+            if (((leftTrackedRemoteState_new.Buttons & ovrButton_X) !=
+                (leftTrackedRemoteState_old.Buttons & ovrButton_X)) &&
+                    (leftTrackedRemoteState_old.Buttons & ovrButton_X)){
+                sendButtonActionSimple("invnext");
+            }
+
+            //Prev Weapon
+            if (((leftTrackedRemoteState_new.Buttons & ovrButton_Y) !=
+                 (leftTrackedRemoteState_old.Buttons & ovrButton_Y)) &&
+                (leftTrackedRemoteState_old.Buttons & ovrButton_Y)){
+                sendButtonActionSimple("invprev");
+            }
         }
     }
 
@@ -1551,7 +1617,9 @@ void initialize_gl4es();
 
 static void initializeVRCvars()
 {
-	cl_snapturn_angle = Cvar_Get( "cl_snapturn_angle", "45", CVAR_ARCHIVE, "Sets the angle for snap-turn, set to < 10.0 to enable smooth turning" );
+	vr_snapturn_angle = Cvar_Get( "vr_snapturn_angle", "45", CVAR_ARCHIVE, "Sets the angle for snap-turn, set to < 10.0 to enable smooth turning" );
+	vr_reloadtimeoutms = Cvar_Get( "vr_reloadtimeoutms", "150", CVAR_ARCHIVE, "How quickly the grip trigger needs to be release to initiate a reload" );
+	vr_positionalMultiplier = Cvar_Get( "vr_positionalMultiplier", "2600", CVAR_ARCHIVE, "Arbitrary number that makes positional tracking work well" );
 }
 
 void * AppThreadFunction( void * parm )
@@ -1597,8 +1665,6 @@ void * AppThreadFunction( void * parm )
 
 	//Always use this folder
 	chdir("/sdcard/xash");
-
-	const double startTime = GetTimeInSeconds();
 
 	for ( bool destroyed = false; destroyed == false; )
 	{

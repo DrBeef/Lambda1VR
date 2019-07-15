@@ -957,17 +957,13 @@ void SV_Init( void )
 	sv_gravity = Cvar_Get( "sv_gravity", "800", CVAR_PHYSICINFO, "world gravity" );
 	sv_maxspeed = Cvar_Get( "sv_maxspeed", "320", CVAR_PHYSICINFO, "maximum speed a player can accelerate to when on ground");
 #ifdef VR
-	sv_accelerate = Cvar_Get( "sv_accelerate", "10000", CVAR_PHYSICINFO, "rate at which a player accelerates to sv_maxspeed" ); // Instant acceleration in VR (for positional movement)
+    sv_accelerate = Cvar_Get( "sv_accelerate", "10000", CVAR_PHYSICINFO, "rate at which a player accelerates to sv_maxspeed" ); // Instant acceleration in VR (for positional movement)
 #else
-	sv_accelerate = Cvar_Get( "sv_accelerate", "10", CVAR_PHYSICINFO, "rate at which a player accelerates to sv_maxspeed" );
+    sv_accelerate = Cvar_Get( "sv_accelerate", "10", CVAR_PHYSICINFO, "rate at which a player accelerates to sv_maxspeed" );
 #endif
-	sv_friction = Cvar_Get( "sv_friction", "4", CVAR_PHYSICINFO, "how fast you slow down" );
+    sv_friction = Cvar_Get( "sv_friction", "4", CVAR_PHYSICINFO, "how fast you slow down" );
 	sv_edgefriction = Cvar_Get( "edgefriction", "2", CVAR_PHYSICINFO, "how much you slow down when nearing a ledge you might fall off" );
-#ifdef VR
-	sv_stopspeed = Cvar_Get( "sv_stopspeed", "10000", CVAR_PHYSICINFO, "how fast you come to a complete stop" ); // Instant deceleration in VR (for positional movement)
-#else
 	sv_stopspeed = Cvar_Get( "sv_stopspeed", "100", CVAR_PHYSICINFO, "how fast you come to a complete stop" );
-#endif
 	sv_maxclients = Cvar_Get( "maxplayers", "1", CVAR_LATCH|CVAR_SERVERNOTIFY, "server clients limit" );
 	sv_check_errors = Cvar_Get( "sv_check_errors", "0", CVAR_ARCHIVE, "check edicts for errors" );
 	physinfo = Cvar_Get( "@physinfo", "0", CVAR_READ_ONLY, "" ); // use ->modified value only

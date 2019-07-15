@@ -594,7 +594,7 @@ void PM_UpdateStepSound( void )
 	// If we're on a ladder or on the ground, and we're moving fast enough,
 	//  play step sound.  Also, if pmove->flTimeStepSound is zero, get the new
 	//  sound right away - we just started moving in new level.
-	if( ( fLadder || ( pmove->onground != -1 ) ) && ( Length( pmove->velocity ) > 0.0 ) && ( speed >= velwalk || !pmove->flTimeStepSound ) )
+	if( ( fLadder || ( pmove->onground != -1 ) ) && ( Length( pmove->velocity ) > 20.0f ) && ( speed >= velwalk || !pmove->flTimeStepSound ) )
 	{
 		fWalking = speed < velrun;		
 
