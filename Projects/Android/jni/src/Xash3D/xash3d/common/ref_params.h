@@ -23,13 +23,12 @@ typedef struct ref_params_s
 	vec3_t		viewangles;
 
 #ifdef VR
-	//left controller
-	vec3_t		lcontrollerorg;
-	vec3_t		lcontrollerangles;
-
-	//right controller
-	vec3_t		rcontrollerorg;
-	vec3_t		rcontrollerangles;
+	//controllers
+	struct controller_t {
+		vec3_t org;
+		vec3_t velocity;
+		vec3_t angles;
+	} flashlight, weapon;
 #endif
 
 	vec3_t		forward;

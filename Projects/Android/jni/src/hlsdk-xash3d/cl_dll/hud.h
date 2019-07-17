@@ -570,8 +570,7 @@ private:
 	client_sprite_t				*m_pSpriteList;
 	int							m_iSpriteCount;
 	int							m_iSpriteCountAllRes;
-	float						m_flMouseSensitivity;
-	int							m_iConcussionEffect; 
+	int							m_iConcussionEffect;
 
 public:
 	HSPRITE						m_hsprCursor;
@@ -668,8 +667,6 @@ public:
 	int m_iNoConsolePrint;
 
 	void AddHudElem( CHudBase *p );
-
-	float GetSensitivity();
 };
 
 extern CHud gHUD;

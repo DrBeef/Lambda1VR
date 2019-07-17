@@ -2520,7 +2520,7 @@ void CL_UpdateFlashlight( cl_entity_t *pEnt )
 	{
 		// get the predicted angles
 #ifdef VR
-        AngleVectors( cl.refdef.lcontrollerangles, forward, NULL, NULL );
+        AngleVectors( cl.refdef.flashlight.angles, forward, NULL, NULL );
 #else
 		AngleVectors( cl.refdef.cl_viewangles, forward, NULL, NULL );
 #endif
@@ -2541,7 +2541,7 @@ void CL_UpdateFlashlight( cl_entity_t *pEnt )
 
 	if(( pEnt->index - 1 ) == cl.playernum ) {
 #ifdef VR
-		VectorAdd(cl.refdef.lcontrollerorg, cl.refdef.viewheight, view_ofs);
+		VectorAdd(cl.refdef.flashlight.org, cl.refdef.viewheight, view_ofs);
 #else
 		VectorCopy( cl.refdef.viewheight, view_ofs );
 #endif

@@ -2834,7 +2834,6 @@ void PM_CheckParamters( void )
 {
 	float spd;
 	float maxspeed;
-	vec3_t v_angle;
 
 	spd = ( pmove->cmd.forwardmove * pmove->cmd.forwardmove ) + ( pmove->cmd.sidemove * pmove->cmd.sidemove ) +
 		( pmove->cmd.upmove * pmove->cmd.upmove );
@@ -2863,6 +2862,9 @@ void PM_CheckParamters( void )
 
 	PM_DropPunchAngle( pmove->punchangle );
 
+	VectorCopy(pmove->cmd.viewangles, pmove->angles);
+
+	/*
 	// Take angles from command.
 	if( !pmove->dead )
 	{
@@ -2879,12 +2881,13 @@ void PM_CheckParamters( void )
 		VectorCopy( pmove->oldangles, pmove->angles );
 	}
 
+
 	// Set dead player view_offset
 	if( pmove->dead )
 	{
 		pmove->view_ofs[2] = PM_DEAD_VIEWHEIGHT;
 	}
-
+*/
 	// Adjust client view angles to match values used on server.
 	if( pmove->angles[YAW] > 180.0f )
 	{

@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2002, Valve LLC, All rights reserved. ============
+//========= Copyright ï¿½ 1996-2002, Valve LLC, All rights reserved. ============
 //
 // Purpose: 
 //
@@ -51,7 +51,6 @@
 using namespace vgui;
 
 
-extern int cam_thirdperson;
 
 
 #define VOICE_MODEL_INTERVAL		0.3
@@ -368,7 +367,7 @@ void CVoiceStatus::CreateEntities()
 			continue;
 
 		// Don't show an icon for the local player unless we're in thirdperson mode.
-		if(pClient == localPlayer && !cam_thirdperson)
+		if(pClient == localPlayer)
 			continue;
 
 		cl_entity_s *pEnt = &m_VoiceHeadModels[iOutModel];

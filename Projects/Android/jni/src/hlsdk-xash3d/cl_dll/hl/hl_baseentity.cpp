@@ -30,6 +30,9 @@ This file contains "stubs" of class member implementations so that we can predic
 #include	"nodes.h"
 #include	"soundent.h"
 #include	"skill.h"
+#include	"cl_entity.h"
+#include	"../hud_iface.h"
+#include	"cdll_int.h"
 
 // Globals used by game logic
 const Vector g_vecZero = Vector( 0, 0, 0 );
@@ -297,11 +300,70 @@ int CBasePlayer::GetCustomDecalFrames( void ) { return -1; }
 void CBasePlayer::DropPlayerItem( char *pszItemName ) { }
 BOOL CBasePlayer::HasPlayerItem( CBasePlayerItem *pCheckItem ) { return FALSE; }
 BOOL CBasePlayer::SwitchWeapon( CBasePlayerItem *pWeapon )  { return FALSE; }
-Vector CBasePlayer::GetGunPosition( void ) { return g_vecZero; }
+Vector CBasePlayer::GetGunPosition( void ) { return GetWeaponPosition(); }
 const char *CBasePlayer::TeamID( void ) { return ""; }
 int CBasePlayer::GiveAmmo( int iCount, const char *szName, int iMax ) { return 0; }
 void CBasePlayer::AddPoints( int score, BOOL bAllowNegativeScore ) { } 
-void CBasePlayer::AddPointsToTeam( int score, BOOL bAllowNegativeScore ) { } 
+void CBasePlayer::AddPointsToTeam( int score, BOOL bAllowNegativeScore ) { }
+
+// VR related functions
+extern struct cl_entity_s *GetViewEntity(void);
+const Vector CBasePlayer::GetWeaponPosition()
+{
+    if (GetViewEntity())
+    {
+        return GetViewEntity()->curstate.origin;
+    }
+    else
+    {
+        return g_vecZero;
+    }
+}
+const Vector CBasePlayer::GetWeaponAngles()
+{
+    if (GetViewEntity())
+    {
+        return GetViewEntity()->curstate.angles;
+    }
+    else
+    {
+        return g_vecZero;
+    }
+}
+const Vector CBasePlayer::GetWeaponViewAngles()
+{
+    Vector angles = GetWeaponAngles();
+    angles.x = -angles.x;
+    return angles;
+}
+
+const Vector CBasePlayer::GetWeaponVelocity()
+{
+    if (GetViewEntity())
+    {
+        return GetViewEntity()->curstate.velocity;
+    }
+    else
+    {
+        return g_vecZero;
+    }
+}
+
+bool CBasePlayer::IsWeaponUnderWater()
+{
+    extern cl_enginefunc_t gEngfuncs;
+    float weaponPos[3];
+    GetWeaponPosition().CopyToArray(weaponPos);
+    return gEngfuncs.PM_PointContents(weaponPos, NULL) == CONTENTS_WATER;
+}
+bool CBasePlayer::IsWeaponPositionValid()
+{
+    extern cl_enginefunc_t gEngfuncs;
+    float weaponPos[3];
+    GetWeaponPosition().CopyToArray(weaponPos);
+    int weaponOriginContent = gEngfuncs.PM_PointContents(weaponPos, NULL);
+    return weaponOriginContent == CONTENTS_EMPTY || weaponOriginContent == CONTENTS_WATER;
+}
 
 void ClearMultiDamage( void ) { }
 void ApplyMultiDamage( entvars_t *pevInflictor, entvars_t *pevAttacker ) { }

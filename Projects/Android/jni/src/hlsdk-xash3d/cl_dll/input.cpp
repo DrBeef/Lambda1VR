@@ -1118,7 +1118,7 @@ void InitInput( void )
 	m_side			= gEngfuncs.pfnRegisterVariable( "m_side","0.8", FCVAR_ARCHIVE );
 
 	// Initialize third person camera controls.
-	CAM_Init();
+	//CAM_Init();
 	// Initialize inputs
 	IN_Init();
 	// Initialize keyboard

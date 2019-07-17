@@ -35,13 +35,16 @@ update refdef values each frame
 */
 
 #ifdef VR
+extern cvar_t *vr_worldscale;
+
 extern float playerHeight;
 extern float hmdPosition[3];
-extern cvar_t *r_worldscale;
-extern float gunangles[3];
-extern float flashlightangles[3];
-extern float weaponOffset[3];
-extern float flashlightOffset[3];
+
+extern vec3_t weaponangles;
+extern vec3_t weaponoffset;
+extern vec3_t weaponvelocity;
+extern vec3_t flashlightangles;
+extern vec3_t flashlightoffset;
 #endif
 
 void V_SetupRefDef( void )
@@ -129,12 +132,14 @@ void V_SetupRefDef( void )
 
 #ifdef VR
     //Only reasonable place to do this
-	cl.refdef.viewheight[2] += ((hmdPosition[1] - playerHeight) * r_worldscale->value);
+	cl.refdef.viewheight[2] += ((hmdPosition[1] - playerHeight) * vr_worldscale->value);
 
-    VectorAdd( cl.refdef.viewheight, weaponOffset, cl.refdef.rcontrollerorg );
-    VectorCopy( gunangles, cl.refdef.rcontrollerangles );
-	VectorAdd( cl.refdef.viewheight, flashlightOffset, cl.refdef.lcontrollerorg );
-    VectorCopy( flashlightangles, cl.refdef.lcontrollerangles );
+	VectorCopy(weaponoffset, cl.refdef.weapon.org);
+	VectorCopy(weaponangles, cl.refdef.weapon.angles);
+	VectorCopy(weaponvelocity, cl.refdef.weapon.velocity);
+
+	VectorCopy(flashlightoffset, cl.refdef.flashlight.org);
+	VectorCopy(flashlightangles, cl.refdef.flashlight.angles);
 #endif
 }
 

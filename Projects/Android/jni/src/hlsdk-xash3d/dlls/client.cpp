@@ -588,6 +588,24 @@ void ClientCommand( edict_t *pEntity )
 		if( pPlayer->IsObserver() )
 			pPlayer->Observer_SetMode( atoi( CMD_ARGV( 1 ) ) );
 	}
+	else if (FStrEq(pcmd, "updatevr"))	// Client sends update for VR related data - Max Vollmer, 2017-08-18
+	{
+		int size = CMD_ARGC();
+		if (size == 13)
+		{
+			CBasePlayer * pPlayer = GetClassPtr((CBasePlayer *)pev);
+			pPlayer->UpdateVRRelatedPositions(
+					Vector(atof(CMD_ARGV(1)), atof(CMD_ARGV(2)), atof(CMD_ARGV(3))),
+					Vector(atof(CMD_ARGV(4)), atof(CMD_ARGV(5)), atof(CMD_ARGV(6))),
+					Vector(atof(CMD_ARGV(7)), atof(CMD_ARGV(8)), atof(CMD_ARGV(9))),
+					Vector(atof(CMD_ARGV(10)), atof(CMD_ARGV(11)), atof(CMD_ARGV(12)))
+			);
+		}
+		else
+		{
+			ClientPrint(&pEntity->v, HUD_PRINTCONSOLE, "Invalid vr update!\n");
+		}
+	}
 	else if( FStrEq( pcmd, "closemenus" ) )
 	{
 		// just ignore it
@@ -1693,8 +1711,10 @@ void UpdateClientData( const struct edict_s *ent, int sendweapons, struct client
 {
 	if( !ent || !ent->pvPrivateData )
 		return;
+
 	entvars_t *pev = (entvars_t *)&ent->v;
 	CBasePlayer *pl = (CBasePlayer *)( CBasePlayer::Instance( pev ) );
+
 	entvars_t *pevOrg = NULL;
 
 	// if user is spectating different player in First person, override some vars
@@ -1718,9 +1738,18 @@ void UpdateClientData( const struct edict_s *ent, int sendweapons, struct client
 	cd->weapons		= pev->weapons;
 
 	// Vectors
-	cd->origin		= pev->origin;
+	if (pl != nullptr)
+	{
+		cd->origin = pl->GetClientOrigin();
+		cd->view_ofs = pl->GetClientViewOfs();
+	}
+	else
+	{
+		cd->origin = pev->origin;
+		cd->view_ofs = pev->view_ofs;
+	}
+
 	cd->velocity		= pev->velocity;
-	cd->view_ofs		= pev->view_ofs;
 	cd->punchangle		= pev->punchangle;
 
 	cd->bInDuck		= pev->bInDuck;

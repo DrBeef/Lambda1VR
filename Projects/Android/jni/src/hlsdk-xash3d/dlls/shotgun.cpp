@@ -116,7 +116,7 @@ BOOL CShotgun::Deploy()
 void CShotgun::PrimaryAttack()
 {
 	// don't fire underwater
-	if( m_pPlayer->pev->waterlevel == 3 )
+	if( m_pPlayer->IsWeaponUnderWater() )
 	{
 		PlayEmptySound();
 		m_flNextPrimaryAttack = GetNextAttackDelay( 0.15 );
@@ -187,7 +187,7 @@ void CShotgun::PrimaryAttack()
 void CShotgun::SecondaryAttack( void )
 {
 	// don't fire underwater
-	if( m_pPlayer->pev->waterlevel == 3 )
+	if( m_pPlayer->IsWeaponUnderWater() )
 	{
 		PlayEmptySound();
 		m_flNextPrimaryAttack = GetNextAttackDelay( 0.15 );

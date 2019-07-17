@@ -22,6 +22,7 @@
 #include "cl_util.h"
 #include "netadr.h"
 #include "parsemsg.h"
+#include "vr_renderer.h"
 
 #if defined(GOLDSOURCE_SUPPORT) && (defined(_WIN32) || defined(__linux__) || defined(__APPLE__)) && (defined(__i386) || defined(_M_IX86))
 #define USE_VGUI_FOR_GOLDSOURCE_SUPPORT
@@ -287,7 +288,8 @@ redraw the HUD.
 
 int DLLEXPORT HUD_Redraw( float time, int intermission )
 {
-	gHUD.Redraw( time, intermission );
+	gVRRenderer.InterceptHUDRedraw(time, intermission);
+	//gHUD.Redraw( time, intermission );
 
 	return 1;
 }
@@ -341,6 +343,8 @@ void DLLEXPORT HUD_Frame( double time )
 #else
 	gEngfuncs.VGui_ViewportPaintBackground(HUD_GetRect());
 #endif
+
+	gVRRenderer.Frame(time);
 }
 
 /*

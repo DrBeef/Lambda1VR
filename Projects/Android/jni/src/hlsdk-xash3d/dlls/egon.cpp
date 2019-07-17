@@ -160,7 +160,7 @@ void CEgon::UseAmmo( int count )
 void CEgon::Attack( void )
 {
 	// don't fire underwater
-	if( m_pPlayer->pev->waterlevel == 3 )
+	if( m_pPlayer->IsWeaponUnderWater()  )
 	{
 		if( m_fireState != FIRE_OFF || m_pBeam )
 		{
@@ -173,7 +173,7 @@ void CEgon::Attack( void )
 		return;
 	}
 
-	UTIL_MakeVectors( m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle );
+	UTIL_MakeVectors( m_pPlayer->GetWeaponViewAngles());
 	Vector vecAiming = gpGlobals->v_forward;
 	Vector vecSrc = m_pPlayer->GetGunPosition();
 
@@ -379,7 +379,8 @@ void CEgon::UpdateEffect( const Vector &startPoint, const Vector &endPoint, floa
 		CreateEffect();
 	}
 
-	m_pBeam->SetStartPos( endPoint );
+	m_pBeam->SetStartPos(endPoint);
+	m_pBeam->SetEndPos(m_pPlayer->GetWeaponPosition());
 	m_pBeam->SetBrightness( (int)( 255 - ( timeBlend * 180 )) );
 	m_pBeam->SetWidth( (int)( 40 - ( timeBlend * 20 ) ) );
 
@@ -394,6 +395,7 @@ void CEgon::UpdateEffect( const Vector &startPoint, const Vector &endPoint, floa
 		m_pSprite->pev->frame = 0;
 
 	m_pNoise->SetStartPos( endPoint );
+	m_pNoise->SetEndPos(m_pPlayer->GetWeaponPosition());
 #endif
 }
 
@@ -403,7 +405,7 @@ void CEgon::CreateEffect( void )
 	DestroyEffect();
 
 	m_pBeam = CBeam::BeamCreate( EGON_BEAM_SPRITE, 40 );
-	m_pBeam->PointEntInit( pev->origin, m_pPlayer->entindex() );
+	m_pBeam->PointsInit( pev->origin, m_pPlayer->GetWeaponPosition() );
 	m_pBeam->SetFlags( BEAM_FSINE );
 	m_pBeam->SetEndAttachment( 1 );
 	m_pBeam->pev->spawnflags |= SF_BEAM_TEMPORARY;	// Flag these to be destroyed on save/restore or level transition
@@ -411,7 +413,7 @@ void CEgon::CreateEffect( void )
 	m_pBeam->pev->owner = m_pPlayer->edict();
 
 	m_pNoise = CBeam::BeamCreate( EGON_BEAM_SPRITE, 55 );
-	m_pNoise->PointEntInit( pev->origin, m_pPlayer->entindex() );
+	m_pNoise->PointsInit( pev->origin, m_pPlayer->GetWeaponPosition());
 	m_pNoise->SetScrollRate( 25 );
 	m_pNoise->SetBrightness( 100 );
 	m_pNoise->SetEndAttachment( 1 );

@@ -66,6 +66,7 @@ SRCS+=./input.cpp
 SRCS+=./input_goldsource.cpp
 SRCS+=./input_mouse.cpp
 #SRCS+=./inputw32.cpp
+SRCS+=./Matrices.cpp
 SRCS+=./menu.cpp
 SRCS+=./message.cpp
 SRCS+=./overview.cpp
@@ -86,6 +87,10 @@ SRCS+=./view.cpp
 SRCS+=./input_xash3d.cpp
 SRCS+=./scoreboard.cpp
 SRCS+=./MOTD.cpp
+SRCS+=./vr_renderer.cpp
+SRCS+=./vr_helper.cpp
+
+
 INCLUDES =  -I../common -I. -I../game_shared -I../pm_shared -I../engine -I../dlls -I../utils/false_vgui/include
 DEFINES = -Wno-write-strings -DLINUX -D_LINUX -Dstricmp=strcasecmp -Dstrnicmp=strncasecmp -DCLIENT_WEAPONS -DCLIENT_DLL -w -D_snprintf=snprintf
 

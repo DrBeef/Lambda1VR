@@ -189,10 +189,13 @@ void QC_exit(int exitCode)
 }
 
 vec3_t hmdorientation;
-float gunangles[3];
-float weaponOffset[3];
-float flashlightangles[3];
-float flashlightOffset[3];
+
+vec3_t weaponangles;
+vec3_t weaponoffset;
+vec3_t weaponvelocity;
+
+vec3_t flashlightangles;
+vec3_t flashlightoffset;
 
 float horizFOV;
 float vertFOV;
@@ -1037,10 +1040,13 @@ static void rotateAboutOrigin(float v1, float v2, float rotation, vec2_t out)
 
 ovrInputStateTrackedRemote leftTrackedRemoteState_old;
 ovrInputStateTrackedRemote leftTrackedRemoteState_new;
-ovrTracking leftRemoteTracking;
+ovrTracking leftRemoteTracking_old;
+ovrTracking leftRemoteTracking_new;
+
 ovrInputStateTrackedRemote rightTrackedRemoteState_old;
 ovrInputStateTrackedRemote rightTrackedRemoteState_new;
-ovrTracking rightRemoteTracking;
+ovrTracking rightRemoteTracking_old;
+ovrTracking rightRemoteTracking_new;
 
 int IN_TouchEvent( touchEventType type, int fingerID, float x, float y, float dx, float dy );
 void Touch_Motion( touchEventType type, int fingerID, float x, float y, float dx, float dy );
@@ -1070,8 +1076,6 @@ static void ovrApp_HandleInput( ovrApp * app )
 {
     //The amount of yaw changed by controller
     //TODO: fixme
-    float yawOffset = cl.refdef.cl_viewangles[YAW] - hmdorientation[YAW];
-
 	for ( int i = 0; ; i++ ) {
 		ovrInputCapabilityHeader cap;
 		ovrResult result = vrapi_EnumerateInputDevices(app->Ovr, i, &cap);
@@ -1095,10 +1099,10 @@ static void ovrApp_HandleInput( ovrApp * app )
 
 				if (remoteCapabilities.ControllerCapabilities & ovrControllerCaps_RightHand) {
 					rightTrackedRemoteState_new = trackedRemoteState;
-					rightRemoteTracking = remoteTracking;
+					rightRemoteTracking_new = remoteTracking;
 				} else{
 					leftTrackedRemoteState_new = trackedRemoteState;
-					leftRemoteTracking = remoteTracking;
+					leftRemoteTracking_new = remoteTracking;
 				}
 			}
 		}
@@ -1106,11 +1110,13 @@ static void ovrApp_HandleInput( ovrApp * app )
 
     ovrInputStateTrackedRemote *dominantTrackedRemoteState = !r_lefthand->integer ? &rightTrackedRemoteState_new : &leftTrackedRemoteState_new;
     ovrInputStateTrackedRemote *dominantTrackedRemoteStateOld = !r_lefthand->integer ? &rightTrackedRemoteState_old : &leftTrackedRemoteState_old;
-	ovrTracking *dominantRemoteTracking = !r_lefthand->integer ? &rightRemoteTracking : &leftRemoteTracking;
-	
+	ovrTracking *dominantRemoteTracking = !r_lefthand->integer ? &rightRemoteTracking_new : &leftRemoteTracking_new;
+	ovrTracking *dominantRemoteTrackingOld = !r_lefthand->integer ? &rightRemoteTracking_old : &leftRemoteTracking_old;
+
 	ovrInputStateTrackedRemote *offHandTrackedRemoteState = r_lefthand->integer ? &rightTrackedRemoteState_new : &leftTrackedRemoteState_new;
 	ovrInputStateTrackedRemote *offHandTrackedRemoteStateOld = r_lefthand->integer ? &rightTrackedRemoteState_old : &leftTrackedRemoteState_old;
-	ovrTracking *offHandRemoteTracking = r_lefthand->integer ? &rightRemoteTracking : &leftRemoteTracking;
+	ovrTracking *offHandRemoteTracking = r_lefthand->integer ? &rightRemoteTracking_new : &leftRemoteTracking_new;
+	ovrTracking *offHandRemoteTrackingOld = r_lefthand->integer ? &rightRemoteTracking_old : &leftRemoteTracking_old;
 
 	static bool dominantGripPushed = false;
 	static float dominantGripPushTime = 0.0f;
@@ -1118,7 +1124,7 @@ static void ovrApp_HandleInput( ovrApp * app )
     //Menu control - Uses "touch"
     if (useScreenLayer())
     {
-        const ovrQuatf quatRemote = rightRemoteTracking.HeadPose.Pose.Orientation;
+        const ovrQuatf quatRemote = rightRemoteTracking_new.HeadPose.Pose.Orientation;
         float remoteAngles[3];
         QuatToYawPitchRoll(quatRemote, remoteAngles);
         if (remoteAngles[YAW] > -40.0f && remoteAngles[YAW] < 40.0f &&
@@ -1148,24 +1154,47 @@ static void ovrApp_HandleInput( ovrApp * app )
     {
         //dominant hand stuff first
         {
-            weaponOffset[0] = dominantRemoteTracking->HeadPose.Pose.Position.x - hmdPosition[0];
-            weaponOffset[1] = dominantRemoteTracking->HeadPose.Pose.Position.y - hmdPosition[1];
-            weaponOffset[2] = dominantRemoteTracking->HeadPose.Pose.Position.z - hmdPosition[2];
+			///Weapon location relative to view
+            weaponoffset[0] = dominantRemoteTracking->HeadPose.Pose.Position.x - hmdPosition[0];
+            weaponoffset[1] = dominantRemoteTracking->HeadPose.Pose.Position.y - hmdPosition[1];
+            weaponoffset[2] = dominantRemoteTracking->HeadPose.Pose.Position.z - hmdPosition[2];
 
-            ///Weapon location relative to view
-           	vec2_t v;
-            rotateAboutOrigin(weaponOffset[0], weaponOffset[2], -yawOffset, v);
-            weaponOffset[0] = v[0];
-            weaponOffset[2] = v[1];
+			{
+				vec2_t v;
+				rotateAboutOrigin(weaponoffset[0], weaponoffset[2], -(cl.refdef.cl_viewangles[YAW] - hmdorientation[YAW]), v);
+				weaponoffset[0] = v[0];
+				weaponoffset[2] = v[1];
+
+                ALOGV("        Weapon Offset: %f, %f, %f",
+                      weaponoffset[0],
+                      weaponoffset[1],
+                      weaponoffset[2]);
+			}
+
+            //Weapon velocity
+			weaponvelocity[0] = dominantRemoteTracking->HeadPose.LinearVelocity.x;
+			weaponvelocity[1] = dominantRemoteTracking->HeadPose.LinearVelocity.y;
+			weaponvelocity[2] = dominantRemoteTracking->HeadPose.LinearVelocity.z;
+
+			{
+				vec2_t v;
+				rotateAboutOrigin(weaponvelocity[0], weaponvelocity[2], -cl.refdef.cl_viewangles[YAW], v);
+				weaponvelocity[0] = v[0];
+				weaponvelocity[2] = v[1];
+
+                ALOGV("        Weapon Velocity: %f, %f, %f",
+                      weaponvelocity[0],
+                      weaponvelocity[1],
+                      weaponvelocity[2]);
+			}
+
 
             //Set gun angles
             const ovrQuatf quatRemote = dominantRemoteTracking->HeadPose.Pose.Orientation;
-            QuatToYawPitchRoll(quatRemote, gunangles);
+            QuatToYawPitchRoll(quatRemote, weaponangles);
 
-            //Adjust gun pitch for user preference
-            gunangles[PITCH] *= -1.0f;
-//            gunangles[PITCH] += cl_weaponpitchadjust.value;
-            gunangles[YAW] += yawOffset;
+            weaponangles[YAW] += (cl.refdef.cl_viewangles[YAW] - hmdorientation[YAW]);
+            weaponangles[PITCH] *= -1.0f;
 
             //Use (Action)
             if ((dominantTrackedRemoteState->Buttons & ovrButton_Joystick) !=
@@ -1188,6 +1217,7 @@ static void ovrApp_HandleInput( ovrApp * app )
                     if ((GetTimeInMilliSeconds() - dominantGripPushTime) < vr_reloadtimeoutms->integer)
                     {
                         sendButtonActionSimple("+reload");
+                        sendButtonActionSimple("-reload");
                     }
                 }
             }
@@ -1195,17 +1225,16 @@ static void ovrApp_HandleInput( ovrApp * app )
 
         //off-hand stuff
         float controllerYawHeading = 0.0f;
-        float hmdYawHeading = 0.0f;
+
         {
-            flashlightOffset[0] = offHandRemoteTracking->HeadPose.Pose.Position.x - hmdPosition[0];
-            flashlightOffset[1] = offHandRemoteTracking->HeadPose.Pose.Position.y - hmdPosition[1];
-            flashlightOffset[2] = offHandRemoteTracking->HeadPose.Pose.Position.z - hmdPosition[2];
+            flashlightoffset[0] = offHandRemoteTracking->HeadPose.Pose.Position.x - hmdPosition[0];
+            flashlightoffset[1] = offHandRemoteTracking->HeadPose.Pose.Position.y - hmdPosition[1];
+            flashlightoffset[2] = offHandRemoteTracking->HeadPose.Pose.Position.z - hmdPosition[2];
 
             QuatToYawPitchRoll(offHandRemoteTracking->HeadPose.Pose.Orientation, flashlightangles);
-            flashlightangles[YAW] += yawOffset;
+            flashlightangles[YAW] += cl.refdef.cl_viewangles[YAW];
 
-            controllerYawHeading = flashlightangles[YAW] - yawOffset;
-            hmdYawHeading = hmdorientation[YAW];
+            controllerYawHeading = -cl.refdef.cl_viewangles[YAW] + flashlightangles[YAW] - hmdorientation[YAW];
 
 			//Run
 			handleTrackedControllerButton(offHandTrackedRemoteState,
@@ -1216,9 +1245,9 @@ static void ovrApp_HandleInput( ovrApp * app )
         //Right-hand specific stuff
         {
             ALOGV("        Right-Controller-Position: %f, %f, %f",
-                  rightRemoteTracking.HeadPose.Pose.Position.x,
-                  rightRemoteTracking.HeadPose.Pose.Position.y,
-                  rightRemoteTracking.HeadPose.Pose.Position.z);
+                  rightRemoteTracking_new.HeadPose.Pose.Position.x,
+				  rightRemoteTracking_new.HeadPose.Pose.Position.y,
+				  rightRemoteTracking_new.HeadPose.Pose.Position.z);
 
             //This section corrects for the fact that the controller actually controls direction of movement, but we want to move relative to the direction the
             //player is facing for positional tracking
@@ -1272,9 +1301,9 @@ static void ovrApp_HandleInput( ovrApp * app )
         //Left-hand specific stuff
         {
             ALOGV("        Left-Controller-Position: %f, %f, %f",
-                  leftRemoteTracking.HeadPose.Pose.Position.x,
-                  leftRemoteTracking.HeadPose.Pose.Position.y,
-                  leftRemoteTracking.HeadPose.Pose.Position.z);
+                  leftRemoteTracking_new.HeadPose.Pose.Position.x,
+				  leftRemoteTracking_new.HeadPose.Pose.Position.y,
+				  leftRemoteTracking_new.HeadPose.Pose.Position.z);
 
             //Menu button
             handleTrackedControllerButton(&leftTrackedRemoteState_new, &leftTrackedRemoteState_old,
@@ -1284,7 +1313,7 @@ static void ovrApp_HandleInput( ovrApp * app )
             vec2_t v;
             rotateAboutOrigin(leftTrackedRemoteState_new.Joystick.x,
                               leftTrackedRemoteState_new.Joystick.y,
-                              vr_walkdirection->integer == 1 ? hmdYawHeading : controllerYawHeading,
+                              vr_walkdirection->integer == 1 ? cl.refdef.cl_viewangles[YAW] : controllerYawHeading,
                               v);
 
             remote_movementSideways = v[0];
@@ -1617,7 +1646,7 @@ static void initializeVRCvars()
 	vr_snapturn_angle = Cvar_Get( "vr_snapturn_angle", "45", CVAR_ARCHIVE, "Sets the angle for snap-turn, set to < 10.0 to enable smooth turning" );
 	vr_reloadtimeoutms = Cvar_Get( "vr_reloadtimeoutms", "150", CVAR_ARCHIVE, "How quickly the grip trigger needs to be release to initiate a reload" );
 	vr_positionalMultiplier = Cvar_Get( "vr_positionalMultiplier", "2600", CVAR_ARCHIVE, "Arbitrary number that makes positional tracking work well" );
-    vr_walkdirection = Cvar_Get( "vr_walkdirection", "1", CVAR_ARCHIVE, "1 - Use HMD for direction, 0 - Use off-hand controller for direction" );
+    vr_walkdirection = Cvar_Get( "vr_walkdirection", "0", CVAR_ARCHIVE, "1 - Use HMD for direction, 0 - Use off-hand controller for direction" );
 }
 
 void * AppThreadFunction( void * parm )
@@ -1804,20 +1833,20 @@ void * AppThreadFunction( void * parm )
 
 			appState.DisplayTime = predictedDisplayTime;
 
-			ovrApp_HandleInput(&appState);
+            //Get orientation
+            // We extract Yaw, Pitch, Roll instead of directly using the orientation
+            // to allow "additional" yaw manipulation with mouse/controller.
+            const ovrQuatf quatHmd = tracking.HeadPose.Pose.Orientation;
+            const ovrVector3f positionHmd = tracking.HeadPose.Pose.Position;
+            QuatToYawPitchRoll(quatHmd, hmdorientation);
+            setHMDPosition(positionHmd.x, positionHmd.y, positionHmd.z);
 
-			//Get orientation
-			// We extract Yaw, Pitch, Roll instead of directly using the orientation
-			// to allow "additional" yaw manipulation with mouse/controller.
-			const ovrQuatf quatHmd = tracking.HeadPose.Pose.Orientation;
-			const ovrVector3f positionHmd = tracking.HeadPose.Pose.Position;
-			QuatToYawPitchRoll(quatHmd, hmdorientation);
-			setHMDPosition(positionHmd.x, positionHmd.y, positionHmd.z);
+            //TODO: fix - set to use HMD position for world position
+            setWorldPosition(positionHmd.x, positionHmd.y, positionHmd.z);
 
-			//TODO: fix - set to use HMD position for world position
-			setWorldPosition(positionHmd.x, positionHmd.y, positionHmd.z);
+            ALOGV("        HMD-Position: %f, %f, %f", positionHmd.x, positionHmd.y, positionHmd.z);
 
-			ALOGV("        HMD-Position: %f, %f, %f", positionHmd.x, positionHmd.y, positionHmd.z);
+            ovrApp_HandleInput(&appState);
 
 			static usingScreenLayer = true; //Starts off using the screen layer
 			if (usingScreenLayer != useScreenLayer())

@@ -496,13 +496,12 @@ public:
 	void Spawn( void );
 	void Precache( void );
 	int iItemSlot( void ) { return 1; }
-	void EXPORT SwingAgain( void );
-	void EXPORT Smack( void );
-	int GetItemInfo( ItemInfo *p );
-	int AddToPlayer( CBasePlayer *pPlayer );
 
-	void PrimaryAttack( void );
-	int Swing( int fFirst );
+	int GetItemInfo( ItemInfo *p );
+
+	virtual void ItemPostFrame(void);
+
+	void CheckSmack(float speed);
 	BOOL Deploy( void );
 	void Holster( int skiplocal = 0 );
 #ifdef CROWBAR_IDLE_ANIM
@@ -521,6 +520,17 @@ public:
 	}
 private:
 	unsigned short m_usCrowbar;
+
+#ifndef CLIENT_DLL
+	// Stuff for VR swinging
+	bool playedWooshSound = false;
+	float lastWooshSoundTime = 0;
+	float hitCount = 0;
+	bool HasNotHitThisEntityThisSwing(CBaseEntity *pEntity);
+	void RememberHasHitThisEntityThisSwing(CBaseEntity *pEntity);
+	void ClearEntitiesHitThisSwing();
+	EHANDLE hitEntities[128];	// TODO: Use std::unordered_set
+#endif
 };
 
 class CPython : public CBasePlayerWeapon
@@ -539,7 +549,7 @@ public:
 	void WeaponIdle( void );
 	float m_flSoundDelay;
 
-	BOOL m_fInZoom;// don't save this. 
+	//BOOL m_fInZoom;// don't save this.
 
 	virtual BOOL UseDecrement( void )
 	{
@@ -731,7 +741,7 @@ public:
 
 	int m_iTrail;
 	float m_flIgniteTime;
-	EHANDLE m_hLauncher; // handle back to the launcher that fired me. 
+    CRpg *m_pLauncher; // pointer back to the launcher that fired me.
 };
 
 class CGauss : public CBasePlayerWeapon
