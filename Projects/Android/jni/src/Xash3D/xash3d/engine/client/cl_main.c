@@ -2269,8 +2269,8 @@ Host_ClientFrame
 ==================
 */
 #ifdef VR
-int r_stereo_side; // Move this.. this is bad placement
-void Host_ClientFrame( int eye )
+		int r_stereo_side; // Move this.. this is bad placement
+				void Host_ClientFrame( int eye )
 #else
 void Host_ClientFrame(  )
 #endif

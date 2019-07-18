@@ -330,6 +330,9 @@ V_CalcRefDef
 sets cl.refdef view values
 ===============
 */
+#ifdef VR
+extern int r_stereo_side; // Move this.. this is bad placement
+#endif
 void V_CalcRefDef( void )
 {
 	R_Set2DMode( false );
@@ -337,8 +340,11 @@ void V_CalcRefDef( void )
 
 	do
 	{
-		clgame.dllFuncs.pfnCalcRefdef( &cl.refdef );
-		V_MergeOverviewRefdef( &cl.refdef );
+	    //Only recalc refdef once
+	    if (r_stereo_side == VR_EYE_LEFT || r_stereo_side == VR_EYE_MONO) {
+            clgame.dllFuncs.pfnCalcRefdef(&cl.refdef);
+            V_MergeOverviewRefdef(&cl.refdef);
+        }
 		R_RenderFrame( &cl.refdef, true );
 		cl.refdef.onlyClientDraw = false;
 	} while( cl.refdef.nextView );

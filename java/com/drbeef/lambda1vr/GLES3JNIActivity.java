@@ -60,8 +60,24 @@ import static android.system.Os.setenv;
 		params.screenBrightness = 1.0f;
 		getWindow().setAttributes( params );
 
-		copy_asset(getFilesDir().getPath(), "extras.pak");
+		copy_asset(getFilesDir().getPath(), "extras.pak", false);
 
+		//Copy modified weapon models
+		copy_asset("/sdcard/xash/valve/", "models/v_9mmar.mdl", true);
+		copy_asset("/sdcard/xash/valve/", "models/v_9mmhandgun.mdl", true);
+		copy_asset("/sdcard/xash/valve/", "models/v_357.mdl", true);
+		copy_asset("/sdcard/xash/valve/", "models/v_crossbow.mdl", true);
+		copy_asset("/sdcard/xash/valve/", "models/v_crowbar.mdl", true);
+		copy_asset("/sdcard/xash/valve/", "models/v_egon.mdl", true);
+		copy_asset("/sdcard/xash/valve/", "models/v_gauss.mdl", true);
+		copy_asset("/sdcard/xash/valve/", "models/v_grenade.mdl", true);
+		copy_asset("/sdcard/xash/valve/", "models/v_hgun.mdl", true);
+		copy_asset("/sdcard/xash/valve/", "models/v_rpg.mdl", true);
+		copy_asset("/sdcard/xash/valve/", "models/v_satchel.mdl", true);
+		copy_asset("/sdcard/xash/valve/", "models/v_satchel_radio.mdl", true);
+		copy_asset("/sdcard/xash/valve/", "models/v_shotgun.mdl", true);
+		copy_asset("/sdcard/xash/valve/", "models/v_squeak.mdl", true);
+		copy_asset("/sdcard/xash/valve/", "models/v_tripmine.mdl", true);
 
 		//Set default environment
 		try {
@@ -105,9 +121,9 @@ import static android.system.Os.setenv;
 		mNativeHandle = GLES3JNILib.onCreate( this, commandLineParams );
 	}
 	
-	public void copy_asset(String path, String name) {
+	public void copy_asset(String path, String name, boolean forceOverwrite) {
 		File f = new File(path + "/" + name);
-		if (!f.exists()) {
+		if (!f.exists() || forceOverwrite) {
 			
 			//Ensure we have an appropriate folder
 			new File(path).mkdirs();
