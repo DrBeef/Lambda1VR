@@ -74,7 +74,7 @@ class Vector						// same data-layout as engine's vec3_t,
 {								//which is a vec_t[3]
 public:
 	// Construction/destruction
-	inline Vector( void )					{ }
+	inline Vector( void )					{ x = 0.0f; y = 0.0f; z = 0.0f; }
 	inline Vector( float X, float Y, float Z )		{ x = X; y = Y; z = Z; }
 	inline Vector( double X, double Y, double Z )		{ x = (float)X; y = (float)Y; z = (float)Z; }
 	inline Vector( int X, int Y, int Z )			{ x = (float)X; y = (float)Y; z = (float)Z; }
