@@ -1263,9 +1263,9 @@ static void ovrApp_HandleInput( ovrApp * app )
                   positional_movementSideways,
                   positional_movementForward);
 
-            //Jump
+            //Jump (B Button)
             handleTrackedControllerButton(&rightTrackedRemoteState_new,
-                                          &rightTrackedRemoteState_old, ovrButton_A, K_SPACE);
+                                          &rightTrackedRemoteState_old, ovrButton_B, K_SPACE);
 
             if (!r_lefthand->integer) {
                 if (dominantGripPushed && (GetTimeInMilliSeconds() - dominantGripPushTime) > vr_reloadtimeoutms->integer)
@@ -1290,11 +1290,11 @@ static void ovrApp_HandleInput( ovrApp * app )
 				}
             }
 
-            //Duck with B
-            if ((rightTrackedRemoteState_new.Buttons & ovrButton_B) !=
-                (rightTrackedRemoteState_old.Buttons & ovrButton_B)) {
+            //Duck with A
+            if ((rightTrackedRemoteState_new.Buttons & ovrButton_A) !=
+                (rightTrackedRemoteState_old.Buttons & ovrButton_A)) {
 
-                sendButtonAction("+duck", (rightTrackedRemoteState_new.Buttons & ovrButton_B));
+                sendButtonAction("+duck", (rightTrackedRemoteState_new.Buttons & ovrButton_A));
             }
         }
 
