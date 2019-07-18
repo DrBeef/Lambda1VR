@@ -1232,9 +1232,9 @@ static void ovrApp_HandleInput( ovrApp * app )
             flashlightoffset[2] = offHandRemoteTracking->HeadPose.Pose.Position.z - hmdPosition[2];
 
             QuatToYawPitchRoll(offHandRemoteTracking->HeadPose.Pose.Orientation, flashlightangles);
-            flashlightangles[YAW] += (cl.refdef.cl_viewangles[YAW] - hmdorientation[YAW]);
 
-            controllerYawHeading = -cl.refdef.cl_viewangles[YAW] + flashlightangles[YAW] - hmdorientation[YAW];
+            flashlightangles[YAW] += (cl.refdef.cl_viewangles[YAW] - hmdorientation[YAW]);
+            controllerYawHeading = -cl.refdef.cl_viewangles[YAW] + flashlightangles[YAW];
 
 			//Run
 			handleTrackedControllerButton(offHandTrackedRemoteState,
