@@ -177,7 +177,7 @@ typedef enum
 
 // PERFORMANCE INFO
 #define MIN_FPS         	15.0		// host minimum fps value for maxfps.
-#define MAX_FPS         	72.0		// upper limit for maxfps.
+#define MAX_FPS         	500.0		// upper limit for maxfps.
 
 #ifdef VR
 #define VR_EYE_MONO		-1
