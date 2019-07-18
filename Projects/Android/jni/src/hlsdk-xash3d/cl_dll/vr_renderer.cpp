@@ -52,7 +52,8 @@ void VRRenderer::VidInit()
 void VRRenderer::Frame(double time)
 {
 	// make sure these are always properly set
-	gEngfuncs.pfnClientCmd("fps_max 150");
+	//GB - Changing to 72 to see if it fixes physics
+	gEngfuncs.pfnClientCmd("fps_max 72");
 	//gEngfuncs.pfnClientCmd("fps_override 1");
 	gEngfuncs.pfnClientCmd("gl_vsync 0");
 	gEngfuncs.pfnClientCmd("default_fov 110");
