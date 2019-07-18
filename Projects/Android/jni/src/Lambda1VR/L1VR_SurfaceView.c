@@ -739,31 +739,107 @@ void ovrRenderer_Destroy( ovrRenderer * renderer )
 	renderer->ProjectionMatrix = ovrMatrix4f_CreateIdentity();
 }
 
-void QuatToYawPitchRoll(ovrQuatf q, vec3_t out) {
-	float sqw = q.w*q.w;
-	float sqx = q.x*q.x;
-	float sqy = q.y*q.y;
-	float sqz = q.z*q.z;
-	float unit = sqx + sqy + sqz + sqw; // if normalised is one, otherwise is correction factor
-	float test = q.x*q.y + q.z*q.w;
-	if( test > 0.49999*unit ) { // singularity at north pole
-		out[YAW] = 2 * atan2f(q.x,q.w) / ((float)M_PI / 180.0f);
-		out[ROLL] = -(float)M_PI/2 / ((float)M_PI / 180.0f) ;
-		out[PITCH] = 0;
-	}
-	else if( test < -0.49999*unit ) { // singularity at south pole
-		out[YAW] = -2 * atan2f(q.x,q.w) / ((float)M_PI / 180.0f);
-		out[ROLL] = (float)M_PI/2 / ((float)M_PI / 180.0f);
-		out[PITCH] = 0;
-	}
-	else {
-        //out[YAW] = atan2(2*q.y*q.w-2*q.x*q.z , sqx - sqy - sqz + sqw) / (M_PI / 180.0f);
-        out[YAW] = atan2f(2*q.y*q.w-2*q.x*q.z , 1 - 2*sqy - 2*sqz) / ((float)M_PI / 180.0f);
-		out[ROLL] = -asinf(2*test/unit) / ((float)M_PI / 180.0f);
-		//out[PITCH] = -atan2(2*q.x*q.w-2*q.y*q.z , -sqx + sqy - sqz + sqw) / (M_PI / 180.0f);
-        out[PITCH] = -atan2f(2*q.x*q.w-2*q.y*q.z , 1 - 2*sqx - 2*sqz) / ((float)M_PI / 180.0f);
 
+#ifndef EPSILON
+#define EPSILON 0.001f
+#endif
+
+static ovrVector3f normalizeVec(ovrVector3f vec) {
+    //NOTE: leave w-component untouched
+    //@@const float EPSILON = 0.000001f;
+    float xxyyzz = vec.x*vec.x + vec.y*vec.y + vec.z*vec.z;
+    //@@if(xxyyzz < EPSILON)
+    //@@    return *this; // do nothing if it is zero vector
+
+    //float invLength = invSqrt(xxyyzz);
+    ovrVector3f result;
+    float invLength = 1.0f / sqrtf(xxyyzz);
+    result.x = vec.x * invLength;
+    result.y = vec.y * invLength;
+    result.z = vec.z * invLength;
+    return result;
+}
+
+void NormalizeAngles(vec3_t angles)
+{
+	while (angles[0] >= 90) angles[0] -= 360;
+	while (angles[1] >= 180) angles[1] -= 360;
+	while (angles[2] >= 180) angles[2] -= 360;
+	while (angles[0] < -90) angles[0] += 360;
+	while (angles[1] < -180) angles[1] += 360;
+	while (angles[2] < -180) angles[2] += 360;
+}
+
+void GetAnglesFromVectors(const ovrVector3f forward, const ovrVector3f right, const ovrVector3f up, vec3_t angles)
+{
+	float sr, sp, sy, cr, cp, cy;
+
+	sp = -forward.z;
+
+	float cp_x_cy = forward.x;
+	float cp_x_sy = forward.y;
+	float cp_x_sr = -right.z;
+	float cp_x_cr = up.z;
+
+	float yaw = atan2(cp_x_sy, cp_x_cy);
+	float roll = atan2(cp_x_sr, cp_x_cr);
+
+	cy = cos(yaw);
+	sy = sin(yaw);
+	cr = cos(roll);
+	sr = sin(roll);
+
+	if (fabs(cy) > EPSILON)
+	{
+	cp = cp_x_cy / cy;
 	}
+	else if (fabs(sy) > EPSILON)
+	{
+	cp = cp_x_sy / sy;
+	}
+	else if (fabs(sr) > EPSILON)
+	{
+	cp = cp_x_sr / sr;
+	}
+	else if (fabs(cr) > EPSILON)
+	{
+	cp = cp_x_cr / cr;
+	}
+	else
+	{
+	cp = cos(asin(sp));
+	}
+
+	float pitch = atan2(sp, cp);
+
+	angles[0] = pitch / (M_PI*2.f / 360.f);
+	angles[1] = yaw / (M_PI*2.f / 360.f);
+	angles[2] = roll / (M_PI*2.f / 360.f);
+
+	NormalizeAngles(angles);
+}
+
+void QuatToYawPitchRoll(ovrQuatf q, vec3_t out) {
+
+    ovrMatrix4f mat = ovrMatrix4f_CreateFromQuaternion( &q );
+    ovrVector4f v1 = {0, 0, -1, 0};
+    ovrVector4f v2 = {1, 0, 0, 0};
+    ovrVector4f v3 = {0, 1, 0, 0};
+
+    ovrVector4f forwardInVRSpace = ovrVector4f_MultiplyMatrix4f(&mat, &v1);
+    ovrVector4f rightInVRSpace = ovrVector4f_MultiplyMatrix4f(&mat, &v2);
+    ovrVector4f upInVRSpace = ovrVector4f_MultiplyMatrix4f(&mat, &v3);
+
+	ovrVector3f forward = {-forwardInVRSpace.z, -forwardInVRSpace.x, forwardInVRSpace.y};
+	ovrVector3f right = {-rightInVRSpace.z, -rightInVRSpace.x, rightInVRSpace.y};
+	ovrVector3f up = {-upInVRSpace.z, -upInVRSpace.x, upInVRSpace.y};
+
+	ovrVector3f forwardNormal = normalizeVec(forward);
+	ovrVector3f rightNormal = normalizeVec(right);
+	ovrVector3f upNormal = normalizeVec(up);
+
+	GetAnglesFromVectors(forwardNormal, rightNormal, upNormal, out);
+	return;
 }
 
 static void adjustYaw(float adjustment, float* out)
