@@ -55,6 +55,7 @@ void VRRenderer::Frame(double time)
 	gEngfuncs.pfnClientCmd("fps_max 150");
 	//gEngfuncs.pfnClientCmd("fps_override 1");
 	gEngfuncs.pfnClientCmd("gl_vsync 0");
+	gEngfuncs.pfnClientCmd("crosshair 0");
 	gEngfuncs.pfnClientCmd("default_fov 110");
 	//gEngfuncs.pfnClientCmd("firstperson");
 
