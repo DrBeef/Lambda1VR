@@ -61,23 +61,27 @@ import static android.system.Os.setenv;
 		getWindow().setAttributes( params );
 
 		copy_asset(getFilesDir().getPath(), "extras.pak", false);
+		copy_asset("/sdcard/xash/valve/", "config.cfg", false); // Copy in case user has deleted their config
 
 		//Copy modified weapon models
-		copy_asset("/sdcard/xash/valve/", "models/v_9mmar.mdl", true);
-		copy_asset("/sdcard/xash/valve/", "models/v_9mmhandgun.mdl", true);
-		copy_asset("/sdcard/xash/valve/", "models/v_357.mdl", true);
-		copy_asset("/sdcard/xash/valve/", "models/v_crossbow.mdl", true);
-		copy_asset("/sdcard/xash/valve/", "models/v_crowbar.mdl", true);
-		copy_asset("/sdcard/xash/valve/", "models/v_egon.mdl", true);
-		copy_asset("/sdcard/xash/valve/", "models/v_gauss.mdl", true);
-		copy_asset("/sdcard/xash/valve/", "models/v_grenade.mdl", true);
-		copy_asset("/sdcard/xash/valve/", "models/v_hgun.mdl", true);
-		copy_asset("/sdcard/xash/valve/", "models/v_rpg.mdl", true);
-		copy_asset("/sdcard/xash/valve/", "models/v_satchel.mdl", true);
-		copy_asset("/sdcard/xash/valve/", "models/v_satchel_radio.mdl", true);
-		copy_asset("/sdcard/xash/valve/", "models/v_shotgun.mdl", true);
-		copy_asset("/sdcard/xash/valve/", "models/v_squeak.mdl", true);
-		copy_asset("/sdcard/xash/valve/", "models/v_tripmine.mdl", true);
+		if (!(new File("/sdcard/xash/valve/models/no_copy").exists()))
+		{
+			copy_asset("/sdcard/xash/valve/", "models/v_9mmar.mdl", true);
+			copy_asset("/sdcard/xash/valve/", "models/v_9mmhandgun.mdl", true);
+			copy_asset("/sdcard/xash/valve/", "models/v_357.mdl", true);
+			copy_asset("/sdcard/xash/valve/", "models/v_crossbow.mdl", true);
+			copy_asset("/sdcard/xash/valve/", "models/v_crowbar.mdl", true);
+			copy_asset("/sdcard/xash/valve/", "models/v_egon.mdl", true);
+			copy_asset("/sdcard/xash/valve/", "models/v_gauss.mdl", true);
+			copy_asset("/sdcard/xash/valve/", "models/v_grenade.mdl", true);
+			copy_asset("/sdcard/xash/valve/", "models/v_hgun.mdl", true);
+			copy_asset("/sdcard/xash/valve/", "models/v_rpg.mdl", true);
+			copy_asset("/sdcard/xash/valve/", "models/v_satchel.mdl", true);
+			copy_asset("/sdcard/xash/valve/", "models/v_satchel_radio.mdl", true);
+			copy_asset("/sdcard/xash/valve/", "models/v_shotgun.mdl", true);
+			copy_asset("/sdcard/xash/valve/", "models/v_squeak.mdl", true);
+			copy_asset("/sdcard/xash/valve/", "models/v_tripmine.mdl", true);
+		}
 
 		//Set default environment
 		try {

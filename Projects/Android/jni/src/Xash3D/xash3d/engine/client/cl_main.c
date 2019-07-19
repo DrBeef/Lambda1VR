@@ -2143,7 +2143,11 @@ void CL_InitLocal( void )
 	r_bmodelinterp = Cvar_Get( "r_bmodelinterp", "1", 0, "enable bmodel interpolation" );
 	cl_nat = Cvar_Get( "cl_nat", "0", 0, "Show servers running under nat" );
 
+#ifdef VR
+	hud_scale = Cvar_Get( "hud_scale", "1.3", CVAR_ARCHIVE|CVAR_LATCH, "scale hud at current resolution" );
+#else
 	hud_scale = Cvar_Get( "hud_scale", "0", CVAR_ARCHIVE|CVAR_LATCH, "scale hud at current resolution" );
+#endif
 	hud_utf8 = Cvar_Get( "hud_utf8", "0", CVAR_ARCHIVE, "Use utf-8 encoding for hud text" );
 
 	ui_renderworld = Cvar_Get( "ui_renderworld", "0", CVAR_ARCHIVE, "render world when UI is visible" );

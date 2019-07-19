@@ -68,8 +68,8 @@ int CHudAmmoSecondary::Draw( float flTime )
 
 	AmmoWidth = gHUD.GetSpriteRect( gHUD.m_HUD_number_0 ).right - gHUD.GetSpriteRect( gHUD.m_HUD_number_0 ).left;
 
-	y = ScreenHeight - ( gHUD.m_iFontHeight * 4 );  // this is one font height higher than the weapon ammo values
-	x = ScreenWidth - AmmoWidth;
+	y = (ScreenHeight * 0.3f) - ( gHUD.m_iFontHeight * 4 );  // this is one font height higher than the weapon ammo values
+	x = (ScreenWidth * 0.65f) - AmmoWidth;
 
 	if( m_HUD_ammoicon )
 	{
