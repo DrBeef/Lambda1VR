@@ -1457,6 +1457,12 @@ static void ovrApp_HandleInput( ovrApp * app )
 				}
             }
 
+            //Reload
+            if ((leftTrackedRemoteState_new.Buttons & ovrButton_X) !=
+                (leftTrackedRemoteState_old.Buttons & ovrButton_X)){
+                sendButtonAction("+reload", (leftTrackedRemoteState_new.Buttons & ovrButton_X));
+            }
+
             static increaseSnap = true;
 			if (rightTrackedRemoteState_new.Joystick.x > 0.6f)
 			{
