@@ -871,7 +871,7 @@ int CHudAmmo::Draw( float flTime )
 	ScaleColors( r, g, b, a );
 
 	// Does this weapon have a clip?
-	y = ScreenHeight - gHUD.m_iFontHeight - gHUD.m_iFontHeight / 2 - (ScreenHeight * 0.3f);
+	y = ScreenHeight - gHUD.m_iFontHeight - gHUD.m_iFontHeight / 2 - (ScreenHeight / 3);
 
 	// Does weapon have any ammo at all?
 	if( m_pWeapon->iAmmoType > 0 )
@@ -1014,8 +1014,8 @@ int CHudAmmo::DrawWList( float flTime )
 	else 
 		iActiveSlot = gpActiveSel->iSlot;
 
-	x = 10; //!!!
-	y = 10; //!!!
+	x = ScreenWidth / 3;
+	y = ScreenHeight / 3;
 
 	// Ensure that there are available choices in the active slot
 	if( iActiveSlot > 0 )
@@ -1060,12 +1060,12 @@ int CHudAmmo::DrawWList( float flTime )
 	}
 
 	a = 128; //!!!
-	x = 10;
+	x = ScreenWidth / 3;
 
 	// Draw all of the buckets
 	for( i = 0; i < MAX_WEAPON_SLOTS; i++ )
 	{
-		y = giBucketHeight + 10;
+		y = (ScreenHeight / 3) + giBucketHeight + 10;
 
 		// If this is the active slot, draw the bigger pictures,
 		// otherwise just draw boxes

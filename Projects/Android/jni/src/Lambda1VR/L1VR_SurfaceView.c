@@ -1148,6 +1148,11 @@ static inline sendButtonActionSimple(const char* action)
     Cbuf_AddText( command );
 }
 
+static inline between(float min, float val, float max)
+{
+	return (min < val) && (val < max);
+}
+
 static void ovrApp_HandleInput( ovrApp * app )
 {
     //The amount of yaw changed by controller
@@ -1312,11 +1317,19 @@ static void ovrApp_HandleInput( ovrApp * app )
             flashlightangles[YAW] += (cl.refdef.cl_viewangles[YAW] - hmdorientation[YAW]);
             controllerYawHeading = -cl.refdef.cl_viewangles[YAW] + flashlightangles[YAW];
 
+			//flashlight on/off
+			if (((leftTrackedRemoteState_new.Buttons & ovrButton_X) !=
+				 (leftTrackedRemoteState_old.Buttons & ovrButton_X)) &&
+				(leftTrackedRemoteState_old.Buttons & ovrButton_X)) {
+				sendButtonActionSimple("impulse 100");
+			}
+
 			//Run
-			handleTrackedControllerButton(offHandTrackedRemoteState,
-                                          offHandTrackedRemoteStateOld,
+			handleTrackedControllerButton(&leftTrackedRemoteState_new,
+										  &leftTrackedRemoteState_old,
 										  ovrButton_GripTrigger, K_SHIFT);
-        }
+
+		}
 
         //Right-hand specific stuff
         {
@@ -1347,23 +1360,21 @@ static void ovrApp_HandleInput( ovrApp * app )
                 if (dominantGripPushed && (GetTimeInMilliSeconds() - dominantGripPushTime) > vr_reloadtimeoutms->integer)
                 {
                     //Fire Secondary
-                    handleTrackedControllerButton(&rightTrackedRemoteState_new,
-                                                  &rightTrackedRemoteState_old,
-                                                  ovrButton_Trigger, K_MOUSE2);
+					if ((rightTrackedRemoteState_new.Buttons & ovrButton_Trigger) !=
+						(rightTrackedRemoteState_old.Buttons & ovrButton_Trigger)) {
+
+						sendButtonAction("+attack2", (rightTrackedRemoteState_new.Buttons & ovrButton_Trigger));
+					}
                 } else {
                     //Fire Primary
-                    handleTrackedControllerButton(&rightTrackedRemoteState_new,
-                                                  &rightTrackedRemoteState_old,
-                                                  ovrButton_Trigger, K_MOUSE1);
+					if ((rightTrackedRemoteState_new.Buttons & ovrButton_Trigger) !=
+						(rightTrackedRemoteState_old.Buttons & ovrButton_Trigger)) {
+
+						sendButtonAction("+attack", (rightTrackedRemoteState_new.Buttons & ovrButton_Trigger));
+					}
                 }
             } else {
-				//flashlight on/off
-				if ((rightTrackedRemoteState_new.Buttons & ovrButton_Trigger) &&
-					((rightTrackedRemoteState_new.Buttons & ovrButton_Trigger) !=
-					 (rightTrackedRemoteState_old.Buttons & ovrButton_Trigger))) {
-
-					sendButtonActionSimple("impulse 100");
-				}
+            	//Unused for now
             }
 
             //Duck with A
@@ -1372,6 +1383,27 @@ static void ovrApp_HandleInput( ovrApp * app )
 
                 sendButtonAction("+duck", (rightTrackedRemoteState_new.Buttons & ovrButton_A));
             }
+
+			//Weapon Chooser
+			static bool weaponSwitched = false;
+			if (between(-0.15f, rightTrackedRemoteState_new.Joystick.x, 0.15f) &&
+				(between(0.7f, rightTrackedRemoteState_new.Joystick.y, 1.0f) ||
+				 between(-1.0f, rightTrackedRemoteState_new.Joystick.y, -0.7f)))
+			{
+				if (!weaponSwitched) {
+					if (between(0.7f, rightTrackedRemoteState_new.Joystick.y, 1.0f))
+					{
+						sendButtonActionSimple("invnext");
+					}
+					else
+					{
+						sendButtonActionSimple("invprev");
+					}
+					weaponSwitched = true;
+				}
+			} else {
+				weaponSwitched = false;
+			}
         }
 
         //Left-hand specific stuff
@@ -1400,25 +1432,23 @@ static void ovrApp_HandleInput( ovrApp * app )
                   remote_movementForward);
 
             if (!r_lefthand->integer) {
-				//flashlight on/off
-				if ((leftTrackedRemoteState_new.Buttons & ovrButton_Trigger) &&
-					((leftTrackedRemoteState_new.Buttons & ovrButton_Trigger) !=
-					 (leftTrackedRemoteState_old.Buttons & ovrButton_Trigger))) {
-
-					sendButtonActionSimple("impulse 100");
-				}
+				//Unused for now
             } else {
 				if (dominantGripPushed && (GetTimeInMilliSeconds() - dominantGripPushTime) > vr_reloadtimeoutms->integer)
 				{
 					//Fire Secondary
-					handleTrackedControllerButton(&leftTrackedRemoteState_new,
-												  &leftTrackedRemoteState_old,
-												  ovrButton_Trigger, K_MOUSE2);
+					if ((leftTrackedRemoteState_new.Buttons & ovrButton_Trigger) !=
+						(leftTrackedRemoteState_old.Buttons & ovrButton_Trigger)) {
+
+						sendButtonAction("+attack2", (leftTrackedRemoteState_new.Buttons & ovrButton_Trigger));
+					}
 				} else {
 					//Fire Primary
-					handleTrackedControllerButton(&leftTrackedRemoteState_new,
-												  &leftTrackedRemoteState_old,
-												  ovrButton_Trigger, K_MOUSE1);
+					if ((leftTrackedRemoteState_new.Buttons & ovrButton_Trigger) !=
+						(leftTrackedRemoteState_old.Buttons & ovrButton_Trigger)) {
+
+						sendButtonAction("+attack", (leftTrackedRemoteState_new.Buttons & ovrButton_Trigger));
+					}
 				}
             }
 
@@ -1462,20 +1492,6 @@ static void ovrApp_HandleInput( ovrApp * app )
 			{
 				decreaseSnap = true;
 			}
-
-            //Next Weapon
-            if (((leftTrackedRemoteState_new.Buttons & ovrButton_X) !=
-                (leftTrackedRemoteState_old.Buttons & ovrButton_X)) &&
-                    (leftTrackedRemoteState_old.Buttons & ovrButton_X)){
-                sendButtonActionSimple("invnext");
-            }
-
-            //Prev Weapon
-            if (((leftTrackedRemoteState_new.Buttons & ovrButton_Y) !=
-                 (leftTrackedRemoteState_old.Buttons & ovrButton_Y)) &&
-                (leftTrackedRemoteState_old.Buttons & ovrButton_Y)){
-                sendButtonActionSimple("invprev");
-            }
         }
     }
 

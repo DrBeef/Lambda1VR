@@ -160,10 +160,10 @@ void CCrowbar::ItemPostFrame()
 		if (!playedWooshSound)
 		{
 			// prevent w-w-woo-woosh stutters when player waves crowbar around frantically
-			if (UTIL_WeaponTimeBase() > lastWooshSoundTime + 0.5f)
+			if (gpGlobals->time > lastWooshSoundTime + 0.5f)
 			{
 				EMIT_SOUND_DYN(ENT(pev), CHAN_ITEM, "weapons/cbar_miss1.wav", 1, ATTN_NORM, 0, 98 + RANDOM_LONG(0, 3));
-				lastWooshSoundTime = UTIL_WeaponTimeBase();
+				lastWooshSoundTime = gpGlobals->time;
 			}
 			playedWooshSound = true;
 		}

@@ -151,9 +151,10 @@ void VRHelper::UpdateGunPosition(struct ref_params_s* pparams)
 		Vector originInRelativeHLSpace(-originInVRSpace.z * vr_worldscale->value, -originInVRSpace.x * vr_worldscale->value, originInVRSpace.y * vr_worldscale->value);
 
 		cl_entity_t *localPlayer = gEngfuncs.GetLocalPlayer();
-		Vector clientGroundPosition = localPlayer->curstate.origin;
-		clientGroundPosition.z -= localPlayer->curstate.mins.z;
-		Vector originInHLSpace = clientGroundPosition + originInRelativeHLSpace;
+		Vector clientPosition = pparams->vieworg;
+        //Vector clientPositionInRelativeHLSpace(clientPosition.x * vr_worldscale->value, clientPosition.y * vr_worldscale->value, , clientPosition.z * vr_worldscale->value);
+
+		Vector originInHLSpace = clientPosition + originInRelativeHLSpace;
 
 		VectorCopy(originInHLSpace, viewent->origin);
 		VectorCopy(originInHLSpace, viewent->curstate.origin);
