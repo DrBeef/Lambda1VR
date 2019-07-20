@@ -1317,13 +1317,6 @@ static void ovrApp_HandleInput( ovrApp * app )
             flashlightangles[YAW] += (cl.refdef.cl_viewangles[YAW] - hmdorientation[YAW]);
             controllerYawHeading = -cl.refdef.cl_viewangles[YAW] + flashlightangles[YAW];
 
-			//flashlight on/off
-			if (((leftTrackedRemoteState_new.Buttons & ovrButton_X) !=
-				 (leftTrackedRemoteState_old.Buttons & ovrButton_X)) &&
-				(leftTrackedRemoteState_old.Buttons & ovrButton_X)) {
-				sendButtonActionSimple("impulse 100");
-			}
-
 			//Run
 			handleTrackedControllerButton(&leftTrackedRemoteState_new,
 										  &leftTrackedRemoteState_old,
@@ -1374,7 +1367,13 @@ static void ovrApp_HandleInput( ovrApp * app )
 					}
                 }
             } else {
-            	//Unused for now
+                //flashlight on/off
+                if ((rightTrackedRemoteState_new.Buttons & ovrButton_Trigger) &&
+                    ((rightTrackedRemoteState_new.Buttons & ovrButton_Trigger) !=
+                     (rightTrackedRemoteState_old.Buttons & ovrButton_Trigger))) {
+
+                    sendButtonActionSimple("impulse 100");
+                }
             }
 
             //Duck with A
@@ -1386,12 +1385,12 @@ static void ovrApp_HandleInput( ovrApp * app )
 
 			//Weapon Chooser
 			static bool weaponSwitched = false;
-			if (between(-0.15f, rightTrackedRemoteState_new.Joystick.x, 0.15f) &&
-				(between(0.7f, rightTrackedRemoteState_new.Joystick.y, 1.0f) ||
-				 between(-1.0f, rightTrackedRemoteState_new.Joystick.y, -0.7f)))
+			if (between(-0.2f, rightTrackedRemoteState_new.Joystick.x, 0.2f) &&
+				(between(0.8f, rightTrackedRemoteState_new.Joystick.y, 1.0f) ||
+				 between(-1.0f, rightTrackedRemoteState_new.Joystick.y, -0.8f)))
 			{
 				if (!weaponSwitched) {
-					if (between(0.7f, rightTrackedRemoteState_new.Joystick.y, 1.0f))
+					if (between(0.8f, rightTrackedRemoteState_new.Joystick.y, 1.0f))
 					{
 						sendButtonActionSimple("invnext");
 					}
@@ -1432,7 +1431,13 @@ static void ovrApp_HandleInput( ovrApp * app )
                   remote_movementForward);
 
             if (!r_lefthand->integer) {
-				//Unused for now
+                //flashlight on/off
+                if ((leftTrackedRemoteState_new.Buttons & ovrButton_Trigger) &&
+                    ((leftTrackedRemoteState_new.Buttons & ovrButton_Trigger) !=
+                     (leftTrackedRemoteState_old.Buttons & ovrButton_Trigger))) {
+
+                    sendButtonActionSimple("impulse 100");
+                }
             } else {
 				if (dominantGripPushed && (GetTimeInMilliSeconds() - dominantGripPushTime) > vr_reloadtimeoutms->integer)
 				{
