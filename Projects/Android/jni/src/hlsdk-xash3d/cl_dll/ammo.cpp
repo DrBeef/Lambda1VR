@@ -1003,6 +1003,7 @@ void DrawAmmoBar( WEAPON *p, int x, int y, int width, int height )
 int CHudAmmo::DrawWList( float flTime )
 {
 	int r, g, b, x, y, a, i;
+	float screenHeightDivisible = 2.25f;
 
 	if( !gpActiveSel )
 		return 0;
@@ -1015,7 +1016,7 @@ int CHudAmmo::DrawWList( float flTime )
 		iActiveSlot = gpActiveSel->iSlot;
 
 	x = ScreenWidth / 3;
-	y = ScreenHeight / 3.5f;
+	y = ScreenHeight / screenHeightDivisible;
 
 	// Ensure that there are available choices in the active slot
 	if( iActiveSlot > 0 )
@@ -1065,7 +1066,7 @@ int CHudAmmo::DrawWList( float flTime )
 	// Draw all of the buckets
 	for( i = 0; i < MAX_WEAPON_SLOTS; i++ )
 	{
-		y = (ScreenHeight / 3.5f) + giBucketHeight + 10;
+		y = (ScreenHeight / screenHeightDivisible) + giBucketHeight + 10;
 
 		// If this is the active slot, draw the bigger pictures,
 		// otherwise just draw boxes
