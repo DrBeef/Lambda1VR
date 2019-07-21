@@ -82,11 +82,11 @@ void VRHelper::UpdateGunPosition(struct ref_params_s* pparams)
 
 void VRHelper::SendPositionUpdateToServer()
 {
-	cl_entity_t *localPlayer = gEngfuncs.GetLocalPlayer();
 	cl_entity_t *viewent = gEngfuncs.GetViewModel();
+
 	Vector hmdOffset; // TODO
 	Vector weaponOrigin = viewent ? viewent->curstate.origin : Vector();
-	Vector weaponOffset = weaponOrigin - localPlayer->curstate.origin;
+	Vector weaponOffset = weaponOrigin - positions.vieworg;
 	Vector weaponAngles = viewent ? viewent->curstate.angles : Vector();
 	Vector weaponVelocity = viewent ? viewent->curstate.velocity : Vector();
 
