@@ -121,6 +121,7 @@ convar_t	*vr_snapturn_angle;
 convar_t	*vr_reloadtimeoutms;
 convar_t	*vr_positionalMultiplier;
 convar_t	*vr_walkdirection;
+convar_t	*vr_gunangleadjust;
 
 
 /*
@@ -1233,6 +1234,30 @@ static void ovrApp_HandleInput( ovrApp * app )
     }
     else
     {
+        static bool weaponStabilisation = false;
+
+        //If distance to off-hand remote is less than 35cm and user pushes grip, then we enable weapon stabilisation
+        float distance = sqrtf(powf(offHandRemoteTracking->HeadPose.Pose.Position.x - dominantRemoteTracking->HeadPose.Pose.Position.x, 2) +
+                               powf(offHandRemoteTracking->HeadPose.Pose.Position.y - dominantRemoteTracking->HeadPose.Pose.Position.y, 2) +
+                               powf(offHandRemoteTracking->HeadPose.Pose.Position.z - dominantRemoteTracking->HeadPose.Pose.Position.z, 2));
+
+        //Turn on weapon stabilisation?
+        if ((offHandTrackedRemoteState->Buttons & ovrButton_GripTrigger) !=
+            (offHandTrackedRemoteStateOld->Buttons & ovrButton_GripTrigger)) {
+
+            if (offHandTrackedRemoteState->Buttons & ovrButton_GripTrigger)
+            {
+                if (distance < 0.50f)
+                {
+                    weaponStabilisation = true;
+                }
+            }
+            else
+            {
+                weaponStabilisation = false;
+            }
+        }
+
         //dominant hand stuff first
         {
 			///Weapon location relative to view
@@ -1274,8 +1299,29 @@ static void ovrApp_HandleInput( ovrApp * app )
             const ovrQuatf quatRemote = dominantRemoteTracking->HeadPose.Pose.Orientation;
             QuatToYawPitchRoll(quatRemote, weaponangles);
 
-            weaponangles[YAW] += (cl.refdef.cl_viewangles[YAW] - hmdorientation[YAW]);
-            weaponangles[PITCH] *= -1.0f;
+            if (weaponStabilisation)
+            {
+                float z = fabs(offHandRemoteTracking->HeadPose.Pose.Position.z - dominantRemoteTracking->HeadPose.Pose.Position.z);
+                float x = offHandRemoteTracking->HeadPose.Pose.Position.x - dominantRemoteTracking->HeadPose.Pose.Position.x;
+                float y = offHandRemoteTracking->HeadPose.Pose.Position.y - dominantRemoteTracking->HeadPose.Pose.Position.y;
+
+                if (z != 0.0f) {
+                    weaponangles[YAW] = -degrees(atanf(x / z));
+                }
+
+                float zxDist = sqrtf(powf(x, 2) + powf(z, 2));
+                if (zxDist != 0.0f) {
+                    weaponangles[PITCH] = degrees(atanf(y / zxDist));
+                }
+            }
+            else
+            {
+                weaponangles[YAW] += (cl.refdef.cl_viewangles[YAW] - hmdorientation[YAW]);
+                weaponangles[PITCH] *= -1.0f;
+
+                //Slight gun angle adjustment
+                weaponangles[PITCH] -= vr_gunangleadjust->value;
+            }
 
             //Use (Action)
             if ((dominantTrackedRemoteState->Buttons & ovrButton_Joystick) !=
@@ -1311,9 +1357,8 @@ static void ovrApp_HandleInput( ovrApp * app )
             }
         }
 
-        //off-hand stuff
         float controllerYawHeading = 0.0f;
-
+        //off-hand stuff
         {
             flashlightoffset[0] = offHandRemoteTracking->HeadPose.Pose.Position.x - hmdPosition[0];
             flashlightoffset[1] = offHandRemoteTracking->HeadPose.Pose.Position.y - hmdPosition[1];
@@ -1323,13 +1368,7 @@ static void ovrApp_HandleInput( ovrApp * app )
 
             flashlightangles[YAW] += (cl.refdef.cl_viewangles[YAW] - hmdorientation[YAW]);
             controllerYawHeading = -cl.refdef.cl_viewangles[YAW] + flashlightangles[YAW];
-
-			//Run
-			handleTrackedControllerButton(&leftTrackedRemoteState_new,
-										  &leftTrackedRemoteState_old,
-										  ovrButton_GripTrigger, K_SHIFT);
-
-		}
+        }
 
         //Right-hand specific stuff
         {
@@ -1380,13 +1419,10 @@ static void ovrApp_HandleInput( ovrApp * app )
 					}
                 }
             } else {
-                //flashlight on/off
-                if ((rightTrackedRemoteState_new.Buttons & ovrButton_Trigger) &&
-                    ((rightTrackedRemoteState_new.Buttons & ovrButton_Trigger) !=
-                     (rightTrackedRemoteState_old.Buttons & ovrButton_Trigger))) {
-
-                    sendButtonActionSimple("impulse 100");
-                }
+                //Run
+                handleTrackedControllerButton(&rightTrackedRemoteState_new,
+                                              &rightTrackedRemoteState_old,
+                                              ovrButton_Trigger, K_SHIFT);
             }
 
             //Duck with A
@@ -1443,17 +1479,22 @@ static void ovrApp_HandleInput( ovrApp * app )
                   remote_movementSideways,
                   remote_movementForward);
 
+
+            //flashlight on/off
+            if (((leftTrackedRemoteState_new.Buttons & ovrButton_X) !=
+                 (leftTrackedRemoteState_old.Buttons & ovrButton_X)) &&
+                (leftTrackedRemoteState_old.Buttons & ovrButton_X)) {
+                sendButtonActionSimple("impulse 100");
+            }
+
             //We need to record if we have started firing primary so that releasing trigger will stop definitely firing, if user has pushed grip
             //in meantime, then it wouldn't stop the gun firing and it would get stuck
             static bool firingPrimary = false;
             if (!r_lefthand->integer) {
-                //flashlight on/off
-                if ((leftTrackedRemoteState_new.Buttons & ovrButton_Trigger) &&
-                    ((leftTrackedRemoteState_new.Buttons & ovrButton_Trigger) !=
-                     (leftTrackedRemoteState_old.Buttons & ovrButton_Trigger))) {
-
-                    sendButtonActionSimple("impulse 100");
-                }
+                //Run
+                handleTrackedControllerButton(&leftTrackedRemoteState_new,
+                                              &leftTrackedRemoteState_old,
+                                              ovrButton_Trigger, K_SHIFT);
             }
             else
             {
@@ -1765,6 +1806,7 @@ static void initializeVRCvars()
 	vr_reloadtimeoutms = Cvar_Get( "vr_reloadtimeoutms", "200", CVAR_ARCHIVE, "How quickly the grip trigger needs to be release to initiate a reload" );
 	vr_positionalMultiplier = Cvar_Get( "vr_positionalMultiplier", "2600", CVAR_ARCHIVE, "Arbitrary number that makes positional tracking work well" );
     vr_walkdirection = Cvar_Get( "vr_walkdirection", "0", CVAR_ARCHIVE, "1 - Use HMD for direction, 0 - Use off-hand controller for direction" );
+    vr_gunangleadjust = Cvar_Get( "vr_gunangleadjust", "0.0", CVAR_ARCHIVE, "gun pitch angle adjust" );
 }
 
 void * AppThreadFunction( void * parm )

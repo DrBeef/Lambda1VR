@@ -53,23 +53,9 @@ void VRRenderer::Frame(double time)
 {
 	// make sure these are always properly set
 	gEngfuncs.pfnClientCmd("fps_max 150");
-	//gEngfuncs.pfnClientCmd("fps_override 1");
 	gEngfuncs.pfnClientCmd("gl_vsync 0");
 	gEngfuncs.pfnClientCmd("crosshair 0");
 	gEngfuncs.pfnClientCmd("default_fov 110");
-	//gEngfuncs.pfnClientCmd("firstperson");
-
-	if (isInMenu)
-	{
-		//vrHelper->CaptureMenuTexture();
-		//CaptureCurrentScreenToTexture(vrGLMenuTexture);
-	}
-	else
-	{
-		//CaptureCurrentScreenToTexture(vrGLHUDTexture);
-		isInMenu = true;
-	}
-
 }
 
 
@@ -80,17 +66,8 @@ void VRRenderer::CalcRefdef(struct ref_params_s* pparams)
 	gEngfuncs.SetViewAngles(pparams->viewangles);
 }
 
-void VRRenderer::DrawNormal()
-{
-}
-
-void VRRenderer::DrawTransparent()
-{
-}
-
 void VRRenderer::InterceptHUDRedraw(float time, int intermission)
 {
-	isInMenu = false;
 	gHUD.Redraw(time, intermission);
 }
 
