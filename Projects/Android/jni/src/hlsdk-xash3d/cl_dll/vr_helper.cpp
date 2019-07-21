@@ -10,6 +10,7 @@
 #define MAX_COMMAND_SIZE 256
 #endif
 
+bool bIsMultiplayer( void );
 
 VRHelper::VRHelper()
 {
@@ -90,14 +91,16 @@ void VRHelper::SendPositionUpdateToServer()
 	Vector weaponAngles = viewent ? viewent->curstate.angles : Vector();
 	Vector weaponVelocity = viewent ? viewent->curstate.velocity : Vector();
 
-	// void CBasePlayer::UpdateVRRelatedPositions(const Vector & hmdOffset, const Vector & weaponoffset, const Vector & weaponAngles, const Vector & weaponVelocity)
-	char cmd[MAX_COMMAND_SIZE] = { 0 };
-	sprintf(cmd, "updatevr %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f",
-		hmdOffset.x, hmdOffset.y, hmdOffset.z,
-		weaponOffset.x, weaponOffset.y, weaponOffset.z,
-		weaponAngles.x, weaponAngles.y, weaponAngles.z,
-		weaponVelocity.x, weaponVelocity.y, weaponVelocity.z
-	);
+	if (!bIsMultiplayer()) {
+        // void CBasePlayer::UpdateVRRelatedPositions(const Vector & hmdOffset, const Vector & weaponoffset, const Vector & weaponAngles, const Vector & weaponVelocity)
+        char cmd[MAX_COMMAND_SIZE] = {0};
+        sprintf(cmd, "updatevr %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f",
+                hmdOffset.x, hmdOffset.y, hmdOffset.z,
+                weaponOffset.x, weaponOffset.y, weaponOffset.z,
+                weaponAngles.x, weaponAngles.y, weaponAngles.z,
+                weaponVelocity.x, weaponVelocity.y, weaponVelocity.z
+        );
 
-	gEngfuncs.pfnClientCmd(cmd);
+        gEngfuncs.pfnClientCmd(cmd);
+    }
 }

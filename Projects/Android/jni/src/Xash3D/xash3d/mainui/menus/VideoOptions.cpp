@@ -55,6 +55,7 @@ public:
 	CMenuCheckBox	hiTextures;
 	CMenuCheckBox   vbo;
 	CMenuCheckBox   bump;
+	CMenuCheckBox   fps;
 
 	HIMAGE		hTestImage;
 } uiVidOptions;
@@ -90,6 +91,7 @@ void CMenuVidOptions::SaveAndPopMenu( void )
 	hiTextures.WriteCvar();
 	vbo.WriteCvar();
 	bump.WriteCvar();
+	fps.WriteCvar();
 	// gamma is already written
 
 	CMenuFramework::SaveAndPopMenu();
@@ -186,13 +188,13 @@ void CMenuVidOptions::_Init( void )
 	}
 
 	bump.SetNameAndStatus( "Bump-mapping", "Enable bump mapping" );
-	bump.SetCoord( 72, 515 );
+	bump.SetCoord( 72, 505 );
 	bump.LinkCvar( "r_bump" );
 	if( !EngFuncs::GetCvarFloat( "r_vbo" ) )
 		bump.SetGrayed( true );
 
 	vbo.SetNameAndStatus( "Use VBO", "Use new world renderer. Faster, but rarely glitchy" );
-	vbo.SetCoord( 72, 565 );
+	vbo.SetCoord( 72, 555 );
 	vbo.LinkCvar( "r_vbo" );
 	vbo.onChanged = CMenuCheckBox::BitMaskCb;
 	vbo.onChanged.pExtra = &bump.iFlags;
@@ -200,12 +202,16 @@ void CMenuVidOptions::_Init( void )
 	vbo.iMask = QMF_GRAYED;
 
 	fastSky.SetNameAndStatus( "Draw simple sky", "enable/disable fast sky rendering (for old computers)" );
-	fastSky.SetCoord( 72, 615 );
+	fastSky.SetCoord( 72, 605 );
 	fastSky.LinkCvar( "r_fastsky" );
 
 	hiTextures.SetNameAndStatus( "Allow materials", "let engine replace 8-bit textures with full color hi-res prototypes (if present)" );
-	hiTextures.SetCoord( 72, 665 );
+	hiTextures.SetCoord( 72, 655 );
 	hiTextures.LinkCvar( "host_allow_materials" );
+
+	fps.SetNameAndStatus( "Show FPS", "Show FPS Counter" );
+	fps.SetCoord( 72, 705 );
+	fps.LinkCvar( "cl_showfps" );
 
 	AddItem( background );
 	AddItem( banner );
@@ -214,6 +220,7 @@ void CMenuVidOptions::_Init( void )
 	AddItem( gammaIntensity );
 	AddItem( glareReduction );
 	AddItem( bump );
+	AddItem( fps );
 	AddItem( vbo );
 	AddItem( fastSky );
 	AddItem( hiTextures );
