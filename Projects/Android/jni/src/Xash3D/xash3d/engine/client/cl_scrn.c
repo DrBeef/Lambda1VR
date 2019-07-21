@@ -97,7 +97,7 @@ void SCR_DrawFPS( void )
 	}
 	else
 	{
-		int curfps = (int)( calc + 0.5f );
+		int curfps = (int)( ( calc / 2.0f ) + 0.5f ); // Divide by 2 as this gets calculated once per eye
 
 		if ( curfps < minfps )
 			minfps = curfps;
@@ -125,7 +125,7 @@ void SCR_DrawFPS( void )
 	}
 
 	Con_DrawStringLen( fpsstring, &offset, NULL );
-	Con_DrawString( scr_width->integer - offset - 2, 4, fpsstring, color );
+	Con_DrawString( (scr_width->integer / 2) - offset - 2, (int)(scr_height->integer * 0.6f), fpsstring, color );
 }
 
 /*
@@ -157,7 +157,7 @@ void SCR_DrawPos( void )
 
 	MakeRGBA( color, 255, 255, 255, 255 );
 
-	Con_DrawString( scr_width->integer / 2, 4, msg, color );
+	Con_DrawString( scr_width->integer / 2, (int)(scr_height->integer * 0.65f) , msg, color );
 
 }
 

@@ -1284,6 +1284,13 @@ static void ovrApp_HandleInput( ovrApp * app )
                 sendButtonAction("+use", (dominantTrackedRemoteState->Buttons & ovrButton_Joystick));
             }
 
+            static bool finishReloadNextFrame = false;
+            if (finishReloadNextFrame)
+            {
+                sendButtonActionSimple("-reload");
+                finishReloadNextFrame = false;
+            }
+
             if ((dominantTrackedRemoteState->Buttons & ovrButton_GripTrigger) !=
                 (dominantTrackedRemoteStateOld->Buttons & ovrButton_GripTrigger)) {
 
@@ -1298,7 +1305,7 @@ static void ovrApp_HandleInput( ovrApp * app )
                     if ((GetTimeInMilliSeconds() - dominantGripPushTime) < vr_reloadtimeoutms->integer)
                     {
                         sendButtonActionSimple("+reload");
-                        sendButtonActionSimple("-reload");
+                        finishReloadNextFrame = true;
                     }
                 }
             }
@@ -1349,8 +1356,11 @@ static void ovrApp_HandleInput( ovrApp * app )
             handleTrackedControllerButton(&rightTrackedRemoteState_new,
                                           &rightTrackedRemoteState_old, ovrButton_B, K_SPACE);
 
+            //We need to record if we have started firing primary so that releasing trigger will stop firing, if user has pushed grip
+            //in meantime, then it wouldn't stop the gun firing and it would get stuck
+            static bool firingPrimary = false;
             if (!r_lefthand->integer) {
-                if (dominantGripPushed && (GetTimeInMilliSeconds() - dominantGripPushTime) > vr_reloadtimeoutms->integer)
+                if (!firingPrimary && dominantGripPushed && (GetTimeInMilliSeconds() - dominantGripPushTime) > vr_reloadtimeoutms->integer)
                 {
                     //Fire Secondary
 					if ((rightTrackedRemoteState_new.Buttons & ovrButton_Trigger) !=
@@ -1358,12 +1368,15 @@ static void ovrApp_HandleInput( ovrApp * app )
 
 						sendButtonAction("+attack2", (rightTrackedRemoteState_new.Buttons & ovrButton_Trigger));
 					}
-                } else {
+                }
+                else
+                {
                     //Fire Primary
 					if ((rightTrackedRemoteState_new.Buttons & ovrButton_Trigger) !=
 						(rightTrackedRemoteState_old.Buttons & ovrButton_Trigger)) {
 
-						sendButtonAction("+attack", (rightTrackedRemoteState_new.Buttons & ovrButton_Trigger));
+                        firingPrimary = (rightTrackedRemoteState_new.Buttons & ovrButton_Trigger);
+						sendButtonAction("+attack", firingPrimary);
 					}
                 }
             } else {
@@ -1430,6 +1443,9 @@ static void ovrApp_HandleInput( ovrApp * app )
                   remote_movementSideways,
                   remote_movementForward);
 
+            //We need to record if we have started firing primary so that releasing trigger will stop definitely firing, if user has pushed grip
+            //in meantime, then it wouldn't stop the gun firing and it would get stuck
+            static bool firingPrimary = false;
             if (!r_lefthand->integer) {
                 //flashlight on/off
                 if ((leftTrackedRemoteState_new.Buttons & ovrButton_Trigger) &&
@@ -1438,8 +1454,10 @@ static void ovrApp_HandleInput( ovrApp * app )
 
                     sendButtonActionSimple("impulse 100");
                 }
-            } else {
-				if (dominantGripPushed && (GetTimeInMilliSeconds() - dominantGripPushTime) > vr_reloadtimeoutms->integer)
+            }
+            else
+            {
+				if (!firingPrimary && dominantGripPushed && (GetTimeInMilliSeconds() - dominantGripPushTime) > vr_reloadtimeoutms->integer)
 				{
 					//Fire Secondary
 					if ((leftTrackedRemoteState_new.Buttons & ovrButton_Trigger) !=
@@ -1447,20 +1465,17 @@ static void ovrApp_HandleInput( ovrApp * app )
 
 						sendButtonAction("+attack2", (leftTrackedRemoteState_new.Buttons & ovrButton_Trigger));
 					}
-				} else {
+				}
+				else
+				{
 					//Fire Primary
 					if ((leftTrackedRemoteState_new.Buttons & ovrButton_Trigger) !=
 						(leftTrackedRemoteState_old.Buttons & ovrButton_Trigger)) {
 
-						sendButtonAction("+attack", (leftTrackedRemoteState_new.Buttons & ovrButton_Trigger));
+                        firingPrimary = (leftTrackedRemoteState_new.Buttons & ovrButton_Trigger);
+						sendButtonAction("+attack", firingPrimary);
 					}
 				}
-            }
-
-            //Reload
-            if ((leftTrackedRemoteState_new.Buttons & ovrButton_X) !=
-                (leftTrackedRemoteState_old.Buttons & ovrButton_X)){
-                sendButtonAction("+reload", (leftTrackedRemoteState_new.Buttons & ovrButton_X));
             }
 
             static increaseSnap = true;
@@ -1747,7 +1762,7 @@ void initialize_gl4es();
 static void initializeVRCvars()
 {
 	vr_snapturn_angle = Cvar_Get( "vr_snapturn_angle", "45", CVAR_ARCHIVE, "Sets the angle for snap-turn, set to < 10.0 to enable smooth turning" );
-	vr_reloadtimeoutms = Cvar_Get( "vr_reloadtimeoutms", "150", CVAR_ARCHIVE, "How quickly the grip trigger needs to be release to initiate a reload" );
+	vr_reloadtimeoutms = Cvar_Get( "vr_reloadtimeoutms", "200", CVAR_ARCHIVE, "How quickly the grip trigger needs to be release to initiate a reload" );
 	vr_positionalMultiplier = Cvar_Get( "vr_positionalMultiplier", "2600", CVAR_ARCHIVE, "Arbitrary number that makes positional tracking work well" );
     vr_walkdirection = Cvar_Get( "vr_walkdirection", "0", CVAR_ARCHIVE, "1 - Use HMD for direction, 0 - Use off-hand controller for direction" );
 }
