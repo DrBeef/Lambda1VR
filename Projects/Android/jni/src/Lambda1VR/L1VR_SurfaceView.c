@@ -85,7 +85,7 @@ int CPU_LEVEL			= 2;
 int GPU_LEVEL			= 3;
 int NUM_MULTI_SAMPLES	= 1;
 
-float SS_MULTIPLIER    = 1.5f;
+float SS_MULTIPLIER    = 1.2f;
 
 float worldPosition[3];
 float hmdPosition[3];
@@ -1299,18 +1299,18 @@ static void ovrApp_HandleInput( ovrApp * app )
             const ovrQuatf quatRemote = dominantRemoteTracking->HeadPose.Pose.Orientation;
             QuatToYawPitchRoll(quatRemote, weaponangles);
 
-            if (weaponStabilisation)
+
+            if (weaponStabilisation &&
+                //Don't trigger stabilisation if controllers are close together (holding Glock for example)
+                (distance > 0.15f))
             {
-                float z = fabs(offHandRemoteTracking->HeadPose.Pose.Position.z - dominantRemoteTracking->HeadPose.Pose.Position.z);
+                float z = offHandRemoteTracking->HeadPose.Pose.Position.z - dominantRemoteTracking->HeadPose.Pose.Position.z;
                 float x = offHandRemoteTracking->HeadPose.Pose.Position.x - dominantRemoteTracking->HeadPose.Pose.Position.x;
                 float y = offHandRemoteTracking->HeadPose.Pose.Position.y - dominantRemoteTracking->HeadPose.Pose.Position.y;
-
-                if (z != 0.0f) {
-                    weaponangles[YAW] = (cl.refdef.cl_viewangles[YAW] - hmdorientation[YAW]) - degrees(atanf(x / z));
-                }
-
                 float zxDist = sqrtf(powf(x, 2) + powf(z, 2));
-                if (zxDist != 0.0f) {
+
+                if (zxDist != 0.0f && z != 0.0f) {
+                    weaponangles[YAW] = (cl.refdef.cl_viewangles[YAW] - hmdorientation[YAW]) - degrees(atan2f(x, -z));
                     weaponangles[PITCH] = degrees(atanf(y / zxDist));
                 }
             }
