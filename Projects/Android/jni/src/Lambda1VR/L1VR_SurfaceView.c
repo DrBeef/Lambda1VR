@@ -1306,7 +1306,7 @@ static void ovrApp_HandleInput( ovrApp * app )
                 float y = offHandRemoteTracking->HeadPose.Pose.Position.y - dominantRemoteTracking->HeadPose.Pose.Position.y;
 
                 if (z != 0.0f) {
-                    weaponangles[YAW] = snapTurn - degrees(atanf(x / z));
+                    weaponangles[YAW] = (cl.refdef.cl_viewangles[YAW] - hmdorientation[YAW]) - degrees(atanf(x / z));
                 }
 
                 float zxDist = sqrtf(powf(x, 2) + powf(z, 2));
