@@ -302,6 +302,10 @@ void V_CalcNormalRefdef( struct ref_params_s *pparams )
 	float bob, waterOffset;
 	static viewinterp_t ViewInterp;
 
+#ifdef VR
+	cvar_t	*vr_weaponrecoil = gEngfuncs.pfnGetCvarPointer("vr_weaponrecoil");
+#endif
+
 	static float oldz = 0;
 	static float lasttime;
 
@@ -318,9 +322,13 @@ void V_CalcNormalRefdef( struct ref_params_s *pparams )
 		ent = gEngfuncs.GetLocalPlayer();
 	}
 
+#ifndef VR
 	// transform the view offset by the model's matrix to get the offset from
 	// model origin for the view
 	bob = V_CalcBob( pparams );
+#else
+	bob = 0.0f;
+#endif
 
 	// refresh position
 	VectorCopy( pparams->simorg, pparams->vieworg );
@@ -336,8 +344,10 @@ void V_CalcNormalRefdef( struct ref_params_s *pparams )
 		VectorCopy( pparams->cl_viewangles, pparams->viewangles );
 	}
 
+#ifndef VR
 	gEngfuncs.V_CalcShake();
 	gEngfuncs.V_ApplyShake( pparams->vieworg, pparams->viewangles, 1.0 );
+#endif
 
 	// never let view origin sit exactly on a node line, because a water plane can
 	// dissapear when viewed with the eye exactly on it.
@@ -448,13 +458,19 @@ void V_CalcNormalRefdef( struct ref_params_s *pparams )
 		}
 	}
 
-	// Add in the punchangle, if any
-	VectorAdd( pparams->viewangles, pparams->punchangle, pparams->viewangles );
+#ifdef VR
+	if (vr_weaponrecoil->value) {
+#endif
+		// Add in the punchangle, if any
+		VectorAdd(pparams->viewangles, pparams->punchangle, pparams->viewangles);
 
-	// Include client side punch, too
-	VectorAdd( pparams->viewangles, (float *)&g_ev_punchangle, pparams->viewangles );
+		// Include client side punch, too
+		VectorAdd(pparams->viewangles, (float *) &g_ev_punchangle, pparams->viewangles);
 
-	V_DropPunchAngle( pparams->frametime, (float *)&g_ev_punchangle );
+		V_DropPunchAngle(pparams->frametime, (float *) &g_ev_punchangle);
+#ifdef VR
+	}
+#endif#endif
 
 	// smooth out stair step ups
 #if 1
