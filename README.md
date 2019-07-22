@@ -32,7 +32,7 @@ Controls:
 
 YES!, the crowbar has to be swung in real life to smash stuff!
 
-Dominant Hand Controller:
+**Dominant Hand Controller:**
 
 Orientation: 			  Weapon Orientation
 
@@ -45,7 +45,7 @@ Grip (Click < 200ms):	Reload
 Click Thumbstick:		Use (action)
 
 
-Off-hand Controller:
+**Off-hand Controller:**
 
 Orientation: 			  Flashlight Orientation
 
@@ -53,10 +53,10 @@ Trigger:				    Shift (to run)
 
 Grip (hold):			  Weapon Stabilise (hold to remain active)
 
-Click Thumbstick:	  **reserved for future use**
+Click Thumbstick:	  *reserved for future use*
 
 
-Left Controller:
+**Left Controller:**
 
 Thumbstick:				  Move/Strafe
 
@@ -64,10 +64,10 @@ Menu Button:			  Menu
 
 X:						      Flashlight on/off
 
-Y:						      **reserved for future use**
+Y:						      *reserved for future use*
 
 
-Right Controller:
+**Right Controller:**
 
 Thumbstick (Left / Right) :   Snap-Turn
 
