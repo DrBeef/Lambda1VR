@@ -62,6 +62,7 @@ import static android.system.Os.setenv;
 
 		copy_asset(getFilesDir().getPath(), "extras.pak", false);
 		copy_asset("/sdcard/xash/valve/", "config.cfg", false); // Copy in case user has deleted their config
+		copy_asset("/sdcard/xash/", "commandline.txt", false); // Copy in case user has deleted their config
 
 		//Copy modified weapon models
 		if (!(new File("/sdcard/xash/valve/models/no_copy").exists()))

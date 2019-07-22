@@ -1488,6 +1488,13 @@ static void ovrApp_HandleInput( ovrApp * app )
                 sendButtonActionSimple("impulse 100");
             }
 
+
+            //Show multiplayer scoreboard
+            if (((leftTrackedRemoteState_new.Buttons & ovrButton_Y) !=
+                 (leftTrackedRemoteState_old.Buttons & ovrButton_Y))) {
+                sendButtonAction("+showscores", (leftTrackedRemoteState_old.Buttons & ovrButton_Y));
+            }
+
             //We need to record if we have started firing primary so that releasing trigger will stop definitely firing, if user has pushed grip
             //in meantime, then it wouldn't stop the gun firing and it would get stuck
             static bool firingPrimary = false;
