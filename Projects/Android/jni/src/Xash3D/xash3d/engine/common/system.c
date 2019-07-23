@@ -307,7 +307,10 @@ char *Sys_GetCurrentUser( void )
 		return pw->pw_name;
 
 #endif
-	return "Player";
+
+	static char buffer[256];
+	Q_snprintf(buffer, sizeof(buffer), "VRPlayer-%x", rand());
+	return buffer;
 }
 
 #if (defined(__linux__) && !defined(__ANDROID__)) || defined (__FreeBSD__) || defined (__NetBSD__) || defined(__OpenBSD__) || defined(__APPLE__)
