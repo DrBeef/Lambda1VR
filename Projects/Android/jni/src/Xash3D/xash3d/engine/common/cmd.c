@@ -370,6 +370,13 @@ void GAME_EXPORT Cbuf_Execute( void )
 			// completely flushed command buffer, so remove server commands flags
 			// cmd_text.haveServerCmds = false;
 		}
+
+		//Fall out options
+		if (host.state == HOST_SHUTDOWN ||
+                host.state == HOST_CRASHED)
+        {
+            return;
+        }
 	}
 }
 

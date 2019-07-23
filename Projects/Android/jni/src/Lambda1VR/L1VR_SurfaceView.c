@@ -880,37 +880,40 @@ void RenderFrame( ovrRenderer * renderer, const ovrJava * java,
 	//Set everything up
 	Host_BeginFrame();
 
-	// Render the eye images.
-	for ( int eye = 0; eye < renderer->NumBuffers; eye++ )
-	{
-		ovrFramebuffer * frameBuffer = &(renderer->FrameBuffer[eye]);
-		ovrFramebuffer_SetCurrent( frameBuffer );
+    //if we are now shutting down, drop out here
+    if (host.state != HOST_SHUTDOWN &&
+            host.state != HOST_CRASHED) {
+        // Render the eye images.
+        for (int eye = 0; eye < renderer->NumBuffers; eye++) {
+            ovrFramebuffer *frameBuffer = &(renderer->FrameBuffer[eye]);
+            ovrFramebuffer_SetCurrent(frameBuffer);
 
-		{
-			GL( glEnable( GL_SCISSOR_TEST ) );
-			GL( glDepthMask( GL_TRUE ) );
-			GL( glEnable( GL_DEPTH_TEST ) );
-			GL( glDepthFunc( GL_LEQUAL ) );
+            {
+                GL(glEnable(GL_SCISSOR_TEST));
+                GL(glDepthMask(GL_TRUE));
+                GL(glEnable(GL_DEPTH_TEST));
+                GL(glDepthFunc(GL_LEQUAL));
 
-			//Weusing the size of the render target
-			GL( glViewport( 0, 0, frameBuffer->Width, frameBuffer->Height ) );
-			GL( glScissor( 0, 0, frameBuffer->Width, frameBuffer->Height ) );
+                //Weusing the size of the render target
+                GL(glViewport(0, 0, frameBuffer->Width, frameBuffer->Height));
+                GL(glScissor(0, 0, frameBuffer->Width, frameBuffer->Height));
 
-			GL( glClearColor( 0.0f, 0.0f, 0.0f, 1.0f ) );
-			GL( glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT ) );
-			GL( glDisable(GL_SCISSOR_TEST));
+                GL(glClearColor(0.0f, 0.0f, 0.0f, 1.0f));
+                GL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
+                GL(glDisable(GL_SCISSOR_TEST));
 
-            //Now do the drawing for this eye
-            Host_Frame(eye);
-		}
+                //Now do the drawing for this eye
+                Host_Frame(eye);
+            }
 
-        //Clear edge to prevent smearing
-        ovrFramebuffer_ClearEdgeTexels( frameBuffer );
-		ovrFramebuffer_Resolve( frameBuffer );
-		ovrFramebuffer_Advance( frameBuffer );
-	}
+            //Clear edge to prevent smearing
+            ovrFramebuffer_ClearEdgeTexels(frameBuffer);
+            ovrFramebuffer_Resolve(frameBuffer);
+            ovrFramebuffer_Advance(frameBuffer);
+        }
 
-    Host_EndFrame();
+        Host_EndFrame();
+    }
 
 	ovrFramebuffer_SetNone();
 }
