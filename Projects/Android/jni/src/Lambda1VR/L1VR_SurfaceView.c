@@ -90,6 +90,7 @@ float SS_MULTIPLIER    = 1.2f;
 float worldPosition[3];
 float hmdPosition[3];
 float playerHeight;
+float playerYaw = 0.0f;
 float positionDeltaThisFrame[3];
 
 vec2_t cylinderSize = {1280, 720};
@@ -155,6 +156,7 @@ static bool xash_initialised = false;
 typedef void (*pfnChangeGame)( const char *progname );
 extern int Host_Main( int argc, const char **argv, const char *progname, int bChangeGame, pfnChangeGame func );
 
+bool showingScoreboard = false;
 static bool useScreenLayer()
 {
 	return (cls.demoplayback || cls.state == ca_cinematic || cls.key_dest != key_game);
@@ -864,13 +866,15 @@ void setWorldPosition( float x, float y, float z )
     worldPosition[2] = z;
 }
 
-void setHMDPosition( float x, float y, float z )
+void setHMDPosition( float x, float y, float z, float yaw )
 {
     hmdPosition[0] = x;
     hmdPosition[1] = y;
     if (useScreenLayer())
     {
         playerHeight = y;
+    } else{
+    	playerYaw = yaw;
     }
     hmdPosition[2] = z;
 }
@@ -1207,7 +1211,7 @@ static void ovrApp_HandleInput( ovrApp * app )
     //Menu control - Uses "touch"
     if (useScreenLayer())
     {
-        const ovrQuatf quatRemote = rightRemoteTracking_new.HeadPose.Pose.Orientation;
+        const ovrQuatf quatRemote = dominantRemoteTracking->HeadPose.Pose.Orientation;
         float remoteAngles[3];
         QuatToYawPitchRoll(quatRemote, remoteAngles);
         if (remoteAngles[YAW] > -40.0f && remoteAngles[YAW] < 40.0f &&
@@ -1492,7 +1496,8 @@ static void ovrApp_HandleInput( ovrApp * app )
             //Show multiplayer scoreboard
             if (((leftTrackedRemoteState_new.Buttons & ovrButton_Y) !=
                  (leftTrackedRemoteState_old.Buttons & ovrButton_Y))) {
-                sendButtonAction("+showscores", (leftTrackedRemoteState_old.Buttons & ovrButton_Y));
+				showingScoreboard = (leftTrackedRemoteState_new.Buttons & ovrButton_Y);
+                sendButtonAction("+showscores", showingScoreboard);
             }
 
             //We need to record if we have started firing primary so that releasing trigger will stop definitely firing, if user has pushed grip
@@ -1883,11 +1888,9 @@ void * AppThreadFunction( void * parm )
 				{
 					if (!xash_initialised)
 					{
-						char *arg = (char*)ovrMessage_GetPointerParm( &message, 0 );
-
 						ALOGV( "    Initialising Xash3D Engine" );
 
-						if (arg)
+						if (argc != 0)
 						{
                             Host_Main(argc, argv, "valve", false, NULL);
 						}
@@ -2008,7 +2011,7 @@ void * AppThreadFunction( void * parm )
             const ovrQuatf quatHmd = tracking.HeadPose.Pose.Orientation;
             const ovrVector3f positionHmd = tracking.HeadPose.Pose.Position;
             QuatToYawPitchRoll(quatHmd, hmdorientation);
-            setHMDPosition(positionHmd.x, positionHmd.y, positionHmd.z);
+            setHMDPosition(positionHmd.x, positionHmd.y, positionHmd.z, hmdorientation[YAW]);
 
             //TODO: fix - set to use HMD position for world position
             setWorldPosition(positionHmd.x, positionHmd.y, positionHmd.z);
@@ -2101,7 +2104,7 @@ void * AppThreadFunction( void * parm )
 				// Add a simple cylindrical layer
 				appState.Layers[appState.LayerCount++].Cylinder =
 						BuildCylinderLayer( &appState.Scene.CylinderRenderer,
-											appState.Scene.CylinderWidth, appState.Scene.CylinderHeight, &tracking );
+											appState.Scene.CylinderWidth, appState.Scene.CylinderHeight, &tracking, playerYaw );
 
 				//Call the game drawing code to populate the cylinder layer texture
 				RenderFrame(&appState.Scene.CylinderRenderer,
