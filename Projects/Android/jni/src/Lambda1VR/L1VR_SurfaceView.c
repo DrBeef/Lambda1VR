@@ -159,35 +159,11 @@ extern int Host_Main( int argc, const char **argv, const char *progname, int bCh
 bool showingScoreboard = false;
 static bool useScreenLayer()
 {
-	return (cls.demoplayback || cls.state == ca_cinematic || cls.key_dest != key_game);
-}
-
-//Timing stuff for joypad control
-static long oldtime=0;
-long delta=0;
-
-int curtime;
-int Sys_Milliseconds (void)
-{
-	struct timeval tp;
-	struct timezone tzp;
-	static int		secbase;
-
-	gettimeofday(&tp, &tzp);
-
-	if (!secbase)
-	{
-		secbase = tp.tv_sec;
-		return tp.tv_usec/1000;
-	}
-
-	curtime = (tp.tv_sec - secbase)*1000 + tp.tv_usec/1000;
-
-	return curtime;
+	return (showingScoreboard || cls.demoplayback || cls.state == ca_cinematic || cls.key_dest != key_game);
 }
 
 int runStatus = -1;
-void QC_exit(int exitCode)
+void L1VR_exit(int exitCode)
 {
 	runStatus = exitCode;
 }
@@ -1208,21 +1184,33 @@ static void ovrApp_HandleInput( ovrApp * app )
 	static bool dominantGripPushed = false;
 	static float dominantGripPushTime = 0.0f;
 
+    //Show multiplayer scoreboard
+    if (((leftTrackedRemoteState_new.Buttons & ovrButton_Y) !=
+         (leftTrackedRemoteState_old.Buttons & ovrButton_Y))) {
+        //Check we are in multiplayer
+        if (CL_GetMaxClients() > 1) {
+            showingScoreboard = (leftTrackedRemoteState_new.Buttons & ovrButton_Y);
+            sendButtonAction("+showscores", showingScoreboard);
+        }
+    }
+
+
     //Menu control - Uses "touch"
     if (useScreenLayer())
     {
         const ovrQuatf quatRemote = dominantRemoteTracking->HeadPose.Pose.Orientation;
         float remoteAngles[3];
         QuatToYawPitchRoll(quatRemote, remoteAngles);
-        if (remoteAngles[YAW] > -40.0f && remoteAngles[YAW] < 40.0f &&
+        float yaw = remoteAngles[YAW] - playerYaw;
+        if (yaw > -40.0f && yaw < 40.0f &&
             remoteAngles[PITCH] > -22.5f && remoteAngles[PITCH] < 22.5f) {
 
-            int newRemoteTrigState = (rightTrackedRemoteState_new.Buttons & ovrButton_Trigger) != 0;
-            int prevRemoteTrigState = (rightTrackedRemoteState_old.Buttons & ovrButton_Trigger) != 0;
+            int newRemoteTrigState = (dominantTrackedRemoteState->Buttons & ovrButton_Trigger) != 0;
+            int prevRemoteTrigState = (dominantTrackedRemoteStateOld->Buttons & ovrButton_Trigger) != 0;
 
             touchEventType t = event_motion;
 
-            float touchX = (-remoteAngles[YAW] + 40.0f) / 80.0f;
+            float touchX = (-yaw + 40.0f) / 80.0f;
             float touchY = (remoteAngles[PITCH] + 22.5f) / 45.0f;
             if (newRemoteTrigState != prevRemoteTrigState)
             {
@@ -1492,16 +1480,6 @@ static void ovrApp_HandleInput( ovrApp * app )
                 sendButtonActionSimple("impulse 100");
             }
 
-
-            //Show multiplayer scoreboard
-            if (((leftTrackedRemoteState_new.Buttons & ovrButton_Y) !=
-                 (leftTrackedRemoteState_old.Buttons & ovrButton_Y))) {
-            	//Check we are in multiplayer
-                if (CL_GetMaxClients() > 1) {
-                    showingScoreboard = (leftTrackedRemoteState_new.Buttons & ovrButton_Y);
-                    sendButtonAction("+showscores", showingScoreboard);
-                }
-            }
 
             //We need to record if we have started firing primary so that releasing trigger will stop definitely firing, if user has pushed grip
             //in meantime, then it wouldn't stop the gun firing and it would get stuck
@@ -2107,7 +2085,7 @@ void * AppThreadFunction( void * parm )
 				// Add a simple cylindrical layer
 				appState.Layers[appState.LayerCount++].Cylinder =
 						BuildCylinderLayer( &appState.Scene.CylinderRenderer,
-											appState.Scene.CylinderWidth, appState.Scene.CylinderHeight, &tracking, playerYaw );
+											appState.Scene.CylinderWidth, appState.Scene.CylinderHeight, &tracking, radians(playerYaw) );
 
 				//Call the game drawing code to populate the cylinder layer texture
 				RenderFrame(&appState.Scene.CylinderRenderer,

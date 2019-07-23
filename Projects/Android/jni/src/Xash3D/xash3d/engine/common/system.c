@@ -774,13 +774,13 @@ void my_exit(int ret)
 Sys_Quit2
 ================
 */
+void L1VR_exit(int exitCode);
+
 void Sys_Quit( void )
 {
 	MsgDev( D_INFO, "Shutting down...\n" );
 	Host_Shutdown();
-	if( host.crashed )
-		exit( 127 );
-	exit( error_on_exit );
+	L1VR_exit(0);
 }
 
 /*

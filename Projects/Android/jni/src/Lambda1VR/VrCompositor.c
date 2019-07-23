@@ -585,7 +585,7 @@ static ovrMatrix4f CylinderModelMatrix( const int texWidth, const int texHeight,
 
 ovrLayerCylinder2 BuildCylinderLayer( ovrRenderer * cylinderRenderer,
 	const int textureWidth, const int textureHeight,
-	const ovrTracking2 * tracking, float rotateYaw )
+	const ovrTracking2 * tracking, float rotatePitch )
 {
 	ovrLayerCylinder2 layer = vrapi_DefaultLayerCylinder2();
 
@@ -602,7 +602,7 @@ ovrLayerCylinder2 BuildCylinderLayer( ovrRenderer * cylinderRenderer,
 	layer.HeadPose = tracking->HeadPose;
 
 	const float density = 4500.0f;
-	const float rotatePitch = 0.0f;
+	const float rotateYaw = 0.0f;
 	const float radius = 2.0f;
 	const ovrVector3f translation = { 0.0f, 0.0f, -0.5f };
 

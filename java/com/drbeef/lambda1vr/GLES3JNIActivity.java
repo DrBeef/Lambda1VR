@@ -99,7 +99,7 @@ import static android.system.Os.setenv;
 		
 
 		//Read these from a file and pass through
-		commandLineParams = new String("-dev 3 -log");
+		commandLineParams = new String("xash3d -dev 3 -log");
 
 		//See if user is trying to use command line params
 		if(new File("/sdcard/xash/commandline.txt").exists()) // should exist!
