@@ -1496,8 +1496,11 @@ static void ovrApp_HandleInput( ovrApp * app )
             //Show multiplayer scoreboard
             if (((leftTrackedRemoteState_new.Buttons & ovrButton_Y) !=
                  (leftTrackedRemoteState_old.Buttons & ovrButton_Y))) {
-				showingScoreboard = (leftTrackedRemoteState_new.Buttons & ovrButton_Y);
-                sendButtonAction("+showscores", showingScoreboard);
+            	//Check we are in multiplayer
+                if (CL_GetMaxClients() > 1) {
+                    showingScoreboard = (leftTrackedRemoteState_new.Buttons & ovrButton_Y);
+                    sendButtonAction("+showscores", showingScoreboard);
+                }
             }
 
             //We need to record if we have started firing primary so that releasing trigger will stop definitely firing, if user has pushed grip
