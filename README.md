@@ -25,7 +25,8 @@ Before attempting to start Lambda1VR you need to do the following:
 - Create a folder on your Quest called "xash"
 - Locate the install of half-life on your PC, if installed from Steam then it will be somewhere like C:/Program Files (x86)/Steam/steamApps/common/HalfLife/
 - Copy the entire folder "valve" to the newly created "xash" folder on the Quest (This will take a long time)
-
+- (optional) Copy the contents of the valve_hd folder into the valve folder now on your Quest (this gives you some nicer models)
+- Find Lambda1VR in Unknown Sources on your Quest and enjoy!
 
 Controls:
 ---------
