@@ -34,7 +34,11 @@ Before attempting to start Lambda1VR you need to do the following:
 
 Before you ask... YES!, the crowbar has to be swung in real life to smash stuff! (except in multi-player, you still have to press the trigger I'm afraid).
 
-*Left-handed people*, add the following cvar to your config.cfg file:  r_lefthand 1
+### Left-handed people
+add the following cvar to your config.cfg file:  hand "1"
+
+
+### Button / Controller Mappings
 
 |Dominant Hand Controller||
 | --- | --- |
