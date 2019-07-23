@@ -115,9 +115,9 @@ I would like to thank the following teams and individual for making this possibl
 * Baggyg - My long-time VR friend whose roles in this have been varied and all helpful, also the creator of excellent websites/artwork/assets for this mod
 * Xash3D team
 * GLE4ES without which this wouldn't have worked at all: https://github.com/ptitSeb/gl4es
-* Max Vollmer
-* SideQuest team - For making it easy for people to install this
-* 
+* Max Vollmer for the initial 6DoF weapons piece
+* The SideQuest team - For making it easy for people to install this
+* https://github.com/formicsapien for the weapon models that work much better with 6DoF
 
 
 ## Notice of Non-Affiliation and Disclaimers
