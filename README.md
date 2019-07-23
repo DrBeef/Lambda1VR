@@ -36,7 +36,7 @@ Before you ask... YES!, the crowbar has to be swung in real life to smash stuff!
 
 *Left-handed people*, add the following cvar to your config.cfg file:  r_lefthand 1
 
-|Dominant Hand Controller:||
+|Dominant Hand Controller||
 | --- | --- |
 |Orientation/Position|Weapon Orientation/Position|
 |Trigger|Fire Primary / Secondary|
@@ -110,7 +110,7 @@ I would like to thank the following teams and individual for making this possibl
 
 * Baggyg - My long-time VR friend whose roles in this have been varied and all helpful, also the creator of excellent websites/artwork/assets for this mod
 * Xash3D team
-* GLE4ES guy
+* GLE4ES without which this wouldn't have worked at all: https://github.com/ptitSeb/gl4es
 * Max Vollmer
 * SideQuest team - For making it easy for people to install this
 * 
