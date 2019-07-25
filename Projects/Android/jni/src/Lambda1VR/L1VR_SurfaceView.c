@@ -1874,11 +1874,13 @@ void * AppThreadFunction( void * parm )
 					{
 						ALOGV( "    Initialising Xash3D Engine" );
 
+#ifndef DEMO
 						if (argc != 0)
 						{
                             Host_Main(argc, argv, "valve", false, NULL);
 						}
 						else
+#endif
 						{
 							int argc = 1; char *argv[] = { "xash3d" };
 

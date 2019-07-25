@@ -303,6 +303,14 @@ void CMenuMain::_Init( void )
 		newGame.SetGrayed( true );
 	}
 
+#ifdef DEMO
+    console.SetGrayed( true );
+    newGame.SetGrayed( true );
+    saveRestore.SetGrayed( true );
+    multiPlayer.SetGrayed( true );
+    customGame.SetGrayed( true );
+#endif
+
 	dialog.Link( this );
 
 	AddItem( background );
@@ -311,7 +319,9 @@ void CMenuMain::_Init( void )
 	if ( gpGlobals->developer )
 		AddItem( console );
 
+#ifndef VR
 	AddItem( disconnect );
+#endif
 	AddItem( resumeGame );
 	AddItem( newGame );
 
@@ -325,8 +335,11 @@ void CMenuMain::_Init( void )
 	if ( bCustomGame )
 		AddItem( customGame );
 
+#ifndef VR
 	AddItem( previews );
+#endif
 	AddItem( quit );
+
 	AddItem( minimizeBtn );
 	AddItem( quitButton );
 }

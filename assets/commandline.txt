@@ -1,1 +1,1 @@
-xash3d -dev 3 -log
+xash3d -log
