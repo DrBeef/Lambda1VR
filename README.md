@@ -105,7 +105,7 @@ You need the following:
 * Oculus Mobile SDK 1.23.0
 * The Lambda1VR folder should be below VrSamples in the extracted SDK
 
-Alternatively you can use the docker image created by @BrainSlugs83 which can be found here:
+Alternatively you can use the docker image created by BrainSlugs83 which can be found here: https://github.com/BrainSlugs83/DockerOvrSdk
 
 
 ## Credits
