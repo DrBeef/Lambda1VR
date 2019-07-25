@@ -49,7 +49,7 @@ namespace std
 #endif
 
 #define printf(...) __android_log_print(ANDROID_LOG_INFO, "LIBGL", __VA_ARGS__)
-
+/*
 // Override fprintf(stderr, ...) constructs
 static inline int __sdl_logged_fprintf(FILE *stream, const char *format, ...)
 {
@@ -65,6 +65,6 @@ static inline int __sdl_logged_fprintf(FILE *stream, const char *format, ...)
 }
 
 #define fprintf(...) __sdl_logged_fprintf(__VA_ARGS__)
-
+*/
 #endif
 
