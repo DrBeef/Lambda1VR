@@ -1153,14 +1153,14 @@ static void ovrApp_HandleInput( ovrApp * app )
 			ovrTracking remoteTracking;
 			ovrInputStateTrackedRemote trackedRemoteState;
 			trackedRemoteState.Header.ControllerType = ovrControllerType_TrackedRemote;
-			result = vrapi_GetCurrentInputState(app->Ovr, i, &trackedRemoteState.Header);
+			result = vrapi_GetCurrentInputState(app->Ovr, cap.DeviceID, &trackedRemoteState.Header);
 
 			if (result == ovrSuccess) {
 				ovrInputTrackedRemoteCapabilities remoteCapabilities;
 				remoteCapabilities.Header = cap;
 				result = vrapi_GetInputDeviceCapabilities(app->Ovr, &remoteCapabilities.Header);
 
-				result = vrapi_GetInputTrackingState(app->Ovr, i, app->DisplayTime,
+				result = vrapi_GetInputTrackingState(app->Ovr, cap.DeviceID, app->DisplayTime,
 													 &remoteTracking);
 
 				if (remoteCapabilities.ControllerCapabilities & ovrControllerCaps_RightHand) {

@@ -22,7 +22,9 @@ android {
         ndkBuild {
                 abiFilters 'armeabi-v7a'
         }
-    } 
+    }
+      minSdkVersion 24
+      targetSdkVersion 26
   }
 
   sourceSets {
@@ -33,9 +35,17 @@ android {
       assets.srcDirs = ['../../assets']
     }
   }
+    compileOptions {
+        sourceCompatibility = '1.8'
+        targetCompatibility = '1.8'
+    }
+    compileSdkVersion = 24
+    buildToolsVersion = '29.0.1'
 }
 
 dependencies {
+    implementation "com.android.support:support-compat:24.2.0"
+    implementation "com.android.support:support-core-utils:24.2.0"
 }
 
 repositories {

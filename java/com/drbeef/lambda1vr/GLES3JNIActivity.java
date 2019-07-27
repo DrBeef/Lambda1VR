@@ -11,11 +11,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -34,6 +38,10 @@ import static android.system.Os.setenv;
 	}
 
 	private static final String TAG = "Lambda1VR";
+
+	private int permissionCount = 0;
+	private static final int READ_EXTERNAL_STORAGE_PERMISSION_ID = 1;
+	private static final int WRITE_EXTERNAL_STORAGE_PERMISSION_ID = 2;
 
 	String commandLineParams;
 
@@ -60,6 +68,73 @@ import static android.system.Os.setenv;
 		params.screenBrightness = 1.0f;
 		getWindow().setAttributes( params );
 
+
+
+		checkPermissionsAndInitialize();
+	}
+
+	/** Initializes the Activity only if the permission has been granted. */
+	private void checkPermissionsAndInitialize() {
+		// Boilerplate for checking runtime permissions in Android.
+		if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+				!= PackageManager.PERMISSION_GRANTED){
+			ActivityCompat.requestPermissions(
+					GLES3JNIActivity.this,
+					new String[] {Manifest.permission.WRITE_EXTERNAL_STORAGE},
+					WRITE_EXTERNAL_STORAGE_PERMISSION_ID);
+		}
+		else
+		{
+			permissionCount++;
+		}
+
+		if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
+				!= PackageManager.PERMISSION_GRANTED)
+		{
+			ActivityCompat.requestPermissions(
+					GLES3JNIActivity.this,
+					new String[] {Manifest.permission.READ_EXTERNAL_STORAGE},
+					READ_EXTERNAL_STORAGE_PERMISSION_ID);
+		}
+		else
+		{
+			permissionCount++;
+		}
+
+		if (permissionCount == 2) {
+			// Permissions have already been granted.
+			create();
+		}
+	}
+
+	/** Handles the user accepting the permission. */
+	@Override
+	public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] results) {
+		if (requestCode == READ_EXTERNAL_STORAGE_PERMISSION_ID) {
+			if (results.length > 0 && results[0] == PackageManager.PERMISSION_GRANTED) {
+				permissionCount++;
+			}
+			else
+			{
+				System.exit(0);
+			}
+		}
+
+		if (requestCode == WRITE_EXTERNAL_STORAGE_PERMISSION_ID) {
+			if (results.length > 0 && results[0] == PackageManager.PERMISSION_GRANTED) {
+				permissionCount++;
+			}
+			else
+			{
+				System.exit(0);
+			}
+		}
+
+		checkPermissionsAndInitialize();
+	}
+
+	public void create()
+	{
 		copy_asset(getFilesDir().getPath(), "extras.pak", false);
 		copy_asset("/sdcard/xash/valve/", "config.cfg", false); // Copy in case user has deleted their config
 		copy_asset("/sdcard/xash/", "commandline.txt", false); // Copy in case user has deleted their config
