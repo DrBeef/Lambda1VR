@@ -54,7 +54,7 @@ void VRRenderer::Frame(double time)
 	// make sure these are always properly set
 	gEngfuncs.pfnClientCmd("fps_max 150");
 	gEngfuncs.pfnClientCmd("crosshair 0");
-    gEngfuncs.pfnClientCmd("default_fov 110");
+    gEngfuncs.pfnClientCmd("default_fov 108");
 
     //Force set these for now
     gEngfuncs.pfnClientCmd("cl_upspeed 150");
