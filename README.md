@@ -104,7 +104,9 @@ Hopefully there will be fixes in time for most of the following, but rather than
 You need the following:
 
 * Android Developer Studio
-* Oculus Mobile SDK 1.23.0
+* Android SDK API level 24
+* Latest Android Native Development Kit
+* Oculus Mobile SDK 1.24.0
 * The Lambda1VR folder should be below VrSamples in the extracted SDK
 
 Alternatively you can use the docker image created by BrainSlugs83 which can be found here: https://github.com/BrainSlugs83/DockerOvrSdk
