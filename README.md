@@ -77,7 +77,8 @@ add the following cvar to your config.cfg file:  hand "1"
 * Your screen name (for multi-player) can be set in the config.cfg file
 * FPS counter can be enabled in the Video Options menu
 * Weapon recoil is disabled by default.. if you want a more authentic experience it can be enabled with the cvar: vr_weaponrecoil 1
-
+* If the player height is messed up. Try reseting the view by holding the home button for 2 seconds. After that go into the main menu and back into the game.
+* After changing files in xash/vale folder, often the device needs to be restarted for the game to use the changed files.
 
 ## Known Issues
 
@@ -85,7 +86,7 @@ Hopefully there will be fixes in time for most of the following, but rather than
 
 * Application crashes when you complete the Hazard Course
 * Application crashes if you select "Disconnect Server" in the menu
-* RPG laser-targetting is based on head orientation
+* RPG (and some other weapon) laser-targetting is based on head orientation
 * No way to enter text at the moment
 * Positional tracking doesn't really work on multi-player servers (unless you run your own server and set the following cvar:  sv_accelerate 10000), it sort of works if you hold down the "run" trigger, but it isn't very good
 * Lambda1VR will crash if you haven't copied the half-life game assets to the right location, no warning, just crash
@@ -95,7 +96,8 @@ Hopefully there will be fixes in time for most of the following, but rather than
 
 * Text entry / Virtual Keyboard - Frustratingly the Quest virtual keyboard isn't available through the native SDK :(
 * Add a flashlight model for the left hand when not stabilising a weapon
-
+* Laser sight for easier aiming
+* Better grenade throwing mechanics (pretty janky at the moment)
 
 ## Building
 
