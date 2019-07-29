@@ -93,11 +93,11 @@ Hopefully there will be fixes in time for most of the following, but rather than
 
 * *After a load or transition the crowbar and some other weapons' position is not located at the right controller, change weapon and then back again to resolve* - I am looking into this and hope to fix it in a future update
 * Application crashes when you complete the Hazard Course
-* Application crashes if you select "Disconnect Server" in the menu
 * RPG (and some other weapons) laser-targetting is based on head orientation
 * No way to enter text at the moment
 * Positional tracking doesn't really work on multi-player servers (unless you run your own server and set the following cvar:  sv_accelerate 10000), it sort of works if you hold down the "run" trigger, but it isn't very good
 * Lambda1VR will crash if you haven't copied the half-life game assets to the right location, no warning, just crash
+* Complaint when you exit that the app did not shutdown properly (or crashed or something).. since you are quitting this wasn't considered serious enough to hold up the release, but will be fixed in a future update
 
 
 ## Future To-Dos
