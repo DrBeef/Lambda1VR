@@ -84,9 +84,10 @@ add the following cvar to your config.cfg file:  hand "1"
 
 Hopefully there will be fixes in time for most of the following, but rather than delay release any longer, none of could be considered show-stoppers:
 
+* *After a load or transition the crowbar and some other weapons' position is not located at the right controller, change weapon and then back again to resolve* - I am looking into this and hope to fix it in a future update
 * Application crashes when you complete the Hazard Course
 * Application crashes if you select "Disconnect Server" in the menu
-* RPG (and some other weapon) laser-targetting is based on head orientation
+* RPG (and some other weapons) laser-targetting is based on head orientation
 * No way to enter text at the moment
 * Positional tracking doesn't really work on multi-player servers (unless you run your own server and set the following cvar:  sv_accelerate 10000), it sort of works if you hold down the "run" trigger, but it isn't very good
 * Lambda1VR will crash if you haven't copied the half-life game assets to the right location, no warning, just crash
@@ -108,6 +109,9 @@ You need the following:
 * Latest Android Native Development Kit
 * Oculus Mobile SDK 1.24.0
 * The Lambda1VR folder should be below VrSamples in the extracted SDK
+* Create a local.properties file in the root of the extracted Oculus Mobile SDK that contains the ndk.dir and sdk.dir properties for where your SDK/NDK are located (see Gradle documentation regarding this)
+* To build debug you will need a _android.debug.keystore_ file placed in the following folder:
+_oculus_sdk_dir_/VrSamples/Lambda1VR/Projects/Android
 
 Alternatively you can use the docker image created by BrainSlugs83 which can be found here: https://github.com/BrainSlugs83/DockerOvrSdk
 
@@ -117,7 +121,7 @@ Alternatively you can use the docker image created by BrainSlugs83 which can be 
 I would like to thank the following teams and individual for making this possible:
 
 * Baggyg - My long-time VR friend whose roles in this have been varied and all helpful, also the creator of excellent websites/artwork/assets for this mod
-* Xash3D team
+* The Xash3D team
 * GLE4ES without which this wouldn't have worked at all: https://github.com/ptitSeb/gl4es
 * Max Vollmer for the initial 6DoF weapons piece
 * The SideQuest team - For making it easy for people to install this
