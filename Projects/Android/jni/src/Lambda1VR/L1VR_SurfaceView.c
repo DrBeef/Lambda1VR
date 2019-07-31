@@ -1831,7 +1831,7 @@ static void initializeVRCvars()
 	vr_reloadtimeoutms = Cvar_Get( "vr_reloadtimeoutms", "200", CVAR_ARCHIVE, "How quickly the grip trigger needs to be release to initiate a reload" );
 	vr_positionalMultiplier = Cvar_Get( "vr_positionalMultiplier", "2600", CVAR_ARCHIVE, "Arbitrary number that makes positional tracking work well" );
     vr_walkdirection = Cvar_Get( "vr_walkdirection", "0", CVAR_ARCHIVE, "1 - Use HMD for direction, 0 - Use off-hand controller for direction" );
-    vr_gunangleadjust = Cvar_Get( "vr_gunangleadjust", "0.0", CVAR_ARCHIVE, "gun pitch angle adjust" );
+    vr_gunangleadjust = Cvar_Get( "vr_gunangleadjust", "20.0", CVAR_ARCHIVE, "gun pitch angle adjust" );
     vr_weaponrecoil = Cvar_Get( "vr_weaponrecoil", "0", CVAR_ARCHIVE, "Enables weapon recoil in VR, default is disabled, warning could make you sick" );
     vr_lasersight = Cvar_Get( "vr_lasersight", "0", CVAR_ARCHIVE, "Enables laser-sight" );
 }

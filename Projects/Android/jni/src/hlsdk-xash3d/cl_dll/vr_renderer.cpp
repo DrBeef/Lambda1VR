@@ -57,10 +57,10 @@ void VRRenderer::Frame(double time)
     gEngfuncs.pfnClientCmd("default_fov 108");
 
     //Force set these for now
-    gEngfuncs.pfnClientCmd("cl_upspeed 120");
-    gEngfuncs.pfnClientCmd("cl_forwardspeed 120");
-    gEngfuncs.pfnClientCmd("cl_backspeed 120");
-    gEngfuncs.pfnClientCmd("cl_sidespeed 120");
+    gEngfuncs.pfnClientCmd("cl_upspeed 150");
+    gEngfuncs.pfnClientCmd("cl_forwardspeed 150");
+    gEngfuncs.pfnClientCmd("cl_backspeed 150");
+    gEngfuncs.pfnClientCmd("cl_sidespeed 150");
     gEngfuncs.pfnClientCmd("cl_movespeedkey 3.0");
 }
 

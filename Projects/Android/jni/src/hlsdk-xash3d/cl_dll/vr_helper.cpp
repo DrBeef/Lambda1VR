@@ -102,7 +102,7 @@ void VRHelper::UpdateGunPosition(struct ref_params_s* pparams)
 		viewent->angles = pparams->weapon.angles;
 		if (positions.currentWeapon == WEAPON_CROWBAR)
 		{
-			viewent->angles[0] -= (vr_gunangleadjust->value - 15.0f);
+			viewent->angles[0] += (vr_gunangleadjust->value + 20.0f);
 		}
 
 		VectorCopy(viewent->angles, viewent->curstate.angles);

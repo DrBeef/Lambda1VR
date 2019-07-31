@@ -919,6 +919,9 @@ public:
 	void Holster( int skiplocal = 0 );
 	void WeaponIdle( void );
 
+	void KillLaser( ) {}
+	void MakeLaser( ) {}
+
 	virtual BOOL UseDecrement( void )
 	{ 
 #if defined( CLIENT_WEAPONS )
@@ -948,6 +951,9 @@ public:
 	BOOL CanDeploy( void );
 	BOOL Deploy( void );
 	BOOL IsUseable( void );
+
+	void KillLaser( ) {}
+	void MakeLaser( ) {}
 
 	void Holster( int skiplocal = 0 );
 	void WeaponIdle( void );
@@ -981,6 +987,9 @@ public:
 	BOOL Deploy( void );
 	void Holster( int skiplocal = 0 );
 	void WeaponIdle( void );
+
+	void KillLaser( ) {}
+	void MakeLaser( ) {}
 
 	virtual BOOL UseDecrement( void )
 	{ 

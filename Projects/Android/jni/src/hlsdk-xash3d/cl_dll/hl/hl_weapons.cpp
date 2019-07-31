@@ -353,7 +353,7 @@ void CBasePlayerWeapon::MakeLaser( void )
 	// set to follow laser spot
 	Vector vecTmpEnd = vecSrc + vecAiming * 2048 * flBeamLength;
 	if (!m_pLaser) {
-		m_pLaser = CBeam::BeamCreate(g_pModelNameLaser, 4);
+		m_pLaser = CBeam::BeamCreate(g_pModelNameLaser, 3);
 	}
 	m_pLaser->PointsInit( vecSrc, vecEnd );
 	m_pLaser->SetColor( 214, 34, 34 );
