@@ -16,6 +16,7 @@ public:
 
 
 	void InterceptHUDRedraw(float time, int intermission);
+	void InterceptHUDWeaponsPostThink( local_state_s *from, local_state_s *to );
 
 	void GetViewAngles(float * angles);
 

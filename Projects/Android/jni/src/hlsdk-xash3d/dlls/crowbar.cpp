@@ -148,7 +148,7 @@ void FindHullIntersection( const Vector &vecSrc, TraceResult &tr, float *mins, f
 
 
 
-#define CROWBAR_MIN_SWING_SPEED 60
+#define CROWBAR_MIN_SWING_SPEED 80
 
 void CCrowbar::ItemPostFrame()
 {

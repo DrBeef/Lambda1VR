@@ -7,15 +7,18 @@ class Positions
 {
 public:
 	// output
-	vec3_t		vieworg;
-	vec3_t		viewangles;
+	Vector		vieworg;
+	Vector		viewangles;
 
 	//controllers
 	struct controller_t {
-		vec3_t org;
-		vec3_t velocity;
-		vec3_t angles;
+		Vector offset;
+		Vector velocity;
+		Vector angles;
 	} flashlight, weapon;
+
+	//Feels hacky
+	long currentWeapon;
 };
 
 class VRHelper
@@ -27,10 +30,9 @@ public:
 	void Init();
 
 	bool UpdatePositions(struct ref_params_s* pparams);
+	void UpdateCurrentWeapon( long currentWeaponID );
 
 	void GetViewAngles(float * angles);
-
-	void TestRenderControllerPosition();
 
 private:
 

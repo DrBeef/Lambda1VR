@@ -124,6 +124,7 @@ convar_t	*vr_positionalMultiplier;
 convar_t	*vr_walkdirection;
 convar_t	*vr_gunangleadjust;
 convar_t	*vr_weaponrecoil;
+convar_t	*vr_lasersight;
 
 
 /*
@@ -156,10 +157,10 @@ static bool xash_initialised = false;
 typedef void (*pfnChangeGame)( const char *progname );
 extern int Host_Main( int argc, const char **argv, const char *progname, int bChangeGame, pfnChangeGame func );
 
-bool showingScoreboard = false;
+bool showingScreenLayer = false;
 static bool useScreenLayer()
 {
-	return (showingScoreboard || cls.demoplayback || cls.state == ca_cinematic || cls.key_dest != key_game);
+	return (showingScreenLayer || cls.demoplayback || cls.state == ca_cinematic || cls.key_dest != key_game);
 }
 
 int runStatus = -1;
@@ -822,15 +823,6 @@ void QuatToYawPitchRoll(ovrQuatf q, vec3_t out) {
 	return;
 }
 
-static void adjustYaw(float adjustment, float* out)
-{
-    *out -= adjustment;
-    if (*out > 180.0f)
-        *out -= 360.0f;
-    if (*out < -180.0f)
-        *out += 360.0f;
-}
-
 void setWorldPosition( float x, float y, float z )
 {
     positionDeltaThisFrame[0] = (worldPosition[0] - x);
@@ -1126,6 +1118,27 @@ static inline sendButtonAction(const char* action, long buttonDown)
 
 }
 
+static inline float nonLinearFilter(float in)
+{
+	float val = 0.0f;
+	if (in > 0.1f)
+	{
+		val = in;
+		val -= 0.1f;
+		val /= 0.9f;
+		val = powf(val, 2.2f);
+	}
+	else if (in < -0.1f)
+	{
+		val = in;
+		val += 0.1f;
+		val /= 0.9f;
+		val = -powf(fabsf(val), 2.2f);
+	}
+
+	return val;
+}
+
 static inline sendButtonActionSimple(const char* action)
 {
     char command[256];
@@ -1187,13 +1200,16 @@ static void ovrApp_HandleInput( ovrApp * app )
 	static bool dominantGripPushed = false;
 	static float dominantGripPushTime = 0.0f;
 
-    //Show multiplayer scoreboard
+    //Show screen view (if in multiplayer toggle scoreboard)
     if (((leftTrackedRemoteState_new.Buttons & ovrButton_Y) !=
-         (leftTrackedRemoteState_old.Buttons & ovrButton_Y))) {
+         (leftTrackedRemoteState_old.Buttons & ovrButton_Y)) &&
+			(leftTrackedRemoteState_new.Buttons & ovrButton_Y)) {
+
+		showingScreenLayer = !showingScreenLayer;
+
         //Check we are in multiplayer
         if (CL_GetMaxClients() > 1) {
-            showingScoreboard = (leftTrackedRemoteState_new.Buttons & ovrButton_Y);
-            sendButtonAction("+showscores", showingScoreboard);
+            sendButtonAction("+showscores", showingScreenLayer);
         }
     }
 
@@ -1461,10 +1477,22 @@ static void ovrApp_HandleInput( ovrApp * app )
             handleTrackedControllerButton(&leftTrackedRemoteState_new, &leftTrackedRemoteState_old,
                                           ovrButton_Enter, K_ESCAPE);
 
+			//Use (Action)
+			if ((leftTrackedRemoteState_new.Buttons & ovrButton_Joystick) !=
+				(leftTrackedRemoteState_old.Buttons & ovrButton_Joystick)
+				&& (leftTrackedRemoteState_new.Buttons & ovrButton_Joystick)) {
+
+				Cvar_SetFloat("vr_lasersight", 1.0f - vr_lasersight->value);
+
+			}
+
             //Adjust to be off-hand controller oriented
+
+            float x = nonLinearFilter(leftTrackedRemoteState_new.Joystick.x);
+            float y = nonLinearFilter(leftTrackedRemoteState_new.Joystick.y);
             vec2_t v;
-            rotateAboutOrigin(leftTrackedRemoteState_new.Joystick.x,
-                              leftTrackedRemoteState_new.Joystick.y,
+            rotateAboutOrigin(x,
+                              y,
                               vr_walkdirection->integer == 1 ? cl.refdef.cl_viewangles[YAW] : controllerYawHeading,
                               v);
 
@@ -1805,6 +1833,7 @@ static void initializeVRCvars()
     vr_walkdirection = Cvar_Get( "vr_walkdirection", "0", CVAR_ARCHIVE, "1 - Use HMD for direction, 0 - Use off-hand controller for direction" );
     vr_gunangleadjust = Cvar_Get( "vr_gunangleadjust", "0.0", CVAR_ARCHIVE, "gun pitch angle adjust" );
     vr_weaponrecoil = Cvar_Get( "vr_weaponrecoil", "0", CVAR_ARCHIVE, "Enables weapon recoil in VR, default is disabled, warning could make you sick" );
+    vr_lasersight = Cvar_Get( "vr_lasersight", "0", CVAR_ARCHIVE, "Enables laser-sight" );
 }
 
 void * AppThreadFunction( void * parm )
@@ -2082,7 +2111,7 @@ void * AppThreadFunction( void * parm )
 				memset( appState.Layers, 0, sizeof( ovrLayer_Union2 ) * ovrMaxLayerCount );
 				appState.LayerCount = 0;
 
-				// Render the world-view layer (simple ground plane)
+				// Render the world-view layer (simple ground plane) - this doesn't work.. it borks the game rendering
 //				appState.Layers[appState.LayerCount++].Projection =
 //						ovrRenderer_RenderGroundPlaneToEyeBuffer( &appState.Renderer, &appState.Java,
 //																  &appState.Scene, &tracking );

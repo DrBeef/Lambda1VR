@@ -4636,27 +4636,10 @@ void CBasePlayer::UpdateVRRelatedPositions(const Vector & hmdOffset, const Vecto
 
 	// Get new server origin from headset x/y coordinates
 	Vector newOrigin = Vector(hmdPosition.x, hmdPosition.y, clientOrigin.z);
-
-	/*
-   // TODO: Check if newOrigin is in wall, if so: check if this is something we can step on
-   if (newOrigin is in wall)
-   {
-       get height of floor (trace from (newOrigin.z + MAX_STEP_SIZE + 1) to newOrigin.z)
-       if (height of floor <= MAX_STEP_SIZE)
-       {
-           move newOrigin.z up to floor level
-           move hmdPosition.z by same delta
-           if (hmdPosition is now in wall)
-           {
-               move both back (better having feed in floor, than head in ceiling)
-           }
-       }
-   }
-   */
 	pev->origin = newOrigin;
 
-	vr_ClientOriginOffset.x = clientOrigin.x - pev->origin.x;
-	vr_ClientOriginOffset.y = clientOrigin.y - pev->origin.y;
+	//vr_ClientOriginOffset.x = clientOrigin.x - pev->origin.x;
+	//vr_ClientOriginOffset.y = clientOrigin.y - pev->origin.y;
 
 	vr_weaponOffset = weaponOffset;
 	vr_weaponAngles = weaponAngles;
@@ -4677,7 +4660,7 @@ void CBasePlayer::UpdateVRRelatedPositions(const Vector & hmdOffset, const Vecto
 }
 const Vector CBasePlayer::GetWeaponPosition()
 {
-	return Vector(pev->origin + vr_weaponOffset);
+	return Vector(pev->origin.x + vr_weaponOffset.x, pev->origin.y + vr_weaponOffset.y, vr_weaponOffset.z);
 }
 const Vector CBasePlayer::GetWeaponAngles()
 {

@@ -1,10 +1,29 @@
 
+
 #include "Matrices.h"
 #include "hud.h"
 #include "cl_util.h"
 #include "r_studioint.h"
 #include "ref_params.h"
 #include "vr_helper.h"
+
+
+#define WEAPON_NONE				0
+#define WEAPON_CROWBAR			1
+#define	WEAPON_GLOCK			2
+#define WEAPON_PYTHON			3
+#define WEAPON_MP5				4
+#define WEAPON_CHAINGUN			5
+#define WEAPON_CROSSBOW			6
+#define WEAPON_SHOTGUN			7
+#define WEAPON_RPG				8
+#define WEAPON_GAUSS			9
+#define WEAPON_EGON				10
+#define WEAPON_HORNETGUN		11
+#define WEAPON_HANDGRENADE		12
+#define WEAPON_TRIPMINE			13
+#define	WEAPON_SATCHEL			14
+#define	WEAPON_SNARK			15
 
 #ifndef MAX_COMMAND_SIZE
 #define MAX_COMMAND_SIZE 256
@@ -51,26 +70,41 @@ void VRHelper::GetViewAngles(float * angles)
 	angles[2] = positions.viewangles[2];
 }
 
+void VRHelper::UpdateCurrentWeapon( long currentWeaponID )
+{
+	positions.currentWeapon = currentWeaponID;
+}
+
 void VRHelper::UpdateGunPosition(struct ref_params_s* pparams)
 {
 	cl_entity_t *viewent = gEngfuncs.GetViewModel();
 	if (viewent != nullptr)
 	{
 		cvar_s	*vr_worldscale = gEngfuncs.pfnGetCvarPointer( "vr_worldscale" );
+		cvar_s	*vr_gunangleadjust = gEngfuncs.pfnGetCvarPointer( "vr_gunangleadjust" );
 
-		Vector3 originInVRSpace = pparams->weapon.org;
-		Vector originInRelativeHLSpace(-originInVRSpace.z * vr_worldscale->value, -originInVRSpace.x * vr_worldscale->value, originInVRSpace.y * vr_worldscale->value);
+		Vector3 weaponOriginInVRSpace = pparams->weapon.org;
+		//
+		//(left/right, forward/backward, up/down)
+		Vector weaponOriginInRelativeHLSpace(-weaponOriginInVRSpace.z * vr_worldscale->value, -weaponOriginInVRSpace.x * vr_worldscale->value, weaponOriginInVRSpace.y * vr_worldscale->value);
 
 		cl_entity_t *localPlayer = gEngfuncs.GetLocalPlayer();
 		Vector clientPosition = pparams->vieworg;
-		Vector originInHLSpace = clientPosition + originInRelativeHLSpace;
+		positions.weapon.offset =  Vector(weaponOriginInRelativeHLSpace.x, weaponOriginInRelativeHLSpace.y, clientPosition.z + weaponOriginInRelativeHLSpace.z);
 
-		VectorCopy(originInHLSpace, viewent->origin);
-		VectorCopy(originInHLSpace, viewent->curstate.origin);
-		VectorCopy(originInHLSpace, viewent->latched.prevorigin);
+		Vector weaponOrigin = clientPosition + weaponOriginInRelativeHLSpace;
+		VectorCopy(weaponOrigin, viewent->origin);
+		VectorCopy(weaponOrigin, viewent->curstate.origin);
+		VectorCopy(weaponOrigin, viewent->latched.prevorigin);
 
 
+		positions.weapon.angles = pparams->weapon.angles;
 		viewent->angles = pparams->weapon.angles;
+		if (positions.currentWeapon == WEAPON_CROWBAR)
+		{
+			viewent->angles[0] -= (vr_gunangleadjust->value - 15.0f);
+		}
+
 		VectorCopy(viewent->angles, viewent->curstate.angles);
 		VectorCopy(viewent->angles, viewent->latched.prevangles);
 
@@ -78,18 +112,16 @@ void VRHelper::UpdateGunPosition(struct ref_params_s* pparams)
 		Vector velocityInVRSpace = pparams->weapon.velocity;
 		Vector velocityInHLSpace(-velocityInVRSpace.z * vr_worldscale->value, -velocityInVRSpace.x * vr_worldscale->value, velocityInVRSpace.y * vr_worldscale->value);
 		viewent->curstate.velocity = velocityInHLSpace;
+		positions.weapon.velocity = velocityInHLSpace;
 	}
 }
 
 void VRHelper::SendPositionUpdateToServer()
 {
-	cl_entity_t *viewent = gEngfuncs.GetViewModel();
-
-	Vector hmdOffset; // TODO
-	Vector weaponOrigin = viewent ? viewent->curstate.origin : Vector();
-	Vector weaponOffset = weaponOrigin - positions.vieworg;
-	Vector weaponAngles = viewent ? viewent->curstate.angles : Vector();
-	Vector weaponVelocity = viewent ? viewent->curstate.velocity : Vector();
+	Vector hmdOffset; // Not required
+	Vector weaponOffset = positions.weapon.offset;
+	Vector weaponAngles = positions.weapon.angles;
+	Vector weaponVelocity = positions.weapon.velocity;
 
 	if (!bIsMultiplayer()) {
         // void CBasePlayer::UpdateVRRelatedPositions(const Vector & hmdOffset, const Vector & weaponoffset, const Vector & weaponAngles, const Vector & weaponVelocity)

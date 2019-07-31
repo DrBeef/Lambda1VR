@@ -32,6 +32,8 @@
 #include "../com_weapons.h"
 #include "../demo.h"
 
+#include "vr_renderer.h"
+
 extern globalvars_t *gpGlobals;
 extern int g_iUser1;
 
@@ -312,6 +314,52 @@ Vector CBaseEntity::FireBulletsPlayer ( ULONG cShots, Vector vecSrc, Vector vecD
 	}
 
 	return Vector( x * vecSpread.x, y * vecSpread.y, 0.0 );
+}
+
+
+void CBasePlayerWeapon::KillLaser( void )
+{
+#ifndef CLIENT_DLL
+	if( m_pLaser )
+	{
+		UTIL_Remove( m_pLaser );
+		m_pLaser = NULL;
+	}
+#endif
+}
+
+void CBasePlayerWeapon::MakeLaser( void )
+{
+#ifndef CLIENT_DLL
+
+	if (gEngfuncs.pfnGetCvarFloat("vr_lasersight") == 0.0f)
+	{
+		KillLaser();
+		return;
+	}
+
+	TraceResult tr;
+
+	// ALERT( at_console, "serverflags %f\n", gpGlobals->serverflags );
+
+	Vector vecSrc = m_pPlayer->GetGunPosition();
+	Vector vecAiming = m_pPlayer->GetAutoaimVector( AUTOAIM_5DEGREES );
+	Vector vecEnd;
+	vecEnd = vecSrc + vecAiming * 2048;
+	UTIL_TraceLine( vecSrc, vecEnd, dont_ignore_monsters, ENT( pev ), &tr );
+
+	float flBeamLength = tr.flFraction;
+
+	// set to follow laser spot
+	Vector vecTmpEnd = vecSrc + vecAiming * 2048 * flBeamLength;
+	if (!m_pLaser) {
+		m_pLaser = CBeam::BeamCreate(g_pModelNameLaser, 4);
+	}
+	m_pLaser->PointsInit( vecSrc, vecEnd );
+	m_pLaser->SetColor( 214, 34, 34 );
+	m_pLaser->SetScrollRate( 255 );
+	m_pLaser->SetBrightness( 96 );
+#endif
 }
 
 /*
@@ -663,6 +711,8 @@ Run Weapon firing code on client
 */
 void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cmd, double time, unsigned int random_seed )
 {
+	gVRRenderer.InterceptHUDWeaponsPostThink( from, to );
+
 	int i;
 	int buttonsChanged;
 	CBasePlayerWeapon *pWeapon = NULL;

@@ -52,15 +52,15 @@ void VRRenderer::VidInit()
 void VRRenderer::Frame(double time)
 {
 	// make sure these are always properly set
-	gEngfuncs.pfnClientCmd("fps_max 150");
+	gEngfuncs.pfnClientCmd("fps_max 144");
 	gEngfuncs.pfnClientCmd("crosshair 0");
     gEngfuncs.pfnClientCmd("default_fov 108");
 
     //Force set these for now
-    gEngfuncs.pfnClientCmd("cl_upspeed 150");
-    gEngfuncs.pfnClientCmd("cl_forwardspeed 150");
-    gEngfuncs.pfnClientCmd("cl_backspeed 150");
-    gEngfuncs.pfnClientCmd("cl_sidespeed 150");
+    gEngfuncs.pfnClientCmd("cl_upspeed 120");
+    gEngfuncs.pfnClientCmd("cl_forwardspeed 120");
+    gEngfuncs.pfnClientCmd("cl_backspeed 120");
+    gEngfuncs.pfnClientCmd("cl_sidespeed 120");
     gEngfuncs.pfnClientCmd("cl_movespeedkey 3.0");
 }
 
@@ -75,6 +75,11 @@ void VRRenderer::CalcRefdef(struct ref_params_s* pparams)
 void VRRenderer::InterceptHUDRedraw(float time, int intermission)
 {
 	gHUD.Redraw(time, intermission);
+}
+
+void VRRenderer::InterceptHUDWeaponsPostThink( local_state_s *from, local_state_s *to )
+{
+	vrHelper->UpdateCurrentWeapon(to->client.m_iId);
 }
 
 void VRRenderer::GetViewAngles(float * angles)

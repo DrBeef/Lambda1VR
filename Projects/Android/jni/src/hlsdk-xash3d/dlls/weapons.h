@@ -327,6 +327,9 @@ public:
 	virtual void Holster( int skiplocal = 0 );
 	virtual BOOL UseDecrement( void ) { return FALSE; };
 
+	virtual void MakeLaser( void );
+	virtual void KillLaser( void );
+
 	int	PrimaryAmmoIndex(); 
 	int	SecondaryAmmoIndex(); 
 
@@ -352,6 +355,8 @@ public:
 	// hle time creep vars
 	float	m_flPrevPrimaryAttack;
 	float	m_flLastFireTime;
+
+	CBeam 	*m_pLaser;
 };
 
 class CBasePlayerAmmo : public CBaseEntity
@@ -473,6 +478,10 @@ public:
 	BOOL Deploy( void );
 	void Reload( void );
 	void WeaponIdle( void );
+
+	void MakeBeam( void );
+	void KillBeam( void );
+
 
 	virtual BOOL UseDecrement( void )
 	{ 
