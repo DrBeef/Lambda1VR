@@ -1118,22 +1118,30 @@ static inline sendButtonAction(const char* action, long buttonDown)
 
 }
 
+static inline float length(float x, float y)
+{
+	return sqrtf(powf(x, 2.0f) + powf(y, 2.0f));
+}
+
+#define NLF_DEADZONE 0.1
+#define NLF_POWER 2.2
+
 static inline float nonLinearFilter(float in)
 {
 	float val = 0.0f;
-	if (in > 0.1f)
+	if (in > NLF_DEADZONE)
 	{
 		val = in;
-		val -= 0.1f;
-		val /= 0.9f;
-		val = powf(val, 2.2f);
+		val -= NLF_DEADZONE;
+		val /= (1.0f - NLF_DEADZONE);
+		val = powf(val, NLF_POWER);
 	}
-	else if (in < -0.1f)
+	else if (in < -NLF_DEADZONE)
 	{
 		val = in;
-		val += 0.1f;
-		val /= 0.9f;
-		val = -powf(fabsf(val), 2.2f);
+		val += NLF_DEADZONE;
+		val /= (1.0f - NLF_DEADZONE);
+		val = -powf(fabsf(val), NLF_POWER);
 	}
 
 	return val;
@@ -1319,7 +1327,7 @@ static void ovrApp_HandleInput( ovrApp * app )
                 float z = offHandRemoteTracking->HeadPose.Pose.Position.z - dominantRemoteTracking->HeadPose.Pose.Position.z;
                 float x = offHandRemoteTracking->HeadPose.Pose.Position.x - dominantRemoteTracking->HeadPose.Pose.Position.x;
                 float y = offHandRemoteTracking->HeadPose.Pose.Position.y - dominantRemoteTracking->HeadPose.Pose.Position.y;
-                float zxDist = sqrtf(powf(x, 2) + powf(z, 2));
+                float zxDist = length(x, z);
 
                 if (zxDist != 0.0f && z != 0.0f) {
                     weaponangles[YAW] = (cl.refdef.cl_viewangles[YAW] - hmdorientation[YAW]) - degrees(atan2f(x, -z));
@@ -1486,15 +1494,15 @@ static void ovrApp_HandleInput( ovrApp * app )
 
 			}
 
-            //Adjust to be off-hand controller oriented
+			//Apply a filter and quadratic scaler so small movements are easier to make
+			float dist = length(leftTrackedRemoteState_new.Joystick.x, leftTrackedRemoteState_new.Joystick.y);
+			float nlf = nonLinearFilter(dist);
+            float x = nlf * leftTrackedRemoteState_new.Joystick.x;
+            float y = nlf * leftTrackedRemoteState_new.Joystick.y;
 
-            float x = nonLinearFilter(leftTrackedRemoteState_new.Joystick.x);
-            float y = nonLinearFilter(leftTrackedRemoteState_new.Joystick.y);
+			//Adjust to be off-hand controller oriented
             vec2_t v;
-            rotateAboutOrigin(x,
-                              y,
-                              vr_walkdirection->integer == 1 ? cl.refdef.cl_viewangles[YAW] : controllerYawHeading,
-                              v);
+            rotateAboutOrigin(x, y, vr_walkdirection->integer == 1 ? cl.refdef.cl_viewangles[YAW] : controllerYawHeading,v);
 
             remote_movementSideways = v[0];
             remote_movementForward = v[1];
