@@ -1225,6 +1225,9 @@ static void ovrApp_HandleInput( ovrApp * app )
     //Menu control - Uses "touch"
     if (useScreenLayer())
     {
+        //Menu button
+    	handleTrackedControllerButton(&leftTrackedRemoteState_new, &leftTrackedRemoteState_old,ovrButton_Enter, K_ESCAPE);
+
         const ovrQuatf quatRemote = dominantRemoteTracking->HeadPose.Pose.Orientation;
         float remoteAngles[3];
         QuatToYawPitchRoll(quatRemote, remoteAngles);
