@@ -794,6 +794,17 @@ void Host_PrintEngineFeatures( void );
 void Host_InitDecals( void );
 void Host_Credits( void );
 
+#ifdef VR
+/*
+==============================================================
+
+VR SYSTEMS
+
+==============================================================
+*/
+void VR_Init();
+#endif
+
 /*
 ==============================================================
 

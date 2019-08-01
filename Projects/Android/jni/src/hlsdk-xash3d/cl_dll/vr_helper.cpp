@@ -81,7 +81,7 @@ void VRHelper::UpdateGunPosition(struct ref_params_s* pparams)
 	if (viewent != nullptr)
 	{
 		cvar_s	*vr_worldscale = gEngfuncs.pfnGetCvarPointer( "vr_worldscale" );
-		cvar_s	*vr_gunangleadjust = gEngfuncs.pfnGetCvarPointer( "vr_gunangleadjust" );
+		cvar_s	*vr_weapon_pitchadjust = gEngfuncs.pfnGetCvarPointer( "vr_weapon_pitchadjust" );
 
 		Vector3 weaponOriginInVRSpace = pparams->weapon.org;
 		//
@@ -100,10 +100,24 @@ void VRHelper::UpdateGunPosition(struct ref_params_s* pparams)
 
 		positions.weapon.angles = pparams->weapon.angles;
 		viewent->angles = pparams->weapon.angles;
-		if (positions.currentWeapon == WEAPON_CROWBAR)
+		switch (positions.currentWeapon)
 		{
-			viewent->angles[0] += (vr_gunangleadjust->value + 20.0f);
+			//Incline crowbar a bit closer to natural hand location (not too far, that causes weirdness)
+			case WEAPON_CROWBAR:
+				viewent->angles[0] -= (vr_weapon_pitchadjust->value - 20.0f);
+				break;
+				//These just need the adjustment removing, they aren't aimed weapons
+			case WEAPON_HANDGRENADE:
+			case WEAPON_TRIPMINE:
+			case WEAPON_SATCHEL:
+			case WEAPON_SNARK:
+				viewent->angles[0] -= vr_weapon_pitchadjust->value;
+				break;
+			default:
+				//Everything else is adjusted correctly
+				break;
 		}
+
 
 		VectorCopy(viewent->angles, viewent->curstate.angles);
 		VectorCopy(viewent->angles, viewent->latched.prevangles);

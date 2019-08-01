@@ -1378,6 +1378,10 @@ int EXPORT Host_Main( int argc, const char **argv, const char *progname, int bCh
 	SV_Init();
 	CL_Init();
 
+#ifdef VR
+	VR_Init();
+#endif
+
 #if defined(__ANDROID__) && !defined( XASH_SDL ) && !defined( XASH_DEDICATED )
 	Android_Init();
 #endif

@@ -87,7 +87,7 @@ add the following cvar to your config.cfg file:  hand "1"
 
 * Your screen name (for multi-player) can be set in the config.cfg file
 * FPS counter can be enabled in the Video Options menu
-* Weapon recoil is disabled by default.. if you want a more authentic experience it can be enabled with the cvar: vr_weaponrecoil 1
+* Weapon recoil is disabled by default.. if you want a more authentic experience it can be enabled with the cvar: vr_weapon_recoil 1
 * If the player height is messed up. Try reseting the view by holding the home button for 2 seconds. After that go into the main menu and back into the game.
 * After changing files in xash/vale folder, often the device needs to be restarted for the game to use the changed files.
 

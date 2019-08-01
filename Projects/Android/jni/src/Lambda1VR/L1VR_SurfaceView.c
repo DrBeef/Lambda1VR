@@ -120,10 +120,10 @@ extern convar_t	*r_lefthand;
 //Define our own cvars
 convar_t	*vr_snapturn_angle;
 convar_t	*vr_reloadtimeoutms;
-convar_t	*vr_positionalMultiplier;
+convar_t	*vr_positional_factor;
 convar_t	*vr_walkdirection;
-convar_t	*vr_gunangleadjust;
-convar_t	*vr_weaponrecoil;
+convar_t	*vr_weapon_pitchadjust;
+convar_t	*vr_weapon_recoil;
 convar_t	*vr_lasersight;
 
 
@@ -1340,7 +1340,7 @@ static void ovrApp_HandleInput( ovrApp * app )
                 weaponangles[PITCH] *= -1.0f;
 
                 //Slight gun angle adjustment
-                weaponangles[PITCH] -= vr_gunangleadjust->value;
+                weaponangles[PITCH] += vr_weapon_pitchadjust->value;
             }
 
             //Use (Action)
@@ -1399,7 +1399,7 @@ static void ovrApp_HandleInput( ovrApp * app )
 
             //This section corrects for the fact that the controller actually controls direction of movement, but we want to move relative to the direction the
             //player is facing for positional tracking
-            float multiplier = vr_positionalMultiplier->value / cl_forwardspeed->value;
+            float multiplier = vr_positional_factor->value / cl_forwardspeed->value;
 
             vec2_t v;
             rotateAboutOrigin(-positionDeltaThisFrame[0] * multiplier,
@@ -1833,14 +1833,14 @@ void Android_MessageBox(const char *title, const char *text)
 
 void initialize_gl4es();
 
-static void initializeVRCvars()
+void VR_Init()
 {
 	vr_snapturn_angle = Cvar_Get( "vr_snapturn_angle", "45", CVAR_ARCHIVE, "Sets the angle for snap-turn, set to < 10.0 to enable smooth turning" );
 	vr_reloadtimeoutms = Cvar_Get( "vr_reloadtimeoutms", "200", CVAR_ARCHIVE, "How quickly the grip trigger needs to be release to initiate a reload" );
-	vr_positionalMultiplier = Cvar_Get( "vr_positionalMultiplier", "2600", CVAR_ARCHIVE, "Arbitrary number that makes positional tracking work well" );
+	vr_positional_factor= Cvar_Get( "vr_positional_factor", "2600", CVAR_ARCHIVE, "Arbitrary number that makes positional tracking work well" );
     vr_walkdirection = Cvar_Get( "vr_walkdirection", "0", CVAR_ARCHIVE, "1 - Use HMD for direction, 0 - Use off-hand controller for direction" );
-    vr_gunangleadjust = Cvar_Get( "vr_gunangleadjust", "20.0", CVAR_ARCHIVE, "gun pitch angle adjust" );
-    vr_weaponrecoil = Cvar_Get( "vr_weaponrecoil", "0", CVAR_ARCHIVE, "Enables weapon recoil in VR, default is disabled, warning could make you sick" );
+	vr_weapon_pitchadjust = Cvar_Get( "vr_weapon_pitchadjust", "-20.0", CVAR_ARCHIVE, "gun pitch angle adjust" );
+    vr_weapon_recoil = Cvar_Get( "vr_weapon_recoil", "0", CVAR_ARCHIVE, "Enables weapon recoil in VR, default is disabled, warning could make you sick" );
     vr_lasersight = Cvar_Get( "vr_lasersight", "0", CVAR_ARCHIVE, "Enables laser-sight" );
 }
 
@@ -1923,9 +1923,6 @@ void * AppThreadFunction( void * parm )
 
                             Host_Main(argc, argv, "valve", false, NULL);
 						}
-
-						//Initialise our cvars here
-						initializeVRCvars();
 
 						xash_initialised = true;
 					}

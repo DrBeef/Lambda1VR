@@ -303,7 +303,7 @@ void V_CalcNormalRefdef( struct ref_params_s *pparams )
 	static viewinterp_t ViewInterp;
 
 #ifdef VR
-	cvar_t	*vr_weaponrecoil = gEngfuncs.pfnGetCvarPointer("vr_weaponrecoil");
+	cvar_t	*vr_weapon_recoil = gEngfuncs.pfnGetCvarPointer("vr_weapon_recoil");
 #endif
 
 	static float oldz = 0;
@@ -459,7 +459,7 @@ void V_CalcNormalRefdef( struct ref_params_s *pparams )
 	}
 
 #ifdef VR
-	if (vr_weaponrecoil->value) {
+	if (vr_weapon_recoil->value) {
 #endif
 		// Add in the punchangle, if any
 		VectorAdd(pparams->viewangles, pparams->punchangle, pparams->viewangles);
