@@ -104,7 +104,7 @@ void VRHelper::UpdateGunPosition(struct ref_params_s* pparams)
 		{
 			//Incline crowbar a bit closer to natural hand location (not too far, that causes weirdness)
 			case WEAPON_CROWBAR:
-				viewent->angles[0] -= (vr_weapon_pitchadjust->value - 20.0f);
+				viewent->angles[0] += (20.0f - vr_weapon_pitchadjust->value);
 				break;
 				//These just need the adjustment removing, they aren't aimed weapons
 			case WEAPON_HANDGRENADE:

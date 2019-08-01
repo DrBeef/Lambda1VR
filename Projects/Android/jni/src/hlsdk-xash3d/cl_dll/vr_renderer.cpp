@@ -62,6 +62,9 @@ void VRRenderer::Frame(double time)
     gEngfuncs.pfnClientCmd("cl_backspeed 150");
     gEngfuncs.pfnClientCmd("cl_sidespeed 150");
     gEngfuncs.pfnClientCmd("cl_movespeedkey 3.0");
+
+    //Force client weapons
+	gEngfuncs.pfnClientCmd("cl_lw 1");
 }
 
 
