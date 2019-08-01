@@ -36,6 +36,10 @@ Before attempting to start Lambda1VR you need to do the following:
 - (optional) Copy the contents of the valve_hd folder into the valve folder now on your Quest (this gives you some nicer models)
 
 
+## Save Games File
+
+Save game files are stored on the internal memory of your quest in the xash/valve folder. This means that if you uninstall/reinstall Lambda1VR all the saves are retained. If you change headset just make sure you copy {quest}/xash/valve/save to the new Quest.
+
 
 ## Controls
 
@@ -104,7 +108,6 @@ Hopefully there will be fixes in time for most of the following, but rather than
 
 * Text entry / Virtual Keyboard - Frustratingly the Quest virtual keyboard isn't available through the native SDK :(
 * Add a flashlight model for the left hand when not stabilising a weapon
-* Laser sight for easier aiming
 * Better grenade throwing mechanics (pretty janky at the moment)
 
 ## Building
@@ -130,7 +133,7 @@ I would like to thank the following teams and individual for making this possibl
 * Baggyg - My long-time VR friend whose roles in this have been varied and all helpful, also the creator of excellent websites/artwork/assets for this mod
 * The Xash3D team
 * GLE4ES without which this wouldn't have worked at all: https://github.com/ptitSeb/gl4es
-* Max Vollmer for the initial 6DoF weapons piece
+* Max Vollmer for the initial 6DoF weapons piece, the code for which can be seen here: https://github.com/maxvollmer/Half-Life-VR
 * The SideQuest team - For making it easy for people to install this
 * https://github.com/formicsapien for the weapon models that work much better with 6DoF
 
