@@ -1,0 +1,4 @@
+[submodule "Projects/Android/jni/src/hlsdk-xash3d"]
+	path = Projects/Android/jni/src/hlsdk-xash3d
+	url = https://github.com/DrBeef/hlsdk-xash3d
+	branch = master
