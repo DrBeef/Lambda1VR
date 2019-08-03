@@ -133,7 +133,7 @@ I would like to thank the following teams and individual for making this possibl
 * Baggyg - My long-time VR friend whose roles in this have been varied and all helpful, also the creator of excellent websites/artwork/assets for this mod
 * The Xash3D team
 * GLE4ES without which this wouldn't have worked at all: https://github.com/ptitSeb/gl4es
-* Max Vollmer for the initial 6DoF weapons piece, the code for which can be seen here: https://github.com/maxvollmer/Half-Life-VR
+* Max Vollmer for their 2017 Half-Life VR mod, of which I used and modified the 6DoF weapons code for this mod, the original code for which can be seen here: https://github.com/maxvollmer/Half-Life-VR
 * The SideQuest team - For making it easy for people to install this
 * https://github.com/formicsapien for the weapon models that work much better with 6DoF
 
