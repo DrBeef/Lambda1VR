@@ -45,6 +45,8 @@ LOCAL_EXPORT_C_INCLUDES := $(LOCAL_C_INCLUDES)
 LOCAL_SRC_FILES := \
 		   $(LOCAL_PATH)/../../../Lambda1VR/L1VR_SurfaceView.c \
 		   $(LOCAL_PATH)/../../../Lambda1VR/VrCompositor.c \
+		   $(LOCAL_PATH)/../../../Lambda1VR/VrInputRight.c \
+		   $(LOCAL_PATH)/../../../Lambda1VR/VrInputLeft.c \
 		   $(LOCAL_PATH)/../../../Lambda1VR/argtable3.c \
 		   client/cl_cmds.c \
            client/cl_demo.c \
