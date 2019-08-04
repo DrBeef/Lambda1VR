@@ -66,7 +66,9 @@ convar_t *m_ignore;
 convar_t *cl_forwardspeed;
 convar_t *cl_sidespeed;
 convar_t *cl_backspeed;
+convar_t *cl_movespeedkey;
 convar_t *look_filter;
+
 /*
 =======
 Host_MapKey
@@ -746,10 +748,12 @@ void IN_Init( void )
     cl_forwardspeed	= Cvar_Get( "cl_forwardspeed", "120", CVAR_ARCHIVE | CVAR_CLIENTDLL, "Default forward move speed" );
     cl_backspeed	= Cvar_Get( "cl_backspeed", "120", CVAR_ARCHIVE | CVAR_CLIENTDLL, "Default back move speed"  );
     cl_sidespeed	= Cvar_Get( "cl_sidespeed", "120", CVAR_ARCHIVE | CVAR_CLIENTDLL, "Default side move speed"  );
+	cl_movespeedkey	= Cvar_Get( "cl_movespeedkey", "3.0", CVAR_ARCHIVE | CVAR_CLIENTDLL, "Default move speed multiplier"  );
 #else
 	cl_forwardspeed	= Cvar_Get( "cl_forwardspeed", "400", CVAR_ARCHIVE | CVAR_CLIENTDLL, "Default forward move speed" );
 	cl_backspeed	= Cvar_Get( "cl_backspeed", "400", CVAR_ARCHIVE | CVAR_CLIENTDLL, "Default back move speed"  );
 	cl_sidespeed	= Cvar_Get( "cl_sidespeed", "400", CVAR_ARCHIVE | CVAR_CLIENTDLL, "Default side move speed"  );
+	cl_movespeedkey	= Cvar_Get( "cl_movespeedkey", "0.3", CVAR_ARCHIVE | CVAR_CLIENTDLL, "Default move speed multiplier"  );
 #endif
 
 	if( !Host_IsDedicated() )

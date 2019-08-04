@@ -816,6 +816,11 @@ void setHMDPosition( float x, float y, float z, float yaw )
     hmdPosition[2] = z;
 }
 
+bool isMultiplayer()
+{
+	return (CL_GetMaxClients() > 1);
+}
+
 void Host_BeginFrame();
 void Host_Frame();
 void Host_EndFrame();

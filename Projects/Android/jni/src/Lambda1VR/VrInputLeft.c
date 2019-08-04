@@ -25,6 +25,7 @@ Authors		:	Simon Brown
 #include "VrCvars.h"
 
 extern cvar_t	*cl_forwardspeed;
+extern cvar_t	*cl_movespeedkey;
 
 int IN_TouchEvent( touchEventType type, int fingerID, float x, float y, float dx, float dy );
 void Touch_Motion( touchEventType type, int fingerID, float x, float y, float dx, float dy );
@@ -79,7 +80,7 @@ void HandleInput_Left( ovrMobile * Ovr, double displayTime )
 		showingScreenLayer = !showingScreenLayer;
 
 		//Check we are in multiplayer
-		if (CL_GetMaxClients() > 1) {
+		if (isMultiplayer()) {
 			sendButtonAction("+showscores", showingScreenLayer);
 		}
 	}
@@ -275,7 +276,8 @@ void HandleInput_Left( ovrMobile * Ovr, double displayTime )
 
 			//This section corrects for the fact that the controller actually controls direction of movement, but we want to move relative to the direction the
 			//player is facing for positional tracking
-			float multiplier = vr_positional_factor->value / cl_forwardspeed->value;
+			float multiplier = vr_positional_factor->value / (cl_forwardspeed->value *
+					(rightTrackedRemoteState_new.Buttons & ovrButton_Trigger) ? cl_movespeedkey->value : 1.0f);
 
 			vec2_t v;
 			rotateAboutOrigin(-positionDeltaThisFrame[0] * multiplier,

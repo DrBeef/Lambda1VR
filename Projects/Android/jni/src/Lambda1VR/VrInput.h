@@ -64,6 +64,7 @@ ovrTracking rightRemoteTracking_new;
 void HandleInput_Right( ovrMobile * Ovr, double displayTime );
 void HandleInput_Left( ovrMobile * Ovr, double displayTime );
 
+bool isMultiplayer();
 double GetTimeInMilliSeconds();
 void sendButtonAction(const char* action, long buttonDown);
 float length(float x, float y);
