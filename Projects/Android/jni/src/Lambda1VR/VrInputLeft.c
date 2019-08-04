@@ -256,7 +256,14 @@ void HandleInput_Left( ovrMobile * Ovr, double displayTime )
 			QuatToYawPitchRoll(rightRemoteTracking_new.HeadPose.Pose.Orientation, flashlightangles);
 
 			flashlightangles[YAW] += (cl.refdef.cl_viewangles[YAW] - hmdorientation[YAW]);
-			controllerYawHeading = -cl.refdef.cl_viewangles[YAW] + flashlightangles[YAW];
+
+			if (vr_walkdirection->integer == 0) {
+				controllerYawHeading = -cl.refdef.cl_viewangles[YAW] + flashlightangles[YAW];
+			}
+			else
+			{
+				controllerYawHeading = 0.0f;
+			}
 		}
 
 		//Right-hand specific stuff
@@ -361,7 +368,7 @@ void HandleInput_Left( ovrMobile * Ovr, double displayTime )
 
 			//Adjust to be off-hand controller oriented
 			vec2_t v;
-			rotateAboutOrigin(x, y, vr_walkdirection->integer == 1 ? cl.refdef.cl_viewangles[YAW] : controllerYawHeading,v);
+			rotateAboutOrigin(x, y, controllerYawHeading,v);
 
 			remote_movementSideways = v[0];
 			remote_movementForward = v[1];
