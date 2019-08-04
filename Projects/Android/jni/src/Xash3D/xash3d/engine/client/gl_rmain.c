@@ -658,11 +658,15 @@ R_SetupModelviewMatrix
 =============
 */
 extern convar_t *vr_worldscale;
-extern int r_stereo_side;
+extern convar_t *vr_stereo_side;
 static void R_SetupModelviewMatrix( const ref_params_t *fd, matrix4x4 m )
 {
     Matrix4x4_CreateModelview( m );
-    Matrix4x4_ConcatTranslate( m, 0, vr_worldscale->value * (0.065f / 2.0f) * ((r_stereo_side - 0.5f) * 2.0f), 0 );
+    Matrix4x4_ConcatTranslate( m, 0, vr_worldscale->value * (0.065f / 2.0f) * ((vr_stereo_side->integer - 0.5f) * 2.0f), 0 );
+
+    //Move eyes forward 3cm - super rudimentary neck model lol
+	Matrix4x4_ConcatTranslate( m, vr_worldscale->value * -0.03f, 0, 0 );
+
     Matrix4x4_ConcatRotate( m, -fd->viewangles[ROLL], 1, 0, 0 );
     Matrix4x4_ConcatRotate( m, -fd->viewangles[PITCH], 0, 1, 0 );
     Matrix4x4_ConcatRotate( m, -fd->viewangles[YAW], 0, 0, 1 );

@@ -331,7 +331,7 @@ sets cl.refdef view values
 ===============
 */
 #ifdef VR
-extern int r_stereo_side; // Move this.. this is bad placement
+extern convar_t *vr_stereo_side;
 #endif
 void V_CalcRefDef( void )
 {
@@ -341,7 +341,7 @@ void V_CalcRefDef( void )
 	do
 	{
 	    //Only recalc refdef once
-	    if (r_stereo_side == VR_EYE_LEFT || r_stereo_side == VR_EYE_MONO) {
+	    if (vr_stereo_side->integer == VR_EYE_LEFT || vr_stereo_side->integer == VR_EYE_MONO) {
             clgame.dllFuncs.pfnCalcRefdef(&cl.refdef);
             V_MergeOverviewRefdef(&cl.refdef);
         }

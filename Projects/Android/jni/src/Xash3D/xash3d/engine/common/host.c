@@ -777,10 +777,10 @@ Host_Frame
 */
 #ifdef VR
 
-void Host_Frame( int eye )
+void Host_Frame( )
 {
 	if ( !Host_IsDedicated() )
-		Host_ClientFrame (eye); // client frame
+		Host_ClientFrame ( ); // client frame
 
 	HTTP_Run();
 }

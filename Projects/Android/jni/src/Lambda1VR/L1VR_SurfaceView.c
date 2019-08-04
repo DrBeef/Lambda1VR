@@ -817,7 +817,7 @@ void setHMDPosition( float x, float y, float z, float yaw )
 }
 
 void Host_BeginFrame();
-void Host_Frame(int eye);
+void Host_Frame();
 void Host_EndFrame();
 
 void VR_GetMove( float *forward, float *side, float *yaw, float *pitch, float *roll )
@@ -858,7 +858,8 @@ void RenderFrame( ovrRenderer * renderer, const ovrJava * java,
                 GL(glDisable(GL_SCISSOR_TEST));
 
                 //Now do the drawing for this eye
-                Host_Frame(eye);
+                Cvar_Set("vr_stereo_side", eye == 0 ? "0" : "1");
+                Host_Frame();
             }
 
             //Clear edge to prevent smearing
@@ -1355,12 +1356,15 @@ void VR_Init()
 	//Create Cvars
 	vr_snapturn_angle = Cvar_Get( "vr_snapturn_angle", "45", CVAR_ARCHIVE, "Sets the angle for snap-turn, set to < 10.0 to enable smooth turning" );
 	vr_reloadtimeoutms = Cvar_Get( "vr_reloadtimeoutms", "200", CVAR_ARCHIVE, "How quickly the grip trigger needs to be release to initiate a reload" );
-	vr_positional_factor= Cvar_Get( "vr_positional_factor", "2600", CVAR_ARCHIVE, "Arbitrary number that makes positional tracking work well" );
+	vr_positional_factor= Cvar_Get( "vr_positional_factor", "1800", CVAR_SERVERINFO, "Arbitrary number that makes positional tracking work" );
     vr_walkdirection = Cvar_Get( "vr_walkdirection", "0", CVAR_ARCHIVE, "1 - Use HMD for direction, 0 - Use off-hand controller for direction" );
 	vr_weapon_pitchadjust = Cvar_Get( "vr_weapon_pitchadjust", "-20.0", CVAR_ARCHIVE, "gun pitch angle adjust" );
     vr_weapon_recoil = Cvar_Get( "vr_weapon_recoil", "0", CVAR_ARCHIVE, "Enables weapon recoil in VR, default is disabled, warning could make you sick" );
     vr_lasersight = Cvar_Get( "vr_lasersight", "0", CVAR_ARCHIVE, "Enables laser-sight" );
     vr_fov = Cvar_Get( "vr_fov", "108.5", CVAR_ARCHIVE, "FOV for Lambda1VR" );
+
+    //Not to be changed by users, as it will be overwritten anyway
+	vr_stereo_side = Cvar_Get( "vr_stereo_side", "0", CVAR_RENDERINFO, "Eye being drawn" );
 }
 
 void * AppThreadFunction( void * parm )
@@ -1558,9 +1562,9 @@ void * AppThreadFunction( void * parm )
             ALOGV("        HMD-Position: %f, %f, %f", positionHmd.x, positionHmd.y, positionHmd.z);
 
             if (r_lefthand->value) {
-				HandleInput_Right(appState.Ovr, appState.DisplayTime);
-			} else {
 				HandleInput_Left(appState.Ovr, appState.DisplayTime);
+			} else {
+				HandleInput_Right(appState.Ovr, appState.DisplayTime);
             }
 
 			static usingScreenLayer = true; //Starts off using the screen layer

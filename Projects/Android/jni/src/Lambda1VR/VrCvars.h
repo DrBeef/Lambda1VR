@@ -10,3 +10,6 @@ convar_t	*vr_weapon_pitchadjust;
 convar_t	*vr_weapon_recoil;
 convar_t	*vr_lasersight;
 convar_t	*vr_fov;
+
+//Used and updated continuously during rendering
+convar_t	*vr_stereo_side;

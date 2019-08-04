@@ -2272,17 +2272,15 @@ Host_ClientFrame
 
 ==================
 */
-#ifdef VR
-		int r_stereo_side; // Move this.. this is bad placement
-				void Host_ClientFrame( int eye )
-#else
-void Host_ClientFrame(  )
-#endif
+void Host_ClientFrame( )
 {
 	// if client is not active, skip render functions
 
 	// decide the simulation time
 #ifdef VR
+
+	int eye = Cvar_VariableInteger("vr_stereo_side");
+
 	if (eye == VR_EYE_MONO || eye == VR_EYE_LEFT ) {
 #endif
 		cl.oldtime = cl.time;
@@ -2323,7 +2321,6 @@ void Host_ClientFrame(  )
 #ifdef VR
 	}
 
-	r_stereo_side = eye;
 #endif
 
 	// update the screen

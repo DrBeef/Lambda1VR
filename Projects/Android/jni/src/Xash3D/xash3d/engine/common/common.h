@@ -814,11 +814,7 @@ CLIENT / SERVER SYSTEMS
 */
 void CL_Init( void );
 void CL_Shutdown( void );
-#ifdef VR
-void Host_ClientFrame( int eye );
-#else
 void Host_ClientFrame( );
-#endif
 void Host_RenderFrame( void );
 void Host_ClientBegin( void );
 qboolean CL_Active( void );
