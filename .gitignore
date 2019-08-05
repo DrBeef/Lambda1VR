@@ -25,7 +25,7 @@ $RECYCLE.BIN/
 *.apk
 *.ap_
 *.class
-*.keystore
+drbeef-release-key.keystore
 projects/Android/build/*
 assets/oculussig*
 Projects/Android/.externalNativeBuild/ndkBuild/debug/arm64-v8a/android_gradle_build.json
