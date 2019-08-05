@@ -77,12 +77,11 @@ PFNEGLSIGNALSYNCKHRPROC			eglSignalSyncKHR;
 PFNEGLGETSYNCATTRIBKHRPROC		eglGetSyncAttribKHR;
 #endif
 
-
+//Let's go to the maximum!
 int CPU_LEVEL			= 2;
 int GPU_LEVEL			= 3;
 int NUM_MULTI_SAMPLES	= 1;
-
-float SS_MULTIPLIER    = 1.2f;
+float SS_MULTIPLIER    = 1.5f;
 
 vec2_t cylinderSize = {1280, 720};
 
@@ -98,7 +97,6 @@ float degrees(float rad) {
 struct arg_dbl *ss;
 struct arg_int *cpu;
 struct arg_int *gpu;
-struct arg_dbl *msaa;
 struct arg_end *end;
 
 char **argv;
@@ -129,10 +127,6 @@ LAMBDA1VR Stuff
 ================================================================================
 */
 
-//All the functionality we link to in the DarkPlaces Quake implementation
-
-static bool xash_initialised = false;
-
 typedef void (*pfnChangeGame)( const char *progname );
 extern int Host_Main( int argc, const char **argv, const char *progname, int bChangeGame, pfnChangeGame func );
 
@@ -146,9 +140,6 @@ void L1VR_exit(int exitCode)
 {
 	runStatus = exitCode;
 }
-
-float horizFOV;
-float vertFOV;
 
 static void UnEscapeQuotes( char *arg )
 {
@@ -659,8 +650,8 @@ void ovrRenderer_Create( int width, int height, ovrRenderer * renderer, const ov
 {
 	renderer->NumBuffers = VRAPI_FRAME_LAYER_EYE_MAX;
 
-    horizFOV = vrapi_GetSystemPropertyInt( java, VRAPI_SYS_PROP_SUGGESTED_EYE_FOV_DEGREES_X);
-    vertFOV = vrapi_GetSystemPropertyInt( java, VRAPI_SYS_PROP_SUGGESTED_EYE_FOV_DEGREES_Y);
+	//Now using a symmetrical render target, based on the horizontal FOV
+    vrFOV = vrapi_GetSystemPropertyInt( java, VRAPI_SYS_PROP_SUGGESTED_EYE_FOV_DEGREES_X);
 
 	// Create the render Textures.
 	for ( int eye = 0; eye < VRAPI_FRAME_LAYER_EYE_MAX; eye++ )
@@ -674,9 +665,7 @@ void ovrRenderer_Create( int width, int height, ovrRenderer * renderer, const ov
 
 	// Setup the projection matrix.
 	renderer->ProjectionMatrix = ovrMatrix4f_CreateProjectionFov(
-			horizFOV,
-			vertFOV,
-			0.0f, 0.0f, 1.0f, 0.0f );
+			vrFOV, vrFOV, 0.0f, 0.0f, 1.0f, 0.0f );
 
 }
 
@@ -862,8 +851,8 @@ void RenderFrame( ovrRenderer * renderer, const ovrJava * java,
                 GL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
                 GL(glDisable(GL_SCISSOR_TEST));
 
-                //Now do the drawing for this eye
-                Cvar_Set("vr_stereo_side", eye == 0 ? "0" : "1");
+                //Now do the drawing for this eye - Force the set as it is a "read only" cvar
+                Cvar_Set2("vr_stereo_side", eye == 0 ? "0" : "1", true);
                 Host_Frame();
             }
 
@@ -1361,15 +1350,15 @@ void VR_Init()
 	//Create Cvars
 	vr_snapturn_angle = Cvar_Get( "vr_snapturn_angle", "45", CVAR_ARCHIVE, "Sets the angle for snap-turn, set to < 10.0 to enable smooth turning" );
 	vr_reloadtimeoutms = Cvar_Get( "vr_reloadtimeoutms", "200", CVAR_ARCHIVE, "How quickly the grip trigger needs to be release to initiate a reload" );
-	vr_positional_factor = Cvar_Get( "vr_positional_factor", "1800", CVAR_READ_ONLY, "Arbitrary number that makes positional tracking work" );
+	vr_positional_factor = Cvar_Get( "vr_positional_factor", "2600", CVAR_READ_ONLY, "Arbitrary number that makes positional tracking work" );
     vr_walkdirection = Cvar_Get( "vr_walkdirection", "0", CVAR_ARCHIVE, "1 - Use HMD for direction, 0 - Use off-hand controller for direction" );
 	vr_weapon_pitchadjust = Cvar_Get( "vr_weapon_pitchadjust", "-20.0", CVAR_ARCHIVE, "gun pitch angle adjust" );
     vr_weapon_recoil = Cvar_Get( "vr_weapon_recoil", "0", CVAR_ARCHIVE, "Enables weapon recoil in VR, default is disabled, warning could make you sick" );
     vr_lasersight = Cvar_Get( "vr_lasersight", "0", CVAR_ARCHIVE, "Enables laser-sight" );
-    vr_fov = Cvar_Get( "vr_fov", "108.5", CVAR_ARCHIVE, "FOV for Lambda1VR" );
+    vr_fov = Cvar_Get( "vr_fov", "108", CVAR_ARCHIVE, "FOV for Lambda1VR" );
 
     //Not to be changed by users, as it will be overwritten anyway
-	vr_stereo_side = Cvar_Get( "vr_stereo_side", "0", CVAR_RENDERINFO, "Eye being drawn" );
+	vr_stereo_side = Cvar_Get( "vr_stereo_side", "0", CVAR_READ_ONLY, "Eye being drawn" );
 }
 
 void * AppThreadFunction( void * parm )
@@ -1383,6 +1372,8 @@ void * AppThreadFunction( void * parm )
 
 	// Note that AttachCurrentThread will reset the thread name.
 	prctl( PR_SET_NAME, (long)"OVR::Main", 0, 0, 0 );
+
+	xash_initialised = false;
 
 	const ovrInitParms initParms = vrapi_DefaultInitParms( &java );
 	int32_t initResult = vrapi_Initialize( &initParms );
@@ -1399,8 +1390,9 @@ void * AppThreadFunction( void * parm )
 	// This app will handle android gamepad events itself.
 	vrapi_SetPropertyInt( &appState.Java, VRAPI_EAT_NATIVE_GAMEPAD_EVENTS, 0 );
 
+	//Using a symmetrical render target
     m_width=vrapi_GetSystemPropertyInt( &java, VRAPI_SYS_PROP_SUGGESTED_EYE_TEXTURE_WIDTH ) * SS_MULTIPLIER;
-    m_height=vrapi_GetSystemPropertyInt( &java, VRAPI_SYS_PROP_SUGGESTED_EYE_TEXTURE_HEIGHT ) * SS_MULTIPLIER;
+    m_height=m_width;
 
 
 	ovrEgl_CreateContext( &appState.Egl, NULL );
@@ -1597,19 +1589,11 @@ void * AppThreadFunction( void * parm )
                     layer.Textures[eye].ColorSwapChain = frameBuffer->ColorTextureSwapChain;
                     layer.Textures[eye].SwapChainIndex = frameBuffer->TextureSwapChainIndex;
 
-#define OCULUS_QUEST
-#ifdef OCULUS_QUEST
                     ovrMatrix4f projectionMatrix;
-                    projectionMatrix = ovrMatrix4f_CreateProjectionFov(horizFOV+1.0f, vertFOV+4.0f,
-                                                                       0.0f, 0.0f, 0.1f,
-                                                                       0.0f);
+                    projectionMatrix = ovrMatrix4f_CreateProjectionFov(vrFOV, vrFOV,
+                                                                       0.0f, 0.0f, 0.1f, 0.0f);
 
                     layer.Textures[eye].TexCoordsFromTanAngles = ovrMatrix4f_TanAngleMatrixFromProjection(&projectionMatrix);
-#else
-
-                    //Gear VR
-                    layer.Textures[eye].TexCoordsFromTanAngles = ovrMatrix4f_TanAngleMatrixFromProjection( &tracking.Eye[eye].ProjectionMatrix );
-#endif
 
                     layer.Textures[eye].TextureRect.x = 0;
                     layer.Textures[eye].TextureRect.y = 0;
@@ -1767,7 +1751,6 @@ JNIEXPORT jlong JNICALL Java_com_drbeef_lambda1vr_GLES3JNILib_onCreate( JNIEnv *
 			ss   = arg_dbl0("s", "supersampling", "<double>", "super sampling value (e.g. 1.0)"),
             cpu   = arg_int0("c", "cpu", "<int>", "CPU perf index 1-3 (default: 2)"),
             gpu   = arg_int0("g", "gpu", "<int>", "GPU perf index 1-3 (default: 3)"),
-            msaa   = arg_dbl0("m", "msaa", "<int>", "msaa value 1-4 (default 1)"), // Don't think this actually works
 			end     = arg_end(20)
 	};
 
@@ -1804,11 +1787,6 @@ JNIEXPORT jlong JNICALL Java_com_drbeef_lambda1vr_GLES3JNILib_onCreate( JNIEnv *
         if (gpu->count > 0 && gpu->ival[0] > 0 && gpu->ival[0] < 10)
         {
             GPU_LEVEL = gpu->ival[0];
-        }
-
-        if (msaa->count > 0 && msaa->dval[0] > 0 && msaa->dval[0] < 5)
-        {
-            NUM_MULTI_SAMPLES = msaa->dval[0];
         }
 	}
 
