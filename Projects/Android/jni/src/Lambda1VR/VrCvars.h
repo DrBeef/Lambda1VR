@@ -11,6 +11,7 @@ convar_t	*vr_weapon_recoil;
 convar_t	*vr_weapon_stabilised;
 convar_t	*vr_lasersight;
 convar_t	*vr_fov;
+convar_t	*vr_control_scheme;
 
 //Used and updated continuously during rendering
 convar_t	*vr_stereo_side;

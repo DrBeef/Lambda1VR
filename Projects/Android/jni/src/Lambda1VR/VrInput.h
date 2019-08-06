@@ -1,6 +1,9 @@
 
 #include "VrCommon.h"
 
+//New scheme definitions to be added here
+enum control_scheme;
+
 ovrInputStateTrackedRemote leftTrackedRemoteState_old;
 ovrInputStateTrackedRemote leftTrackedRemoteState_new;
 ovrTracking leftRemoteTracking_old;

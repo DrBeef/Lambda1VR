@@ -35,6 +35,9 @@ float initialTouchX, initialTouchY;
 
 void HandleInput_Right( ovrMobile * Ovr, double displayTime )
 {
+	//Ensure handedness is set to right
+	Cvar_Set("r_lefthand", "0");
+
     //The amount of yaw changed by controller
     //TODO: fixme
 	for ( int i = 0; ; i++ ) {
