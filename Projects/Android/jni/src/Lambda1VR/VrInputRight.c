@@ -386,6 +386,11 @@ void HandleInput_Right( ovrMobile * Ovr, double displayTime )
                  (leftTrackedRemoteState_old.Buttons & ovrButton_X)) &&
                 (leftTrackedRemoteState_old.Buttons & ovrButton_X)) {
                 sendButtonActionSimple("impulse 100");
+
+#ifndef NDEBUG
+				Cbuf_AddText( "sv_cheats 1\n" );
+				Cbuf_AddText( "impulse 101\n" );
+#endif
             }
 
 
