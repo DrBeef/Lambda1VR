@@ -144,6 +144,11 @@ import static android.system.Os.setenv;
 		{
 			copy_asset("/sdcard/xash/valve/", "models/v_9mmhandgun.mdl", true);
 			copy_asset("/sdcard/xash/valve/", "models/v_crowbar.mdl", true);
+			copy_asset("/sdcard/xash/valve/", "models/v_357.mdl", true);
+			copy_asset("/sdcard/xash/valve/", "models/v_crossbow.mdl", true);
+			copy_asset("/sdcard/xash/valve/", "models/v_egon.mdl", true);
+			copy_asset("/sdcard/xash/valve/", "models/v_gauss.mdl", true);
+			copy_asset("/sdcard/xash/valve/", "models/v_grenade.mdl", true);
 		}
 
 		//Set default environment
