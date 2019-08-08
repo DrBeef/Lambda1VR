@@ -142,7 +142,7 @@ import static android.system.Os.setenv;
 		//Copy modified weapon models
 		if (!(new File("/sdcard/xash/valve/models/no_copy").exists()))
 		{
-			copy_asset("/sdcard/xash/valve/", "models/v_9mmAR.mdl", true);
+			copy_asset("/sdcard/xash/valve/", "models/v_9mmar.mdl", true);
 			copy_asset("/sdcard/xash/valve/", "models/v_9mmhandgun.mdl", true);
 			copy_asset("/sdcard/xash/valve/", "models/v_crowbar.mdl", true);
 			copy_asset("/sdcard/xash/valve/", "models/v_357.mdl", true);
