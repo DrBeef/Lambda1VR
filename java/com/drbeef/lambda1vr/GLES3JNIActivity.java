@@ -142,6 +142,7 @@ import static android.system.Os.setenv;
 		//Copy modified weapon models
 		if (!(new File("/sdcard/xash/valve/models/no_copy").exists()))
 		{
+			copy_asset("/sdcard/xash/valve/", "models/v_9mmAR.mdl", true);
 			copy_asset("/sdcard/xash/valve/", "models/v_9mmhandgun.mdl", true);
 			copy_asset("/sdcard/xash/valve/", "models/v_crowbar.mdl", true);
 			copy_asset("/sdcard/xash/valve/", "models/v_357.mdl", true);
@@ -149,6 +150,13 @@ import static android.system.Os.setenv;
 			copy_asset("/sdcard/xash/valve/", "models/v_egon.mdl", true);
 			copy_asset("/sdcard/xash/valve/", "models/v_gauss.mdl", true);
 			copy_asset("/sdcard/xash/valve/", "models/v_grenade.mdl", true);
+			copy_asset("/sdcard/xash/valve/", "models/v_hgun.mdl", true);
+			copy_asset("/sdcard/xash/valve/", "models/v_rpg.mdl", true);
+			copy_asset("/sdcard/xash/valve/", "models/v_satchel.mdl", true);
+			copy_asset("/sdcard/xash/valve/", "models/v_satchel_radio.mdl", true);
+			copy_asset("/sdcard/xash/valve/", "models/v_shotgun.mdl", true);
+			copy_asset("/sdcard/xash/valve/", "models/v_squeak.mdl", true);
+			copy_asset("/sdcard/xash/valve/", "models/v_tripmine.mdl", true);
 		}
 
 		//Set default environment
