@@ -656,6 +656,60 @@ void GAME_EXPORT CL_AttachTentToPlayer( int client, int modelIndex, float zoffse
 	pTemp->entity.curstate.frame = 0;
 }
 
+
+/*
+==============
+CL_AttachFlashlightEntityToPlayer
+
+Attaches flashlight entity to player
+==============
+*/
+void GAME_EXPORT CL_AttachFlashlightEntityToPlayer( const char* name, vec3_t position, vec3_t angles)
+{
+	static TEMPENTITY	*pFlashlight = NULL;
+
+	cl_entity_t *pClient;
+	pClient = CL_GetEntityByIndex(cl.playernum + 1);
+	if (!pClient) {
+		MsgDev(D_INFO, "Couldn't get ClientEntity for %i\n", 1);
+		return;
+	}
+
+	if (pFlashlight == NULL) {
+		model_t *pModel = Mod_ForName(name, false);
+		if (!pModel) {
+			MsgDev(D_INFO, "No model %s!\n", name);
+			return;
+		}
+
+		vec3_t flashlightLocation;
+		VectorAdd(pClient->origin, position, flashlightLocation);
+		pFlashlight = CL_TempEntAllocHigh(flashlightLocation, pModel);
+
+		if (!pFlashlight) {
+			MsgDev(D_INFO, "No temp ent.\n");
+			return;
+		}
+	}
+
+	pFlashlight->entity.curstate.rendermode = kRenderNormal;
+	pFlashlight->entity.curstate.renderamt = pFlashlight->entity.baseline.renderamt = 192;
+	pFlashlight->entity.curstate.renderfx = kRenderFxNoDissipation;
+
+	pFlashlight->clientIndex = cl.playernum + 1;
+
+	VectorCopy(position, pFlashlight->tentOffset);
+	VectorCopy(angles, pFlashlight->entity.angles);
+	pFlashlight->entity.angles[0] *= -1.0f;
+
+	pFlashlight->die = cl.time + 0.75f;
+	pFlashlight->flags |= FTENT_PLYRATTACHMENT|FTENT_PERSIST;
+
+	// no animation support for attached clientside studio models.
+	pFlashlight->frameMax = 0;
+	pFlashlight->entity.curstate.frame = 0;
+}
+
 /*
 ==============
 CL_KillAttachedTents

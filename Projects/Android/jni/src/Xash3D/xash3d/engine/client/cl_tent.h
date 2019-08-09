@@ -56,6 +56,7 @@ void CL_FizzEffect( cl_entity_t *pent, int modelIndex, int density );
 void CL_Bubbles( const vec3_t mins, const vec3_t maxs, float height, int modelIndex, int count, float speed );
 void CL_BubbleTrail( const vec3_t start, const vec3_t end, float flWaterZ, int modelIndex, int count, float speed );
 void CL_AttachTentToPlayer( int client, int modelIndex, float zoffset, float life );
+void CL_AttachFlashlightEntityToPlayer( const char* name, vec3_t position, vec3_t angles );
 void CL_KillAttachedTents( int client );
 void CL_RicochetSprite( const vec3_t pos, model_t *pmodel, float duration, float scale );
 void CL_RocketFlare( const vec3_t pos );

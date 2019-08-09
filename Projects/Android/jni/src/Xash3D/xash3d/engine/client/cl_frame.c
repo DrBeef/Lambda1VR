@@ -1310,6 +1310,10 @@ void CL_AddEntities( void )
 	clgame.dllFuncs.CAM_Think ();
 
 	CL_AddPacketEntities( &cl.frame );
+
+	//update flashlight location
+	CL_AttachFlashlightEntityToPlayer( "models/roach.mdl", cl.refdef.flashlight.org, cl.refdef.flashlight.angles);
+
 	clgame.dllFuncs.pfnCreateEntities();
 
 	CL_FireEvents();	// so tempents can be created immediately

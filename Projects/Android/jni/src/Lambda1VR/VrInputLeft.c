@@ -255,6 +255,11 @@ void HandleInput_Left( ovrMobile * Ovr, double displayTime )
 			flashlightoffset[1] = rightRemoteTracking_new.HeadPose.Pose.Position.y - hmdPosition[1];
 			flashlightoffset[2] = rightRemoteTracking_new.HeadPose.Pose.Position.z - hmdPosition[2];
 
+			vec2_t v;
+			rotateAboutOrigin(flashlightoffset[0], flashlightoffset[2], -(cl.refdef.cl_viewangles[YAW] - hmdorientation[YAW]), v);
+			flashlightoffset[0] = v[0];
+			flashlightoffset[2] = v[1];
+
 			QuatToYawPitchRoll(rightRemoteTracking_new.HeadPose.Pose.Orientation, flashlightangles);
 
 			flashlightangles[YAW] += (cl.refdef.cl_viewangles[YAW] - hmdorientation[YAW]);

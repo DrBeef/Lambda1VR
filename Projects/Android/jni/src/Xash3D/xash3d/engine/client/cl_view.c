@@ -45,6 +45,13 @@ extern vec3_t weaponoffset;
 extern vec3_t weaponvelocity;
 extern vec3_t flashlightangles;
 extern vec3_t flashlightoffset;
+
+static void convertFromVRtoHL(vec3_t in, vec3_t out)
+{
+	vec3_t originInVRSpace;
+	VectorSet(originInVRSpace, -in[2], -in[0], in[1]);
+	VectorScale(originInVRSpace, vr_worldscale->value, out);
+}
 #endif
 
 void V_SetupRefDef( void )
@@ -134,11 +141,13 @@ void V_SetupRefDef( void )
     //Only reasonable place to do this
 	cl.refdef.viewheight[2] += ((hmdPosition[1] - playerHeight) * vr_worldscale->value);
 
-	VectorCopy(weaponoffset, cl.refdef.weapon.org);
+	convertFromVRtoHL(weaponoffset, cl.refdef.weapon.org);
+	convertFromVRtoHL(weaponvelocity, cl.refdef.weapon.velocity);
 	VectorCopy(weaponangles, cl.refdef.weapon.angles);
-	VectorCopy(weaponvelocity, cl.refdef.weapon.velocity);
 
-	VectorCopy(flashlightoffset, cl.refdef.flashlight.org);
+	//Flashlight
+	convertFromVRtoHL(flashlightoffset, cl.refdef.flashlight.org);
+	cl.refdef.flashlight.org[2] += cl.refdef.viewheight[2]; // Have to do this for some reason..
 	VectorCopy(flashlightangles, cl.refdef.flashlight.angles);
 #endif
 }
@@ -369,7 +378,9 @@ void V_RenderView( void )
 	if( !cl.video_prepped || ( !ui_renderworld->value && UI_IsVisible() && !cl.background ))
 		return; // still loading
 
-	if( cl.frame.valid && ( cl.force_refdef || !cl.refdef.paused ))
+	int eye = Cvar_VariableInteger("vr_stereo_side");
+
+	if( eye == VR_EYE_LEFT && cl.frame.valid && ( cl.force_refdef || !cl.refdef.paused ))
 	{
 		cl.force_refdef = false;
 

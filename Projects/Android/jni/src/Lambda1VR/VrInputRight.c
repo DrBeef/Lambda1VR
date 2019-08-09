@@ -255,6 +255,11 @@ void HandleInput_Right( ovrMobile * Ovr, double displayTime )
             flashlightoffset[1] = leftRemoteTracking_new.HeadPose.Pose.Position.y - hmdPosition[1];
             flashlightoffset[2] = leftRemoteTracking_new.HeadPose.Pose.Position.z - hmdPosition[2];
 
+			vec2_t v;
+			rotateAboutOrigin(flashlightoffset[0], flashlightoffset[2], -(cl.refdef.cl_viewangles[YAW] - hmdorientation[YAW]), v);
+			flashlightoffset[0] = v[0];
+			flashlightoffset[2] = v[1];
+
             QuatToYawPitchRoll(leftRemoteTracking_new.HeadPose.Pose.Orientation, flashlightangles);
 
             flashlightangles[YAW] += (cl.refdef.cl_viewangles[YAW] - hmdorientation[YAW]);
@@ -386,12 +391,12 @@ void HandleInput_Right( ovrMobile * Ovr, double displayTime )
                  (leftTrackedRemoteState_old.Buttons & ovrButton_X)) &&
                 (leftTrackedRemoteState_old.Buttons & ovrButton_X)) {
                 sendButtonActionSimple("impulse 100");
-
+/*
 #ifndef NDEBUG
 				Cbuf_AddText( "sv_cheats 1\n" );
 				Cbuf_AddText( "impulse 101\n" );
 #endif
-            }
+*/            }
 
 
             //We need to record if we have started firing primary so that releasing trigger will stop definitely firing, if user has pushed grip
