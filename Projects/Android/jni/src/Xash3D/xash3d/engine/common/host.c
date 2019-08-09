@@ -1288,7 +1288,9 @@ void Host_BeginFrame() {
 
     Host_GetConsoleCommands();
 
-	Host_ServerFrame (); // server frame
+    if (host.state != HOST_SHUTDOWN) {
+		Host_ServerFrame(); // server frame
+	}
 }
 
 void Host_EndFrame()

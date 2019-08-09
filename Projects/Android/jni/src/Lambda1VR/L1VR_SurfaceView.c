@@ -828,17 +828,23 @@ void VR_GetMove( float *forward, float *side, float *yaw, float *pitch, float *r
 	*roll = hmdorientation[ROLL];
 }
 
+static inline bool isHostAlive()
+{
+	return (host.state != HOST_SHUTDOWN &&
+			host.state != HOST_CRASHED);
+}
+
 void RenderFrame( ovrRenderer * renderer, const ovrJava * java,
 											const ovrTracking2 * tracking, ovrMobile * ovr )
 {
-	//Set everything up
-	Host_BeginFrame();
-
     //if we are now shutting down, drop out here
-    if (host.state != HOST_SHUTDOWN &&
-            host.state != HOST_CRASHED) {
-        // Render the eye images.
-        for (int eye = 0; eye < renderer->NumBuffers; eye++) {
+    if (isHostAlive()) {
+
+		//Set everything up
+		Host_BeginFrame();
+
+		// Render the eye images.
+        for (int eye = 0; eye < renderer->NumBuffers && isHostAlive(); eye++) {
             ovrFramebuffer *frameBuffer = &(renderer->FrameBuffer[eye]);
             ovrFramebuffer_SetCurrent(frameBuffer);
 
