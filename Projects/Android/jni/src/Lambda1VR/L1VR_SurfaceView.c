@@ -23,7 +23,7 @@ Copyright	:	Copyright 2015 Oculus VR, LLC. All Rights reserved.
 #include <android/native_window_jni.h>	// for native window JNI
 #include <android/input.h>
 
-#include "argtable3.h"Flas
+#include "argtable3.h"
 #include "VrInput.h"
 #include "VrCvars.h"
 
