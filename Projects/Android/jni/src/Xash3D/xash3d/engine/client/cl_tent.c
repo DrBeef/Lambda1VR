@@ -666,7 +666,7 @@ Attaches flashlight entity to player
 */
 void GAME_EXPORT CL_AttachFlashlightEntityToPlayer( const char* name, vec3_t position, vec3_t angles)
 {
-	static TEMPENTITY	*pFlashlight = NULL;
+	TEMPENTITY	*pFlashlight = NULL;
 
 	// ignore in thirdperson, camera view or client is died
 	if( cl.thirdperson || cl.refdef.health <= 0 || cl.refdef.viewentity != ( cl.playernum + 1 ))
@@ -679,35 +679,40 @@ void GAME_EXPORT CL_AttachFlashlightEntityToPlayer( const char* name, vec3_t pos
 		return;
 	}
 
-	if (pFlashlight == NULL) {
-		model_t *pModel = Mod_ForName(name, false);
-		if (!pModel) {
-			MsgDev(D_INFO, "No model %s!\n", name);
-			return;
-		}
+    vec3_t flashlightLocation;
+    VectorAdd(pClient->origin, position, flashlightLocation);
 
-		vec3_t flashlightLocation;
-		VectorAdd(pClient->origin, position, flashlightLocation);
-		pFlashlight = CL_TempEntAllocHigh(flashlightLocation, pModel);
+    model_t *pModel = Mod_ForName(name, false);
+    if (!pModel) {
+        MsgDev(D_INFO, "No model %s!\n", name);
+        return;
+    }
 
-		if (!pFlashlight) {
-			MsgDev(D_INFO, "No temp ent.\n");
-			return;
-		}
+    pFlashlight = CL_TempEntAllocHigh(flashlightLocation, pModel);
+    if (!pFlashlight) {
+        MsgDev(D_INFO, "No temp ent.\n");
+        return;
+    }
+
+	//If flashlight is on, then do something..
+	if (pClient->curstate.effects & EF_DIMLIGHT)
+	{
+        pFlashlight->entity.curstate.renderfx = kRenderFxGlowShell;
+	} else
+	{
+        pFlashlight->entity.curstate.renderfx = kRenderFxNone;
 	}
 
 	pFlashlight->entity.curstate.rendermode = kRenderNormal;
 	pFlashlight->entity.curstate.renderamt = pFlashlight->entity.baseline.renderamt = 192;
-	pFlashlight->entity.curstate.renderfx = kRenderFxNoDissipation;
 
 	pFlashlight->clientIndex = cl.playernum + 1;
 
-	VectorCopy(position, pFlashlight->tentOffset);
 	VectorCopy(angles, pFlashlight->entity.angles);
 	pFlashlight->entity.angles[0] *= -1.0f;
 
-	pFlashlight->die = cl.time + 0.75f;
-	pFlashlight->flags |= FTENT_PLYRATTACHMENT|FTENT_PERSIST;
+	//Die immediately on next frame
+	pFlashlight->die = cl.time;
 
 	// no animation support for attached clientside studio models.
 	pFlashlight->frameMax = 0;
