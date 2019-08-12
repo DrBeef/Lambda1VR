@@ -694,11 +694,11 @@ void GAME_EXPORT CL_AttachFlashlightEntityToPlayer( const char* name, vec3_t pos
         return;
     }
 
-	//If flashlight is on, then do something..
-	if (pClient->curstate.effects & EF_DIMLIGHT)
+	//If flashlight is on, then do something..  actually.. maybe not
+	/*if (pClient->curstate.effects & EF_DIMLIGHT)
 	{
         pFlashlight->entity.curstate.renderfx = kRenderFxGlowShell;
-	} else
+	} else*/
 	{
         pFlashlight->entity.curstate.renderfx = kRenderFxNone;
 	}
