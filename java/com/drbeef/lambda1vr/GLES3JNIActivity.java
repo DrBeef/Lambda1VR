@@ -157,6 +157,7 @@ import static android.system.Os.setenv;
 			copy_asset("/sdcard/xash/valve/", "models/v_shotgun.mdl", true);
 			copy_asset("/sdcard/xash/valve/", "models/v_squeak.mdl", true);
 			copy_asset("/sdcard/xash/valve/", "models/v_tripmine.mdl", true);
+			copy_asset("/sdcard/xash/valve/", "models/v_torch.mdl", true);
 		}
 
 		//Set default environment
