@@ -39,9 +39,12 @@
 #define FL_GRAPHED		(1U << 16)	// worldgraph has this ent listed as something that blocks a connection
 
 // UNDONE: Do we need these?
-#define FL_IMMUNE_WATER	(1U << 17)
-#define FL_IMMUNE_SLIME	(1U << 18)
-#define FL_IMMUNE_LAVA	(1U << 19)
+//#define FL_IMMUNE_WATER	(1U << 17)
+//#define FL_IMMUNE_SLIME	(1U << 18)
+//#define FL_IMMUNE_LAVA	(1U << 19)
+
+//VR - Reuse the above flags as they are basically redundant in this engine
+#define FL_HAS_FLASHLIGHT	(1<<17)
 
 #define FL_PROXY		(1U << 20)	// This is a spectator proxy
 #define FL_ALWAYSTHINK	(1U << 21)	// Brush model flag -- call think every frame regardless of nextthink - ltime (for constantly changing velocity/path)
@@ -115,6 +118,7 @@
 #define EF_NIGHTVISION			256	// player nightvision
 #define EF_SNIPERLASER			512	// sniper laser effect
 #define EF_FIBERCAMERA			1024	// fiber camera
+
 
 #define EF_NOREFLECT		(1U << 24)	// Entity won't reflecting in mirrors
 #define EF_REFLECTONLY		(1U << 25)	// Entity will be drawing only in mirrors

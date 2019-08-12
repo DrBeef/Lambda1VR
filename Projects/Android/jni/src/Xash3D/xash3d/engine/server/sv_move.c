@@ -120,7 +120,7 @@ void SV_WaterMove( edict_t *ent )
 	watertype = ent->v.watertype;
 	flags = ent->v.flags;
 
-	if( !( flags & ( FL_IMMUNE_WATER|FL_GODMODE )))
+	if( !( flags & ( /*FL_IMMUNE_WATER|*/FL_GODMODE )))
 	{
 		if((( flags & FL_SWIM ) && waterlevel > drownlevel ) || waterlevel <= drownlevel )
 		{
@@ -170,7 +170,7 @@ void SV_WaterMove( edict_t *ent )
 
 	if( watertype == CONTENTS_LAVA )
 	{
-		if((!( flags & ( FL_IMMUNE_LAVA|FL_GODMODE ))) && ent->v.dmgtime < sv.time )
+		if((!( flags & ( /*FL_IMMUNE_LAVA|*/FL_GODMODE ))) && ent->v.dmgtime < sv.time )
 		{
 			if( ent->v.radsuit_finished < sv.time )
 				ent->v.dmgtime = sv.time + 0.2f;
@@ -179,7 +179,7 @@ void SV_WaterMove( edict_t *ent )
 	}
 	else if( watertype == CONTENTS_SLIME )
 	{
-		if((!( flags & ( FL_IMMUNE_SLIME|FL_GODMODE ))) && ent->v.dmgtime < sv.time )
+		if((!( flags & ( /*FL_IMMUNE_SLIME|*/FL_GODMODE ))) && ent->v.dmgtime < sv.time )
 		{
 			if( ent->v.radsuit_finished < sv.time )
 				ent->v.dmgtime = sv.time + 1.0;

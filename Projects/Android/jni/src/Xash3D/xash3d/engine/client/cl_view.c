@@ -36,6 +36,7 @@ update refdef values each frame
 
 #ifdef VR
 extern cvar_t *vr_worldscale;
+extern convar_t	*vr_weapon_stabilised;
 
 extern float playerHeight;
 extern float hmdPosition[3];
@@ -141,6 +142,8 @@ void V_SetupRefDef( void )
     //Only reasonable place to do this
 	cl.refdef.viewheight[2] += ((hmdPosition[1] - playerHeight) * vr_worldscale->value);
 
+	cl.refdef.weapon.flags = 0;
+	cl.refdef.weapon.flags |= vr_weapon_stabilised->integer;
 	convertFromVRtoHL(weaponoffset, cl.refdef.weapon.org);
 	convertFromVRtoHL(weaponvelocity, cl.refdef.weapon.velocity);
 	VectorCopy(weaponangles, cl.refdef.weapon.angles);

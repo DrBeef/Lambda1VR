@@ -25,6 +25,7 @@ typedef struct ref_params_s
 #ifdef VR
 	//controllers
 	struct controller_t {
+		int flags;
 		vec3_t org;
 		vec3_t velocity;
 		vec3_t angles;

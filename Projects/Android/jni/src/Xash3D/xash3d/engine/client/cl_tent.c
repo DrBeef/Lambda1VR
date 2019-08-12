@@ -668,6 +668,10 @@ void GAME_EXPORT CL_AttachFlashlightEntityToPlayer( const char* name, vec3_t pos
 {
 	static TEMPENTITY	*pFlashlight = NULL;
 
+	// ignore in thirdperson, camera view or client is died
+	if( cl.thirdperson || cl.refdef.health <= 0 || cl.refdef.viewentity != ( cl.playernum + 1 ))
+		return;
+
 	cl_entity_t *pClient;
 	pClient = CL_GetEntityByIndex(cl.playernum + 1);
 	if (!pClient) {
