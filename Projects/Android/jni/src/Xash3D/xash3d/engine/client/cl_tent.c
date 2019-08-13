@@ -2583,7 +2583,7 @@ void CL_UpdateFlashlight( cl_entity_t *pEnt )
 	{
 		// get the predicted angles
 #ifdef VR
-        AngleVectors( cl.refdef.flashlight.angles, forward, NULL, NULL );
+        AngleVectors( cl.refdef.flashlight.angles.adjusted, forward, NULL, NULL );
 #else
 		AngleVectors( cl.refdef.cl_viewangles, forward, NULL, NULL );
 #endif

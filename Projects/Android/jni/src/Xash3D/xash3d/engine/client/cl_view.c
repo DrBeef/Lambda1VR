@@ -41,7 +41,7 @@ extern convar_t	*vr_weapon_stabilised;
 extern float playerHeight;
 extern float hmdPosition[3];
 
-extern vec3_t weaponangles;
+extern vec3_t weaponangles[3];
 extern vec3_t weaponoffset;
 extern vec3_t weaponvelocity;
 extern vec3_t flashlightangles;
@@ -146,12 +146,14 @@ void V_SetupRefDef( void )
 	cl.refdef.weapon.flags |= vr_weapon_stabilised->integer;
 	convertFromVRtoHL(weaponoffset, cl.refdef.weapon.org);
 	convertFromVRtoHL(weaponvelocity, cl.refdef.weapon.velocity);
-	VectorCopy(weaponangles, cl.refdef.weapon.angles);
+	VectorCopy(weaponangles[0], cl.refdef.weapon.angles.adjusted);
+	VectorCopy(weaponangles[1], cl.refdef.weapon.angles.unadjusted);
+	VectorCopy(weaponangles[2], cl.refdef.weapon.angles.melee);
 
 	//Flashlight
 	convertFromVRtoHL(flashlightoffset, cl.refdef.flashlight.org);
 	cl.refdef.flashlight.org[2] += cl.refdef.viewheight[2]; // Have to do this for some reason..
-	VectorCopy(flashlightangles, cl.refdef.flashlight.angles);
+	VectorCopy(flashlightangles, cl.refdef.flashlight.angles.adjusted);
 #endif
 }
 

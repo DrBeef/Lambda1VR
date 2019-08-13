@@ -95,7 +95,7 @@ void HandleInput_Left( ovrMobile * Ovr, double displayTime )
 	if (useScreenLayer())
 	{
 		float remoteAngles[3];
-		QuatToYawPitchRoll(leftRemoteTracking_new.HeadPose.Pose.Orientation, remoteAngles);
+		QuatToYawPitchRoll(leftRemoteTracking_new.HeadPose.Pose.Orientation, 0.0f, remoteAngles);
 		float yaw = remoteAngles[YAW] - playerYaw;
 
 		//Adjust for maximum yaw values
@@ -188,7 +188,9 @@ void HandleInput_Left( ovrMobile * Ovr, double displayTime )
 
 			//Set gun angles
 			const ovrQuatf quatRemote = leftRemoteTracking_new.HeadPose.Pose.Orientation;
-			QuatToYawPitchRoll(quatRemote, weaponangles);
+			QuatToYawPitchRoll(quatRemote, vr_weapon_pitchadjust->value, weaponangles[ADJUSTED]);
+			QuatToYawPitchRoll(quatRemote, 0.0f, weaponangles[UNADJUSTED]);
+			QuatToYawPitchRoll(quatRemote, -30.0f, weaponangles[MELEE]);
 
 
 			if (vr_weapon_stabilised->integer &&
@@ -201,17 +203,21 @@ void HandleInput_Left( ovrMobile * Ovr, double displayTime )
 				float zxDist = length(x, z);
 
 				if (zxDist != 0.0f && z != 0.0f) {
-					weaponangles[YAW] = (cl.refdef.cl_viewangles[YAW] - hmdorientation[YAW]) - degrees(atan2f(x, -z));
-					weaponangles[PITCH] = degrees(atanf(y / zxDist));
+                    VectorSet(weaponangles[ADJUSTED], degrees(atanf(y / zxDist)), (cl.refdef.cl_viewangles[YAW] - hmdorientation[YAW]) - degrees(atan2f(x, -z)), weaponangles[ADJUSTED][ROLL]);
+                    VectorSet(weaponangles[UNADJUSTED], degrees(atanf(y / zxDist)), (cl.refdef.cl_viewangles[YAW] - hmdorientation[YAW]) - degrees(atan2f(x, -z)), weaponangles[UNADJUSTED][ROLL]);
+                    VectorSet(weaponangles[MELEE], degrees(atanf(y / zxDist)), (cl.refdef.cl_viewangles[YAW] - hmdorientation[YAW]) - degrees(atan2f(x, -z)), weaponangles[MELEE][ROLL]);
 				}
 			}
 			else
 			{
-				weaponangles[YAW] += (cl.refdef.cl_viewangles[YAW] - hmdorientation[YAW]);
-				weaponangles[PITCH] *= -1.0f;
+				weaponangles[ADJUSTED][YAW] += (cl.refdef.cl_viewangles[YAW] - hmdorientation[YAW]);
+				weaponangles[ADJUSTED][PITCH] *= -1.0f;
 
-				//Slight gun angle adjustment
-				weaponangles[PITCH] += vr_weapon_pitchadjust->value;
+				weaponangles[UNADJUSTED][YAW] += (cl.refdef.cl_viewangles[YAW] - hmdorientation[YAW]);
+				weaponangles[UNADJUSTED][PITCH] *= -1.0f;
+
+				weaponangles[MELEE][YAW] += (cl.refdef.cl_viewangles[YAW] - hmdorientation[YAW]);
+				weaponangles[MELEE][PITCH] *= -1.0f;
 			}
 
 			//Use (Action)
@@ -260,7 +266,7 @@ void HandleInput_Left( ovrMobile * Ovr, double displayTime )
 			flashlightoffset[0] = v[0];
 			flashlightoffset[2] = v[1];
 
-			QuatToYawPitchRoll(rightRemoteTracking_new.HeadPose.Pose.Orientation, flashlightangles);
+			QuatToYawPitchRoll(rightRemoteTracking_new.HeadPose.Pose.Orientation, 15.0f, flashlightangles);
 
 			flashlightangles[YAW] += (cl.refdef.cl_viewangles[YAW] - hmdorientation[YAW]);
 

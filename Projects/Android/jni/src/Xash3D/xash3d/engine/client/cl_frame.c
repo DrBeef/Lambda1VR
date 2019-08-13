@@ -1317,7 +1317,7 @@ void CL_AddEntities( void )
 	if( cl.frame.client.flags & FL_HAS_FLASHLIGHT  &&
 		cl.refdef.weapon.flags != 1) // Make sure weapon isn't being stabilised
 	{
-		CL_AttachFlashlightEntityToPlayer( "models/v_torch.mdl", cl.refdef.flashlight.org, cl.refdef.flashlight.angles);
+		CL_AttachFlashlightEntityToPlayer( "models/v_torch.mdl", cl.refdef.flashlight.org, cl.refdef.flashlight.angles.adjusted);
 	}
 
 	CL_FireEvents();	// so tempents can be created immediately

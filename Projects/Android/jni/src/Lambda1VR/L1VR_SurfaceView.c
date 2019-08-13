@@ -706,10 +706,10 @@ static ovrVector3f normalizeVec(ovrVector3f vec) {
 
 void NormalizeAngles(vec3_t angles)
 {
-	while (angles[0] >= 90) angles[0] -= 360;
+	while (angles[0] >= 90) angles[0] -= 180;
 	while (angles[1] >= 180) angles[1] -= 360;
 	while (angles[2] >= 180) angles[2] -= 360;
-	while (angles[0] < -90) angles[0] += 360;
+	while (angles[0] < -90) angles[0] += 180;
 	while (angles[1] < -180) angles[1] += 360;
 	while (angles[2] < -180) angles[2] += 360;
 }
@@ -763,9 +763,16 @@ void GetAnglesFromVectors(const ovrVector3f forward, const ovrVector3f right, co
 	NormalizeAngles(angles);
 }
 
-void QuatToYawPitchRoll(ovrQuatf q, vec3_t out) {
+void QuatToYawPitchRoll(ovrQuatf q, float pitchAdjust, vec3_t out) {
 
     ovrMatrix4f mat = ovrMatrix4f_CreateFromQuaternion( &q );
+
+    if (pitchAdjust != 0.0f)
+	{
+		ovrMatrix4f rot = ovrMatrix4f_CreateRotation(radians(pitchAdjust), 0.0f, 0.0f);
+		mat = ovrMatrix4f_Multiply(&mat, &rot);
+	}
+
     ovrVector4f v1 = {0, 0, -1, 0};
     ovrVector4f v2 = {1, 0, 0, 0};
     ovrVector4f v3 = {0, 1, 0, 0};
@@ -1563,7 +1570,7 @@ void * AppThreadFunction( void * parm )
             // to allow "additional" yaw manipulation with mouse/controller.
             const ovrQuatf quatHmd = tracking.HeadPose.Pose.Orientation;
             const ovrVector3f positionHmd = tracking.HeadPose.Pose.Position;
-            QuatToYawPitchRoll(quatHmd, hmdorientation);
+            QuatToYawPitchRoll(quatHmd, 0.0f, hmdorientation);
             setHMDPosition(positionHmd.x, positionHmd.y, positionHmd.z, hmdorientation[YAW]);
 
             //TODO: fix - set to use HMD position for world position

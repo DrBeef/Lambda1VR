@@ -28,7 +28,11 @@ typedef struct ref_params_s
 		int flags;
 		vec3_t org;
 		vec3_t velocity;
-		vec3_t angles;
+		struct angles_s {
+			vec3_t adjusted;
+			vec3_t unadjusted;
+			vec3_t melee;
+		} angles;
 	} flashlight, weapon;
 #endif
 

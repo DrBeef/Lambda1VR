@@ -38,7 +38,10 @@ vec3_t hmdPosition;
 vec3_t hmdorientation;
 vec3_t positionDeltaThisFrame;
 
-vec3_t weaponangles;
+#define ADJUSTED 0
+#define UNADJUSTED 1
+#define MELEE 2
+vec3_t weaponangles[3];
 vec3_t weaponoffset;
 vec3_t weaponvelocity;
 
@@ -53,5 +56,7 @@ float length(float x, float y);
 float nonLinearFilter(float in);
 bool between(float min, float val, float max);
 void rotateAboutOrigin(float v1, float v2, float rotation, vec2_t out);
-void QuatToYawPitchRoll(ovrQuatf q, vec3_t out);
+void QuatToYawPitchRoll(ovrQuatf q, float pitchAdjust, vec3_t out);
 bool useScreenLayer();
+void handleTrackedControllerButton(ovrInputStateTrackedRemote * trackedRemoteState, ovrInputStateTrackedRemote * prevTrackedRemoteState, uint32_t button, int key);
+
