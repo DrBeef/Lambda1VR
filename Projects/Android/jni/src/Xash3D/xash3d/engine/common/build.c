@@ -139,13 +139,7 @@ Q_buildcommit will identify this build as release or "notset"
 */
 const char *Q_buildcommit( void )
 {
-#ifdef XASH_BUILD_COMMIT
-	return XASH_BUILD_COMMIT;
-#elif defined(XASH_RELEASE) // don't check it elsewhere to avoid random bugs
-	return "release";
-#else
-	return "notset";
-#endif
+	return "Lambda1VR-v1.1.0";
 }
 
 /*

@@ -16,10 +16,6 @@ LOCAL_CFLAGS += -D__MULTITEXTURE_SUPPORT__ -DXASH_GLES -DXASH_GL4ES -DUSE_EVDEV 
 #enable VR compatibility
 LOCAL_CFLAGS += -DVR
 
-XASH_COMMIT := $(firstword $(shell cd $(LOCAL_PATH)&&git rev-parse --short=6 HEAD) unknown)
-
-LOCAL_CFLAGS += -DXASH_BUILD_COMMIT=\"$(XASH_COMMIT)\"
-
 LOCAL_CONLYFLAGS += -std=c99
 
 LOCAL_C_INCLUDES := \
