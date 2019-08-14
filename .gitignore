@@ -21,6 +21,9 @@ $RECYCLE.BIN/
 #libs
 *.a
 
+#model files
+*.mdl
+
 #files created by build
 *.apk
 *.ap_
