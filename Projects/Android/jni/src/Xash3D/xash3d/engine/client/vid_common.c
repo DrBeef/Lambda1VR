@@ -878,7 +878,7 @@ void GL_InitCommands( void )
 	mp_decals = Cvar_Get( "mp_decals", "300", CVAR_ARCHIVE, "sets the maximum number of decals in multiplayer" );
 
 #ifdef VR
-	vr_worldscale = Cvar_Get( "vr_worldscale", "40", CVAR_ARCHIVE, "Sets the world scale for stereo separation" );
+	vr_worldscale = Cvar_Get( "vr_worldscale", "26.2467", CVAR_ARCHIVE, "Sets the world scale for stereo separation" );
 #endif
 
 	gl_picmip = Cvar_Get( "gl_picmip", "0", CVAR_GLCONFIG, "reduces resolution of textures by powers of 2" );
