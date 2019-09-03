@@ -106,7 +106,10 @@ extern convar_t	*r_lefthand;
 
 enum control_scheme {
 	RIGHT_HANDED_DEFAULT = 0,
-	LEFT_HANDED_DEFAULT = 10
+	RIGHT_HANDED_ALT = 1,
+	LEFT_HANDED_DEFAULT = 10,
+	LEFT_HANDED_ALT = 11,
+	GAMEPAD = 20 //Not implemented, someone else can do this!
 };
 
 /*
@@ -1033,93 +1036,6 @@ static void ovrApp_HandleVrModeChanges( ovrApp * app )
 	}
 }
 
-void handleTrackedControllerButton(ovrInputStateTrackedRemote * trackedRemoteState, ovrInputStateTrackedRemote * prevTrackedRemoteState, uint32_t button, int key)
-{
-    if ((trackedRemoteState->Buttons & button) != (prevTrackedRemoteState->Buttons & button))
-    {
-        Key_Event(key, (trackedRemoteState->Buttons & button) != 0);
-    }
-}
-
-
-static void Matrix4x4_Transform (const matrix4x4 *in, const float v[3], float out[3])
-{
-	out[0] = v[0] * (*in)[0][0] + v[1] * (*in)[0][1] + v[2] * (*in)[0][2] + (*in)[0][3];
-	out[1] = v[0] * (*in)[1][0] + v[1] * (*in)[1][1] + v[2] * (*in)[1][2] + (*in)[1][3];
-	out[2] = v[0] * (*in)[2][0] + v[1] * (*in)[2][1] + v[2] * (*in)[2][2] + (*in)[2][3];
-}
-
-void rotateAboutOrigin(float v1, float v2, float rotation, vec2_t out)
-{
-    vec3_t temp = {0.0f, 0.0f, 0.0f};
-    temp[0] = v1;
-    temp[1] = v2;
-
-    vec3_t v = {0.0f, 0.0f, 0.0f};
-    matrix4x4 matrix;
-	vec3_t angles = {0.0f, rotation, 0.0f};
-	vec3_t origin = {0.0f, 0.0f, 0.0f};
-    Matrix4x4_CreateFromEntity(matrix, angles, origin, 1.0f);
-    Matrix4x4_Transform(&matrix, temp, v);
-
-    out[0] = v[0];
-    out[1] = v[1];
-}
-
-void sendButtonAction(const char* action, long buttonDown)
-{
-    char command[256];
-    Q_snprintf( command, sizeof( command ), "%s\n", action );
-    if (!buttonDown)
-    {
-        command[0] = '-';
-    }
-    Cbuf_AddText( command );
-
-}
-
-float length(float x, float y)
-{
-	return sqrtf(powf(x, 2.0f) + powf(y, 2.0f));
-}
-
-#define NLF_DEADZONE 0.1
-#define NLF_POWER 2.2
-
-float nonLinearFilter(float in)
-{
-	float val = 0.0f;
-	if (in > NLF_DEADZONE)
-	{
-		val = in;
-		val -= NLF_DEADZONE;
-		val /= (1.0f - NLF_DEADZONE);
-		val = powf(val, NLF_POWER);
-	}
-	else if (in < -NLF_DEADZONE)
-	{
-		val = in;
-		val += NLF_DEADZONE;
-		val /= (1.0f - NLF_DEADZONE);
-		val = -powf(fabsf(val), NLF_POWER);
-	}
-
-	return val;
-}
-
-void sendButtonActionSimple(const char* action)
-{
-    char command[256];
-    Q_snprintf( command, sizeof( command ), "%s\n", action );
-    Cbuf_AddText( command );
-}
-
-bool between(float min, float val, float max)
-{
-	return (min < val) && (val < max);
-}
-
-
 
 /*
 ================================================================================
@@ -1368,7 +1284,7 @@ void VR_Init()
 	//Create Cvars
 	vr_snapturn_angle = Cvar_Get( "vr_snapturn_angle", "45", CVAR_ARCHIVE, "Sets the angle for snap-turn, set to < 10.0 to enable smooth turning" );
 	vr_reloadtimeoutms = Cvar_Get( "vr_reloadtimeoutms", "200", CVAR_ARCHIVE, "How quickly the grip trigger needs to be release to initiate a reload" );
-	vr_positional_factor = Cvar_Get( "vr_positional_factor", "2600", CVAR_ARCHIVE, "Arbitrary number that makes positional tracking work" );
+	vr_positional_factor = Cvar_Get( "vr_positional_factor", "2800", CVAR_ARCHIVE, "Arbitrary number that makes positional tracking work" );
     vr_walkdirection = Cvar_Get( "vr_walkdirection", "0", CVAR_ARCHIVE, "1 - Use HMD for direction, 0 - Use off-hand controller for direction" );
 	vr_weapon_pitchadjust = Cvar_Get( "vr_weapon_pitchadjust", "-20.0", CVAR_ARCHIVE, "gun pitch angle adjust" );
     vr_weapon_recoil = Cvar_Get( "vr_weapon_recoil", "0", CVAR_ARCHIVE, "Enables weapon recoil in VR, default is disabled, warning could make you sick" );
@@ -1584,9 +1500,18 @@ void * AppThreadFunction( void * parm )
 				case RIGHT_HANDED_DEFAULT:
 					HandleInput_Right(appState.Ovr, appState.DisplayTime);
 					break;
+				case RIGHT_HANDED_ALT:
+					HandleInput_RightAlt(appState.Ovr, appState.DisplayTime);
+					break;
 				case LEFT_HANDED_DEFAULT:
 					HandleInput_Left(appState.Ovr, appState.DisplayTime);
 					break;
+				case LEFT_HANDED_ALT:
+					HandleInput_LeftAlt(appState.Ovr, appState.DisplayTime);
+					break;
+                case GAMEPAD:
+                    //HandleInput_Gamepad(appState.Ovr, appState.DisplayTime); // Someone else can implement this
+                    break;
 			}
 
 			static usingScreenLayer = true; //Starts off using the screen layer
