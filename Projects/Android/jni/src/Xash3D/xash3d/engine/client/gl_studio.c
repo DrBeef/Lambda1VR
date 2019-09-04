@@ -171,6 +171,9 @@ void R_StudioInit( void )
 	Matrix3x4_LoadIdentity( g_aliastransform );
 	Matrix3x4_LoadIdentity( g_rotationmatrix );
 
+	//Probably not needed as it is overwritten anyway
+	g_rotationmatrix[2][2] = -g_rotationmatrix[2][2];
+
 	g_nStudioCount = 0;
 	m_fDoRemap = false;
 }
@@ -3751,7 +3754,7 @@ void R_DrawViewModel( void )
 	pglDepthRange( gldepthmin, gldepthmin + 0.3f * ( gldepthmax - gldepthmin ));
 
 	// backface culling for left-handed weapons
-	g_iBackFaceCull = R_LeftHand(); // GL_FrontFace is called in SetupStudioRenderer
+	g_iBackFaceCull = r_lefthand->integer == 1;//R_LeftHand(); // GL_FrontFace is called in SetupStudioRenderer
 	RI.currententity->curstate.scale = 1.0f;
 	RI.currententity->curstate.frame = 0;
 	RI.currententity->curstate.framerate = 1.0f;
@@ -3759,7 +3762,7 @@ void R_DrawViewModel( void )
 		cl.weaponstarttime = cl.time;
 	RI.currententity->curstate.animtime = cl.weaponstarttime;
 	RI.currententity->curstate.sequence = cl.weaponseq;
-	pStudioDraw->StudioDrawModel( STUDIO_RENDER );
+	pStudioDraw->StudioDrawModel( STUDIO_RENDER | STUDIO_VIEWMODEL );
 
 	// restore depth range
 	pglDepthRange( gldepthmin, gldepthmax );

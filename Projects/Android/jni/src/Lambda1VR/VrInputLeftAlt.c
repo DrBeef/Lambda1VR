@@ -32,7 +32,7 @@ void Touch_Motion( touchEventType type, int fingerID, float x, float y, float dx
 void HandleInput_LeftAlt( ovrMobile * Ovr, double displayTime )
 {
 	//Ensure handedness is set to left
-	Cvar_Set("r_lefthand", "1");
+	Cvar_Set("hand", "1");
 
     //Get info for tracked remotes
     acquireTrackedRemotesData(Ovr, displayTime);
