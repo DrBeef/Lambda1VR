@@ -171,9 +171,6 @@ void R_StudioInit( void )
 	Matrix3x4_LoadIdentity( g_aliastransform );
 	Matrix3x4_LoadIdentity( g_rotationmatrix );
 
-	//Probably not needed as it is overwritten anyway
-	g_rotationmatrix[2][2] = -g_rotationmatrix[2][2];
-
 	g_nStudioCount = 0;
 	m_fDoRemap = false;
 }

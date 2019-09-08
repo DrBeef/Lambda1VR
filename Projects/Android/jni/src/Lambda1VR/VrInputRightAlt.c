@@ -267,8 +267,9 @@ void HandleInput_RightAlt(ovrMobile * Ovr, double displayTime )
 
             //Duck with A
             if ((rightTrackedRemoteState_new.Buttons & ovrButton_A) !=
-                (rightTrackedRemoteState_old.Buttons & ovrButton_A)) {
-
+                (rightTrackedRemoteState_old.Buttons & ovrButton_A) &&
+                ducked != DUCK_CROUCHED) {
+                ducked = (rightTrackedRemoteState_new.Buttons & ovrButton_A) ? DUCK_BUTTON : DUCK_NOTDUCKED;
                 sendButtonAction("+duck", (rightTrackedRemoteState_new.Buttons & ovrButton_A));
             }
 

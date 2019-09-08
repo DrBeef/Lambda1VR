@@ -666,7 +666,7 @@
 #define IN_FORWARD			(1U << 3)
 #define IN_BACK			(1U << 4)
 #define IN_USE			(1U << 5)
-#define IN_CANCEL			(1U << 6)
+#define IN_CROUCH			(1U << 6)
 #define IN_LEFT			(1U << 7)
 #define IN_RIGHT			(1U << 8)
 #define IN_MOVELEFT			(1U << 9)

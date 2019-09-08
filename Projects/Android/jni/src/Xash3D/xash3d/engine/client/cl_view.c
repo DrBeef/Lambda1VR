@@ -140,7 +140,7 @@ void V_SetupRefDef( void )
 
 #ifdef VR
     //Only reasonable place to do this
-	cl.refdef.viewheight[2] += ((hmdPosition[1] - playerHeight) * vr_worldscale->value);
+	cl.refdef.viewheight[2] += ((hmdPosition[1] - playerHeight) + 0.02) * vr_worldscale->value; // Add 20cm height as for some reason player is never quite tall enough
 
 	cl.refdef.weapon.flags = 0;
 	cl.refdef.weapon.flags |= vr_weapon_stabilised->integer;

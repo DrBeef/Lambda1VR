@@ -816,7 +816,19 @@ void setHMDPosition( float x, float y, float z, float yaw )
         playerHeight = y;
     } else{
     	playerYaw = yaw;
-    }
+
+    	//Do we trigger crouching based on player height?
+		if (hmdPosition[1] < (playerHeight * 0.75f) &&
+			ducked == DUCK_NOTDUCKED) {
+			ducked = DUCK_CROUCHED;
+			sendButtonAction("+crouch", 1);
+		}
+		else if (hmdPosition[1] > (playerHeight * 0.85f) &&
+			ducked == DUCK_CROUCHED) {
+			ducked = DUCK_NOTDUCKED;
+			sendButtonAction("+crouch", 0);
+		}
+	}
     hmdPosition[2] = z;
 }
 
@@ -1280,6 +1292,7 @@ void VR_Init()
 	positional_movementSideways = 0.0f;
 	positional_movementForward = 0.0f;
 	snapTurn = 0.0f;
+	ducked = DUCK_NOTDUCKED;
 
 	//Create Cvars
 	vr_snapturn_angle = Cvar_Get( "vr_snapturn_angle", "45", CVAR_ARCHIVE, "Sets the angle for snap-turn, set to < 10.0 to enable smooth turning" );
@@ -1418,6 +1431,9 @@ void * AppThreadFunction( void * parm )
 		{
 			continue;
 		}
+
+        //Use floor based tracking space
+        vrapi_SetTrackingSpace(appState.Ovr, VRAPI_TRACKING_SPACE_LOCAL_FLOOR);
 
 		// Create the scene if not yet created.
 		// The scene is created here to be able to show a loading icon.

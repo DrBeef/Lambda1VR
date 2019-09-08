@@ -270,8 +270,9 @@ void HandleInput_Left( ovrMobile * Ovr, double displayTime )
 
 			//Duck with X
 			if ((leftTrackedRemoteState_new.Buttons & ovrButton_X) !=
-				(leftTrackedRemoteState_old.Buttons & ovrButton_X)) {
-
+				(leftTrackedRemoteState_old.Buttons & ovrButton_X) &&
+				ducked != DUCK_CROUCHED) {
+				ducked = (leftTrackedRemoteState_new.Buttons & ovrButton_X) ? DUCK_BUTTON : DUCK_NOTDUCKED;
 				sendButtonAction("+duck", (leftTrackedRemoteState_new.Buttons & ovrButton_X));
 			}
 
