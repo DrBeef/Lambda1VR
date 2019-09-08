@@ -809,16 +809,24 @@ void setWorldPosition( float x, float y, float z )
 
 void setHMDPosition( float x, float y, float z, float yaw )
 {
-    hmdPosition[0] = x;
-    hmdPosition[1] = y;
-    if (useScreenLayer())
+	static bool s_useScreen = false;
+
+	VectorSet(hmdPosition, x, y, z);
+
+    if (s_useScreen != useScreenLayer())
     {
+		s_useScreen = useScreenLayer();
+
+		//Record player height on transition
         playerHeight = y;
-    } else{
+    }
+
+	if (!useScreenLayer())
+    {
     	playerYaw = yaw;
 
     	//Do we trigger crouching based on player height?
-		if (hmdPosition[1] < (playerHeight * 0.75f) &&
+		if (hmdPosition[1] < (playerHeight * 0.8f) &&
 			ducked == DUCK_NOTDUCKED) {
 			ducked = DUCK_CROUCHED;
 			sendButtonAction("+crouch", 1);
@@ -829,7 +837,6 @@ void setHMDPosition( float x, float y, float z, float yaw )
 			sendButtonAction("+crouch", 0);
 		}
 	}
-    hmdPosition[2] = z;
 }
 
 bool isMultiplayer()
