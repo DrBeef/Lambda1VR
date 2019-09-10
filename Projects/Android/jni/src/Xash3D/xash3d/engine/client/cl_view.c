@@ -37,6 +37,7 @@ update refdef values each frame
 #ifdef VR
 extern cvar_t *vr_worldscale;
 extern convar_t	*vr_weapon_stabilised;
+extern convar_t	*vr_height_adjust;
 
 extern float playerHeight;
 extern float hmdPosition[3];
@@ -46,6 +47,8 @@ extern vec3_t weaponoffset;
 extern vec3_t weaponvelocity;
 extern vec3_t flashlightangles;
 extern vec3_t flashlightoffset;
+
+#define GORDON_FREEMAN_HEIGHT   1.57
 
 static void convertFromVRtoHL(vec3_t in, vec3_t out)
 {
@@ -140,7 +143,8 @@ void V_SetupRefDef( void )
 
 #ifdef VR
     //Only reasonable place to do this
-	cl.refdef.viewheight[2] += ((hmdPosition[1] - playerHeight) + 0.02) * vr_worldscale->value; // Add 20cm height as for some reason player is never quite tall enough
+    cl.refdef.viewheight[2] -= (GORDON_FREEMAN_HEIGHT * vr_worldscale->value); // subtract Gordon's default height
+	cl.refdef.viewheight[2] += (hmdPosition[1] + vr_height_adjust->value) * vr_worldscale->value;
 
 	cl.refdef.weapon.flags = 0;
 	cl.refdef.weapon.flags |= vr_weapon_stabilised->integer;

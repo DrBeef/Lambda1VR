@@ -139,6 +139,9 @@ import static android.system.Os.setenv;
 		copy_asset("/sdcard/xash/valve/", "config.cfg", false); // Copy in case user has deleted their config
 		copy_asset("/sdcard/xash/", "commandline.txt", false); // Copy in case user has deleted their config
 
+		//Copy our special sprites
+		copy_asset("/sdcard/xash/valve/", "sprites/s_stealth.spr", true);
+
 		//Copy modified weapon models
 		if (!(new File("/sdcard/xash/valve/models/no_copy").exists()))
 		{

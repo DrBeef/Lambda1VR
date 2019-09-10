@@ -110,9 +110,11 @@ void UI_MultiPlayer_Menu( void )
 	{
 		uiMultiPlayer.AskPredictEnable();
 	}
-	else if( !UI::Names::CheckIsNameValid( EngFuncs::GetCvarString( "name" ) ) )
+	//Just use whatever is in the config.cfg
+/*	else if( !UI::Names::CheckIsNameValid( EngFuncs::GetCvarString( "name" ) ) )
 	{
 		UI_PlayerIntroduceDialog_Show( &uiMultiPlayer );
 	}
+*/
 }
 ADD_MENU( menu_multiplayer, UI_MultiPlayer_Precache, UI_MultiPlayer_Menu );

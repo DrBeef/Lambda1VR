@@ -820,9 +820,10 @@ qboolean SV_TestEntityPosition( edict_t *ent, edict_t *blocker )
 	if( ent->v.flags & (FL_CLIENT|FL_FAKECLIENT))
 	{
 		// to avoid falling through tracktrain update client mins\maxs here
-		if( ent->v.flags & FL_DUCKING ) 
+		if( ent->v.flags & FL_DUCKING )
 			SV_SetMinMaxSize( ent, svgame.pmove->player_mins[1], svgame.pmove->player_maxs[1] );
-		else SV_SetMinMaxSize( ent, svgame.pmove->player_mins[0], svgame.pmove->player_maxs[0] );
+		else
+			SV_SetMinMaxSize( ent, svgame.pmove->player_mins[0], svgame.pmove->player_maxs[0] );
 	}
 
 	trace = SV_Move( ent->v.origin, ent->v.mins, ent->v.maxs, ent->v.origin, MOVE_NORMAL|FMOVE_SIMPLEBOX, ent );

@@ -4253,7 +4253,8 @@ byte *GAME_EXPORT pfnSetFatPVS( const float *org )
 			VectorSubtract( svgame.pmove->player_mins[0], svgame.pmove->player_mins[1], offset );
 			VectorSubtract( org, offset, viewPos );
 		}
-		else VectorCopy( org, viewPos );
+		else
+			VectorCopy( org, viewPos );
 
 		// build a new PVS frame
 		Q_memset( bitvector, 0, fatbytes );

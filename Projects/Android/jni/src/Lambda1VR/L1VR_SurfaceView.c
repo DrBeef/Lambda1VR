@@ -825,17 +825,18 @@ void setHMDPosition( float x, float y, float z, float yaw )
     {
     	playerYaw = yaw;
 
-    	//Do we trigger crouching based on player height?
-		if (hmdPosition[1] < (playerHeight * 0.8f) &&
-			ducked == DUCK_NOTDUCKED) {
-			ducked = DUCK_CROUCHED;
-			sendButtonAction("+crouch", 1);
-		}
-		else if (hmdPosition[1] > (playerHeight * 0.85f) &&
-			ducked == DUCK_CROUCHED) {
-			ducked = DUCK_NOTDUCKED;
-			sendButtonAction("+crouch", 0);
-		}
+    	if (vr_enable_crouching->integer) {
+            //Do we trigger crouching based on player height?
+            if (hmdPosition[1] < (playerHeight * 0.8f) &&
+                ducked == DUCK_NOTDUCKED) {
+                ducked = DUCK_CROUCHED;
+                sendButtonAction("+crouch", 1);
+            } else if (hmdPosition[1] > (playerHeight * 0.82f) &&
+                ducked == DUCK_CROUCHED) {
+                ducked = DUCK_NOTDUCKED;
+                sendButtonAction("+crouch", 0);
+            }
+        }
 	}
 }
 
@@ -1312,6 +1313,9 @@ void VR_Init()
     vr_lasersight = Cvar_Get( "vr_lasersight", "0", CVAR_ARCHIVE, "Enables laser-sight" );
     vr_fov = Cvar_Get( "vr_fov", "107", CVAR_ARCHIVE, "FOV for Lambda1VR" );
 	vr_control_scheme = Cvar_Get( "vr_control_scheme", "0", CVAR_ARCHIVE, "Controller Layout scheme" );
+	vr_enable_crouching = Cvar_Get( "vr_enable_crouching", "1", CVAR_ARCHIVE, "Crouching irl triggers ducking in game" );
+    vr_height_adjust = Cvar_Get( "vr_height_adjust", "0.0", CVAR_ARCHIVE, "Additional height adjustment for in-game player (in metres)" );
+    vr_flashlight_model = Cvar_Get( "vr_flashlight_model", "1", CVAR_ARCHIVE, "Set to 0 to prevent drawing the flashlight model" );
 
     //Not to be changed by users, as it will be overwritten anyway
 	vr_stereo_side = Cvar_Get( "vr_stereo_side", "0", CVAR_READ_ONLY, "Eye being drawn" );
