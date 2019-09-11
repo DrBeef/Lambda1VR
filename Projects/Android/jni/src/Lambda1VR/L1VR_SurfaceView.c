@@ -864,11 +864,16 @@ static inline bool isHostAlive()
 			host.state != HOST_CRASHED);
 }
 
+void COM_SetRandomSeed( int lSeed );
+
 void RenderFrame( ovrRenderer * renderer, const ovrJava * java,
 											const ovrTracking2 * tracking, ovrMobile * ovr )
 {
     //if we are now shutting down, drop out here
     if (isHostAlive()) {
+
+    	//Seed the random number generator the same for each eye to ensure electricity is drawn the same
+		int lSeed = rand();
 
 		//Set everything up
 		Host_BeginFrame();
@@ -894,6 +899,10 @@ void RenderFrame( ovrRenderer * renderer, const ovrJava * java,
 
                 //Now do the drawing for this eye - Force the set as it is a "read only" cvar
                 Cvar_Set2("vr_stereo_side", eye == 0 ? "0" : "1", true);
+
+                //Sow the seed
+				COM_SetRandomSeed(lSeed);
+
                 Host_Frame();
             }
 
