@@ -180,6 +180,13 @@ import static android.system.Os.setenv;
 			copy_asset("/sdcard/xash/valve/", "sound/weapons/explode4.wav", true);
 			copy_asset("/sdcard/xash/valve/", "sound/weapons/explode5.wav", true);
 
+			//Shotgun Benelli M3
+			copy_asset("/sdcard/xash/valve/", "models/v_shotgun.mdl", true);
+			copy_asset("/sdcard/xash/valve/", "models/p_shotgun.mdl", true);
+			copy_asset("/sdcard/xash/valve/", "models/w_shotgun.mdl", true);
+			copy_asset("/sdcard/xash/valve/", "sound/weapons/m3_insertshell.wav", true);
+			copy_asset("/sdcard/xash/valve/", "sound/weapons/m3_pump.wav", true);
+
 
 			copy_asset("/sdcard/xash/valve/", "models/v_crowbar.mdl", true);
 
