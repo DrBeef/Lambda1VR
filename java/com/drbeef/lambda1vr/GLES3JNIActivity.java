@@ -187,6 +187,16 @@ import static android.system.Os.setenv;
 			copy_asset("/sdcard/xash/valve/", "sound/weapons/m3_insertshell.wav", true);
 			copy_asset("/sdcard/xash/valve/", "sound/weapons/m3_pump.wav", true);
 
+			//Stalker Rocket
+			copy_asset("/sdcard/xash/valve/", "models/v_rpg.mdl", true);
+			copy_asset("/sdcard/xash/valve/", "models/p_rpg.mdl", true);
+			copy_asset("/sdcard/xash/valve/", "models/w_rpg.mdl", true);
+			copy_asset("/sdcard/xash/valve/", "models/rpgrocket.mdl", true);
+			copy_asset("/sdcard/xash/valve/", "models/v_rpgammo.mdl", true);
+			copy_asset("/sdcard/xash/valve/", "sound/weapons/rocket1.wav", true);
+			copy_asset("/sdcard/xash/valve/", "sound/weapons/rocketfire1.wav", true);
+			copy_asset("/sdcard/xash/valve/", "sound/weapons/rpg7_reload.wav", true);
+
 
 			copy_asset("/sdcard/xash/valve/", "models/v_crowbar.mdl", true);
 
