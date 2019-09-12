@@ -142,10 +142,41 @@ import static android.system.Os.setenv;
 		//Copy modified weapon models
 		if (!(new File("/sdcard/xash/valve/models/no_copy").exists()))
 		{
+			//Colt (A-16)
 			copy_asset("/sdcard/xash/valve/", "models/v_9mmar.mdl", true);
+			copy_asset("/sdcard/xash/valve/", "models/p_9mmar.mdl", true);
+			copy_asset("/sdcard/xash/valve/", "models/w_9mmar.mdl", true);
+			copy_asset("/sdcard/xash/valve/", "sound/items/clipinsert1.wav", true);
+			copy_asset("/sdcard/xash/valve/", "sound/items/cliprelease1.wav", true);
+			copy_asset("/sdcard/xash/valve/", "sound/weapons/t_m4_boltpull.wav", true);
+			copy_asset("/sdcard/xash/valve/", "sound/weapons/t_m4_deploy.wav", true);
+			copy_asset("/sdcard/xash/valve/", "sound/weapons/t_m4_m203_in.wav", true);
+			copy_asset("/sdcard/xash/valve/", "sound/weapons/t_m4_m203_out.wav", true);
+			copy_asset("/sdcard/xash/valve/", "sound/weapons/t_m4_m203_shell.wav", true);
+
+			//Colt Pistol M1911
 			copy_asset("/sdcard/xash/valve/", "models/v_9mmhandgun.mdl", true);
-			copy_asset("/sdcard/xash/valve/", "models/v_crowbar.mdl", true);
+			copy_asset("/sdcard/xash/valve/", "models/p_9mmhandgun.mdl", true);
+			copy_asset("/sdcard/xash/valve/", "models/w_9mmhandgun.mdl", true);
+
+			//357 Python
 			copy_asset("/sdcard/xash/valve/", "models/v_357.mdl", true);
+			copy_asset("/sdcard/xash/valve/", "models/p_357.mdl", true);
+			copy_asset("/sdcard/xash/valve/", "models/w_357.mdl", true);
+			copy_asset("/sdcard/xash/valve/", "sound/weapons/357_shot1.wav", true);
+			copy_asset("/sdcard/xash/valve/", "sound/weapons/357_shot2.wav", true);
+
+			//RGD Grenade
+			copy_asset("/sdcard/xash/valve/", "models/v_grenade.mdl", true);
+			copy_asset("/sdcard/xash/valve/", "models/w_grenade.mdl", true);
+			copy_asset("/sdcard/xash/valve/", "models/p_grenade.mdl", true);
+			copy_asset("/sdcard/xash/valve/", "sound/weapons/grenade_pinpull.wav", true);
+			copy_asset("/sdcard/xash/valve/", "sound/weapons/grenade_throw.wav", true);
+			copy_asset("/sdcard/xash/valve/", "sound/weapons/grenade_draw.wav", true);
+
+
+			copy_asset("/sdcard/xash/valve/", "models/v_crowbar.mdl", true);
+
 			copy_asset("/sdcard/xash/valve/", "models/v_crossbow.mdl", true);
 			copy_asset("/sdcard/xash/valve/", "models/v_egon.mdl", true);
 			copy_asset("/sdcard/xash/valve/", "models/v_gauss.mdl", true);
