@@ -1311,6 +1311,9 @@ void VR_Init()
 	snapTurn = 0.0f;
 	ducked = DUCK_NOTDUCKED;
 
+	//init randomiser
+	srand(time(NULL));
+
 	//Create Cvars
 	vr_snapturn_angle = Cvar_Get( "vr_snapturn_angle", "45", CVAR_ARCHIVE, "Sets the angle for snap-turn, set to < 10.0 to enable smooth turning" );
 	vr_reloadtimeoutms = Cvar_Get( "vr_reloadtimeoutms", "200", CVAR_ARCHIVE, "How quickly the grip trigger needs to be release to initiate a reload" );
