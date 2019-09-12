@@ -48,6 +48,11 @@ vec3_t weaponvelocity;
 vec3_t flashlightangles;
 vec3_t flashlightoffset;
 
+#define DUCK_NOTDUCKED 0
+#define DUCK_BUTTON 1
+#define DUCK_CROUCHED 2
+int ducked;
+
 float radians(float deg);
 float degrees(float rad);
 bool isMultiplayer();

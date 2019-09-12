@@ -871,14 +871,16 @@ void GL_InitCommands( void )
 	r_drawentities = Cvar_Get( "r_drawentities", "1", CVAR_CHEAT|CVAR_ARCHIVE, "render entities" );
 	r_flaresize = Cvar_Get( "r_flaresize", "200", CVAR_ARCHIVE, "set flares size" );
 	r_lefthand = Cvar_Get( "hand", "0", CVAR_ARCHIVE, "viewmodel handedness" );
-	r_decals = Cvar_Get( "r_decals", "4096", 0, "sets the maximum number of decals" );
 	r_xpos = Cvar_Get( "r_xpos", "130", CVAR_GLCONFIG, "window position by horizontal" );
 	r_ypos = Cvar_Get( "r_ypos", "48", CVAR_GLCONFIG, "window position by vertical" );
 	r_underwater_distortion = Cvar_Get( "r_underwater_distortion", "0.4", CVAR_ARCHIVE, "underwater distortion speed" );
 	mp_decals = Cvar_Get( "mp_decals", "300", CVAR_ARCHIVE, "sets the maximum number of decals in multiplayer" );
 
 #ifdef VR
-	vr_worldscale = Cvar_Get( "vr_worldscale", "26.2467", CVAR_ARCHIVE, "Sets the world scale for stereo separation" );
+	vr_worldscale = Cvar_Get( "vr_worldscale", "40", CVAR_ARCHIVE, "Sets the world scale for stereo separation" );
+	r_decals = Cvar_Get( "r_decals", "256", 0, "sets the maximum number of decals" );
+#else
+	r_decals = Cvar_Get( "r_decals", "4096", 0, "sets the maximum number of decals" );
 #endif
 
 	gl_picmip = Cvar_Get( "gl_picmip", "0", CVAR_GLCONFIG, "reduces resolution of textures by powers of 2" );

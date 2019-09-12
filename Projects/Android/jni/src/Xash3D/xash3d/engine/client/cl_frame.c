@@ -1299,6 +1299,7 @@ CL_AddEntities
 Emits all entities, particles, and lights to the refresh
 ===============
 */
+extern convar_t	*vr_flashlight_model;
 void CL_AddEntities( void )
 {
 	if( cls.state != ca_active )
@@ -1315,7 +1316,8 @@ void CL_AddEntities( void )
 
 	// add flashlight model if required
 	if( cl.frame.client.flags & FL_HAS_FLASHLIGHT  &&
-		cl.refdef.weapon.flags != 1) // Make sure weapon isn't being stabilised
+		cl.refdef.weapon.flags != 1 && // Make sure weapon isn't being stabilised
+		vr_flashlight_model->integer)
 	{
 		CL_AttachFlashlightEntityToPlayer( "models/v_torch.mdl", cl.refdef.flashlight.org, cl.refdef.flashlight.angles.adjusted);
 	}

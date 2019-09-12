@@ -106,7 +106,10 @@ extern convar_t	*r_lefthand;
 
 enum control_scheme {
 	RIGHT_HANDED_DEFAULT = 0,
-	LEFT_HANDED_DEFAULT = 10
+	RIGHT_HANDED_ALT = 1,
+	LEFT_HANDED_DEFAULT = 10,
+	LEFT_HANDED_ALT = 11,
+	GAMEPAD = 20 //Not implemented, someone else can do this!
 };
 
 /*
@@ -806,15 +809,35 @@ void setWorldPosition( float x, float y, float z )
 
 void setHMDPosition( float x, float y, float z, float yaw )
 {
-    hmdPosition[0] = x;
-    hmdPosition[1] = y;
-    if (useScreenLayer())
+	static bool s_useScreen = false;
+
+	VectorSet(hmdPosition, x, y, z);
+
+    if (s_useScreen != useScreenLayer())
     {
+		s_useScreen = useScreenLayer();
+
+		//Record player height on transition
         playerHeight = y;
-    } else{
-    	playerYaw = yaw;
     }
-    hmdPosition[2] = z;
+
+	if (!useScreenLayer())
+    {
+    	playerYaw = yaw;
+
+    	if (vr_enable_crouching->integer) {
+            //Do we trigger crouching based on player height?
+            if (hmdPosition[1] < (playerHeight * 0.8f) &&
+                ducked == DUCK_NOTDUCKED) {
+                ducked = DUCK_CROUCHED;
+                sendButtonAction("+crouch", 1);
+            } else if (hmdPosition[1] > (playerHeight * 0.82f) &&
+                ducked == DUCK_CROUCHED) {
+                ducked = DUCK_NOTDUCKED;
+                sendButtonAction("+crouch", 0);
+            }
+        }
+	}
 }
 
 bool isMultiplayer()
@@ -841,11 +864,16 @@ static inline bool isHostAlive()
 			host.state != HOST_CRASHED);
 }
 
+void COM_SetRandomSeed( int lSeed );
+
 void RenderFrame( ovrRenderer * renderer, const ovrJava * java,
 											const ovrTracking2 * tracking, ovrMobile * ovr )
 {
     //if we are now shutting down, drop out here
     if (isHostAlive()) {
+
+    	//Seed the random number generator the same for each eye to ensure electricity is drawn the same
+		int lSeed = rand();
 
 		//Set everything up
 		Host_BeginFrame();
@@ -871,6 +899,10 @@ void RenderFrame( ovrRenderer * renderer, const ovrJava * java,
 
                 //Now do the drawing for this eye - Force the set as it is a "read only" cvar
                 Cvar_Set2("vr_stereo_side", eye == 0 ? "0" : "1", true);
+
+                //Sow the seed
+				COM_SetRandomSeed(lSeed);
+
                 Host_Frame();
             }
 
@@ -1032,93 +1064,6 @@ static void ovrApp_HandleVrModeChanges( ovrApp * app )
 		}
 	}
 }
-
-void handleTrackedControllerButton(ovrInputStateTrackedRemote * trackedRemoteState, ovrInputStateTrackedRemote * prevTrackedRemoteState, uint32_t button, int key)
-{
-    if ((trackedRemoteState->Buttons & button) != (prevTrackedRemoteState->Buttons & button))
-    {
-        Key_Event(key, (trackedRemoteState->Buttons & button) != 0);
-    }
-}
-
-
-static void Matrix4x4_Transform (const matrix4x4 *in, const float v[3], float out[3])
-{
-	out[0] = v[0] * (*in)[0][0] + v[1] * (*in)[0][1] + v[2] * (*in)[0][2] + (*in)[0][3];
-	out[1] = v[0] * (*in)[1][0] + v[1] * (*in)[1][1] + v[2] * (*in)[1][2] + (*in)[1][3];
-	out[2] = v[0] * (*in)[2][0] + v[1] * (*in)[2][1] + v[2] * (*in)[2][2] + (*in)[2][3];
-}
-
-void rotateAboutOrigin(float v1, float v2, float rotation, vec2_t out)
-{
-    vec3_t temp = {0.0f, 0.0f, 0.0f};
-    temp[0] = v1;
-    temp[1] = v2;
-
-    vec3_t v = {0.0f, 0.0f, 0.0f};
-    matrix4x4 matrix;
-	vec3_t angles = {0.0f, rotation, 0.0f};
-	vec3_t origin = {0.0f, 0.0f, 0.0f};
-    Matrix4x4_CreateFromEntity(matrix, angles, origin, 1.0f);
-    Matrix4x4_Transform(&matrix, temp, v);
-
-    out[0] = v[0];
-    out[1] = v[1];
-}
-
-void sendButtonAction(const char* action, long buttonDown)
-{
-    char command[256];
-    Q_snprintf( command, sizeof( command ), "%s\n", action );
-    if (!buttonDown)
-    {
-        command[0] = '-';
-    }
-    Cbuf_AddText( command );
-
-}
-
-float length(float x, float y)
-{
-	return sqrtf(powf(x, 2.0f) + powf(y, 2.0f));
-}
-
-#define NLF_DEADZONE 0.1
-#define NLF_POWER 2.2
-
-float nonLinearFilter(float in)
-{
-	float val = 0.0f;
-	if (in > NLF_DEADZONE)
-	{
-		val = in;
-		val -= NLF_DEADZONE;
-		val /= (1.0f - NLF_DEADZONE);
-		val = powf(val, NLF_POWER);
-	}
-	else if (in < -NLF_DEADZONE)
-	{
-		val = in;
-		val += NLF_DEADZONE;
-		val /= (1.0f - NLF_DEADZONE);
-		val = -powf(fabsf(val), NLF_POWER);
-	}
-
-	return val;
-}
-
-void sendButtonActionSimple(const char* action)
-{
-    char command[256];
-    Q_snprintf( command, sizeof( command ), "%s\n", action );
-    Cbuf_AddText( command );
-}
-
-bool between(float min, float val, float max)
-{
-	return (min < val) && (val < max);
-}
-
 
 
 /*
@@ -1364,11 +1309,12 @@ void VR_Init()
 	positional_movementSideways = 0.0f;
 	positional_movementForward = 0.0f;
 	snapTurn = 0.0f;
+	ducked = DUCK_NOTDUCKED;
 
 	//Create Cvars
 	vr_snapturn_angle = Cvar_Get( "vr_snapturn_angle", "45", CVAR_ARCHIVE, "Sets the angle for snap-turn, set to < 10.0 to enable smooth turning" );
 	vr_reloadtimeoutms = Cvar_Get( "vr_reloadtimeoutms", "200", CVAR_ARCHIVE, "How quickly the grip trigger needs to be release to initiate a reload" );
-	vr_positional_factor = Cvar_Get( "vr_positional_factor", "2600", CVAR_ARCHIVE, "Arbitrary number that makes positional tracking work" );
+	vr_positional_factor = Cvar_Get( "vr_positional_factor", "2800", CVAR_ARCHIVE, "Arbitrary number that makes positional tracking work" );
     vr_walkdirection = Cvar_Get( "vr_walkdirection", "0", CVAR_ARCHIVE, "1 - Use HMD for direction, 0 - Use off-hand controller for direction" );
 	vr_weapon_pitchadjust = Cvar_Get( "vr_weapon_pitchadjust", "-20.0", CVAR_ARCHIVE, "gun pitch angle adjust" );
     vr_weapon_recoil = Cvar_Get( "vr_weapon_recoil", "0", CVAR_ARCHIVE, "Enables weapon recoil in VR, default is disabled, warning could make you sick" );
@@ -1376,6 +1322,9 @@ void VR_Init()
     vr_lasersight = Cvar_Get( "vr_lasersight", "0", CVAR_ARCHIVE, "Enables laser-sight" );
     vr_fov = Cvar_Get( "vr_fov", "107", CVAR_ARCHIVE, "FOV for Lambda1VR" );
 	vr_control_scheme = Cvar_Get( "vr_control_scheme", "0", CVAR_ARCHIVE, "Controller Layout scheme" );
+	vr_enable_crouching = Cvar_Get( "vr_enable_crouching", "1", CVAR_ARCHIVE, "Crouching irl triggers ducking in game" );
+    vr_height_adjust = Cvar_Get( "vr_height_adjust", "0.0", CVAR_ARCHIVE, "Additional height adjustment for in-game player (in metres)" );
+    vr_flashlight_model = Cvar_Get( "vr_flashlight_model", "1", CVAR_ARCHIVE, "Set to 0 to prevent drawing the flashlight model" );
 
     //Not to be changed by users, as it will be overwritten anyway
 	vr_stereo_side = Cvar_Get( "vr_stereo_side", "0", CVAR_READ_ONLY, "Eye being drawn" );
@@ -1503,6 +1452,9 @@ void * AppThreadFunction( void * parm )
 			continue;
 		}
 
+        //Use floor based tracking space
+        vrapi_SetTrackingSpace(appState.Ovr, VRAPI_TRACKING_SPACE_LOCAL_FLOOR);
+
 		// Create the scene if not yet created.
 		// The scene is created here to be able to show a loading icon.
 		if ( !ovrScene_IsCreated( &appState.Scene ) )
@@ -1584,9 +1536,18 @@ void * AppThreadFunction( void * parm )
 				case RIGHT_HANDED_DEFAULT:
 					HandleInput_Right(appState.Ovr, appState.DisplayTime);
 					break;
+				case RIGHT_HANDED_ALT:
+					HandleInput_RightAlt(appState.Ovr, appState.DisplayTime);
+					break;
 				case LEFT_HANDED_DEFAULT:
 					HandleInput_Left(appState.Ovr, appState.DisplayTime);
 					break;
+				case LEFT_HANDED_ALT:
+					HandleInput_LeftAlt(appState.Ovr, appState.DisplayTime);
+					break;
+                case GAMEPAD:
+                    //HandleInput_Gamepad(appState.Ovr, appState.DisplayTime); // Someone else can implement this
+                    break;
 			}
 
 			static usingScreenLayer = true; //Starts off using the screen layer

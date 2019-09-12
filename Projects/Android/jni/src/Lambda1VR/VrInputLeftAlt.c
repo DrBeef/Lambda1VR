@@ -1,7 +1,7 @@
 /************************************************************************************
 
-Filename	:	VrInputRight.c 
-Content		:	Handles controller input for the left-handed
+Filename	:	VrInputRightAlt.c
+Content		:	Handles controller input for the left-handed alternative configuration #1
 Created		:	August 2019
 Authors		:	Simon Brown
 
@@ -29,10 +29,7 @@ extern cvar_t	*cl_movespeedkey;
 
 void Touch_Motion( touchEventType type, int fingerID, float x, float y, float dx, float dy );
 
-float initialTouchX, initialTouchY;
-
-
-void HandleInput_Left( ovrMobile * Ovr, double displayTime )
+void HandleInput_LeftAlt( ovrMobile * Ovr, double displayTime )
 {
 	//Ensure handedness is set to left
 	Cvar_Set("hand", "1");

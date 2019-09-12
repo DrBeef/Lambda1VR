@@ -1,7 +1,7 @@
 /************************************************************************************
 
-Filename	:	VrInputRight.c 
-Content		:	Handles controller input for the right-handed
+Filename	:	VrInputRightAlt.c
+Content		:	Handles controller input for the right-handed alternative configuration #1
 Created		:	August 2019
 Authors		:	Simon Brown
 
@@ -29,15 +29,15 @@ extern cvar_t	*cl_movespeedkey;
 
 void Touch_Motion( touchEventType type, int fingerID, float x, float y, float dx, float dy );
 
-void HandleInput_Right(ovrMobile * Ovr, double displayTime )
+void HandleInput_RightAlt(ovrMobile * Ovr, double displayTime )
 {
 	//Ensure handedness is set to right
 	Cvar_Set("hand", "0");
 
-	//Get info for tracked remotes
+    //Get info for tracked remotes
     acquireTrackedRemotesData(Ovr, displayTime);
 
-    static bool dominantGripPushed = false;
+	static bool dominantGripPushed = false;
 	static float dominantGripPushTime = 0.0f;
 
     //Show screen view (if in multiplayer toggle scoreboard)
