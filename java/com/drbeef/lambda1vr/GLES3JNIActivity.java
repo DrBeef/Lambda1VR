@@ -176,6 +176,9 @@ import static android.system.Os.setenv;
 			copy_asset("/sdcard/xash/valve/", "sound/weapons/grenade_pinpull.wav", true);
 			copy_asset("/sdcard/xash/valve/", "sound/weapons/grenade_throw.wav", true);
 			copy_asset("/sdcard/xash/valve/", "sound/weapons/grenade_draw.wav", true);
+			copy_asset("/sdcard/xash/valve/", "sound/weapons/explode3.wav", true);
+			copy_asset("/sdcard/xash/valve/", "sound/weapons/explode4.wav", true);
+			copy_asset("/sdcard/xash/valve/", "sound/weapons/explode5.wav", true);
 
 
 			copy_asset("/sdcard/xash/valve/", "models/v_crowbar.mdl", true);
