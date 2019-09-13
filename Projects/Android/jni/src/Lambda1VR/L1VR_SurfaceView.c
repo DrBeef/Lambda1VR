@@ -1407,14 +1407,14 @@ void * AppThreadFunction( void * parm )
 #ifndef DEMO
 						if (argc != 0)
 						{
-                            Host_Main(argc, argv, "valve", false, NULL);
+                            Host_Main(argc, (const char**)argv, "valve", false, NULL);
 						}
 						else
 #endif
 						{
 							int argc = 1; char *argv[] = { "xash3d" };
 
-                            Host_Main(argc, argv, "valve", false, NULL);
+                            Host_Main(argc, (const char**)argv, "valve", false, NULL);
 						}
 
 						xash_initialised = true;
@@ -1554,7 +1554,7 @@ void * AppThreadFunction( void * parm )
                     break;
 			}
 
-			static usingScreenLayer = true; //Starts off using the screen layer
+			static bool usingScreenLayer = true; //Starts off using the screen layer
 			if (usingScreenLayer != useScreenLayer())
 			{
                 usingScreenLayer = useScreenLayer();
