@@ -209,11 +209,8 @@ import static android.system.Os.setenv;
 			copy_asset("/sdcard/xash/valve/", "models/v_crossbow.mdl", true);
 			copy_asset("/sdcard/xash/valve/", "models/v_egon.mdl", true);
 			copy_asset("/sdcard/xash/valve/", "models/v_gauss.mdl", true);
-			copy_asset("/sdcard/xash/valve/", "models/v_grenade.mdl", true);
 			copy_asset("/sdcard/xash/valve/", "models/v_hgun.mdl", true);
-			copy_asset("/sdcard/xash/valve/", "models/v_rpg.mdl", true);
 
-			copy_asset("/sdcard/xash/valve/", "models/v_shotgun.mdl", true);
 			copy_asset("/sdcard/xash/valve/", "models/v_squeak.mdl", true);
 			copy_asset("/sdcard/xash/valve/", "models/v_tripmine.mdl", true);
 			copy_asset("/sdcard/xash/valve/", "models/v_torch.mdl", true);
