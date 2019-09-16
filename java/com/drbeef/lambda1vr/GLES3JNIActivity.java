@@ -197,6 +197,12 @@ import static android.system.Os.setenv;
 			copy_asset("/sdcard/xash/valve/", "sound/weapons/rocketfire1.wav", true);
 			copy_asset("/sdcard/xash/valve/", "sound/weapons/rpg7_reload.wav", true);
 
+			//Satchel
+			copy_asset("/sdcard/xash/valve/", "models/v_satchel.mdl", true);
+			copy_asset("/sdcard/xash/valve/", "models/v_satchel_radio.mdl", true);
+			copy_asset("/sdcard/xash/valve/", "models/w_satchel.mdl", true);
+			copy_asset("/sdcard/xash/valve/", "models/p_satchel.mdl", true);
+			copy_asset("/sdcard/xash/valve/", "models/p_satchel_radio.mdl", true);
 
 			copy_asset("/sdcard/xash/valve/", "models/v_crowbar.mdl", true);
 
@@ -206,8 +212,7 @@ import static android.system.Os.setenv;
 			copy_asset("/sdcard/xash/valve/", "models/v_grenade.mdl", true);
 			copy_asset("/sdcard/xash/valve/", "models/v_hgun.mdl", true);
 			copy_asset("/sdcard/xash/valve/", "models/v_rpg.mdl", true);
-			copy_asset("/sdcard/xash/valve/", "models/v_satchel.mdl", true);
-			copy_asset("/sdcard/xash/valve/", "models/v_satchel_radio.mdl", true);
+
 			copy_asset("/sdcard/xash/valve/", "models/v_shotgun.mdl", true);
 			copy_asset("/sdcard/xash/valve/", "models/v_squeak.mdl", true);
 			copy_asset("/sdcard/xash/valve/", "models/v_tripmine.mdl", true);
