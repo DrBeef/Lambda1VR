@@ -3721,6 +3721,8 @@ void R_RunViewmodelEvents( void )
 R_DrawViewModel
 =================
 */
+
+extern convar_t	*vr_mirror_weapons;
 void R_DrawViewModel( void )
 {
 	if( RI.refdef.onlyClientDraw || r_drawviewmodel->integer == 0 )
@@ -3750,8 +3752,8 @@ void R_DrawViewModel( void )
 	// hack the depth range to prevent view model from poking into walls
 	pglDepthRange( gldepthmin, gldepthmin + 0.3f * ( gldepthmax - gldepthmin ));
 
-	// backface culling for left-handed weapons
-	g_iBackFaceCull = r_lefthand->integer == 1;//R_LeftHand(); // GL_FrontFace is called in SetupStudioRenderer
+	// backface culling for mirrored weapons
+	g_iBackFaceCull = vr_mirror_weapons->integer == 1;//R_LeftHand(); // GL_FrontFace is called in SetupStudioRenderer
 	RI.currententity->curstate.scale = 1.0f;
 	RI.currententity->curstate.frame = 0;
 	RI.currententity->curstate.framerate = 1.0f;

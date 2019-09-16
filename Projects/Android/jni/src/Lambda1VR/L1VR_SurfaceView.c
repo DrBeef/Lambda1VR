@@ -1311,6 +1311,9 @@ void VR_Init()
 	snapTurn = 0.0f;
 	ducked = DUCK_NOTDUCKED;
 
+	//init randomiser
+	srand(time(NULL));
+
 	//Create Cvars
 	vr_snapturn_angle = Cvar_Get( "vr_snapturn_angle", "45", CVAR_ARCHIVE, "Sets the angle for snap-turn, set to < 10.0 to enable smooth turning" );
 	vr_reloadtimeoutms = Cvar_Get( "vr_reloadtimeoutms", "200", CVAR_ARCHIVE, "How quickly the grip trigger needs to be release to initiate a reload" );
@@ -1325,6 +1328,7 @@ void VR_Init()
 	vr_enable_crouching = Cvar_Get( "vr_enable_crouching", "1", CVAR_ARCHIVE, "Crouching irl triggers ducking in game" );
     vr_height_adjust = Cvar_Get( "vr_height_adjust", "0.0", CVAR_ARCHIVE, "Additional height adjustment for in-game player (in metres)" );
     vr_flashlight_model = Cvar_Get( "vr_flashlight_model", "1", CVAR_ARCHIVE, "Set to 0 to prevent drawing the flashlight model" );
+	vr_mirror_weapons = Cvar_Get( "vr_mirror_weapons", "0", CVAR_ARCHIVE, "Set to 1 to mirror the weapon models (for left handed use)" );
 
     //Not to be changed by users, as it will be overwritten anyway
 	vr_stereo_side = Cvar_Get( "vr_stereo_side", "0", CVAR_READ_ONLY, "Eye being drawn" );
@@ -1403,14 +1407,14 @@ void * AppThreadFunction( void * parm )
 #ifndef DEMO
 						if (argc != 0)
 						{
-                            Host_Main(argc, argv, "valve", false, NULL);
+                            Host_Main(argc, (const char**)argv, "valve", false, NULL);
 						}
 						else
 #endif
 						{
 							int argc = 1; char *argv[] = { "xash3d" };
 
-                            Host_Main(argc, argv, "valve", false, NULL);
+                            Host_Main(argc, (const char**)argv, "valve", false, NULL);
 						}
 
 						xash_initialised = true;
@@ -1550,7 +1554,7 @@ void * AppThreadFunction( void * parm )
                     break;
 			}
 
-			static usingScreenLayer = true; //Starts off using the screen layer
+			static bool usingScreenLayer = true; //Starts off using the screen layer
 			if (usingScreenLayer != useScreenLayer())
 			{
                 usingScreenLayer = useScreenLayer();

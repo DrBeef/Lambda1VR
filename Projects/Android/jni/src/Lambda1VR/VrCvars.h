@@ -15,6 +15,7 @@ convar_t	*vr_control_scheme;
 convar_t	*vr_enable_crouching;
 convar_t	*vr_height_adjust;
 convar_t	*vr_flashlight_model;
+convar_t	*vr_mirror_weapons;
 
 //Used and updated continuously during rendering
 convar_t	*vr_stereo_side;
