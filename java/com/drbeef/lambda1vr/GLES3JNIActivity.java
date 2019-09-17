@@ -204,18 +204,23 @@ import static android.system.Os.setenv;
 			copy_asset("/sdcard/xash/valve/", "models/p_satchel.mdl", true);
 			copy_asset("/sdcard/xash/valve/", "models/p_satchel_radio.mdl", true);
 
+			//Tripmine
+			copy_asset("/sdcard/xash/valve/", "models/v_tripmine.mdl", true);
+			copy_asset("/sdcard/xash/valve/", "models/p_tripmine.mdl", true);
+			copy_asset("/sdcard/xash/valve/", "sound/weapons/mine_activate.wav", true);
+			copy_asset("/sdcard/xash/valve/", "sound/weapons/mine_deploy.wav", true);
+			copy_asset("/sdcard/xash/valve/", "sound/weapons/tripmine_ant.wav", true);
+			copy_asset("/sdcard/xash/valve/", "sound/weapons/tripmine_button.wav", true);
+			copy_asset("/sdcard/xash/valve/", "sound/weapons/tripmine_move.wav", true);
+
+
 			copy_asset("/sdcard/xash/valve/", "models/v_crowbar.mdl", true);
 
 			copy_asset("/sdcard/xash/valve/", "models/v_crossbow.mdl", true);
 			copy_asset("/sdcard/xash/valve/", "models/v_egon.mdl", true);
 			copy_asset("/sdcard/xash/valve/", "models/v_gauss.mdl", true);
-			copy_asset("/sdcard/xash/valve/", "models/v_grenade.mdl", true);
 			copy_asset("/sdcard/xash/valve/", "models/v_hgun.mdl", true);
-			copy_asset("/sdcard/xash/valve/", "models/v_rpg.mdl", true);
-
-			copy_asset("/sdcard/xash/valve/", "models/v_shotgun.mdl", true);
 			copy_asset("/sdcard/xash/valve/", "models/v_squeak.mdl", true);
-			copy_asset("/sdcard/xash/valve/", "models/v_tripmine.mdl", true);
 			copy_asset("/sdcard/xash/valve/", "models/v_torch.mdl", true);
 		}
 
