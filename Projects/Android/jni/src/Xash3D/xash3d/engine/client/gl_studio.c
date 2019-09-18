@@ -3761,7 +3761,15 @@ void R_DrawViewModel( void )
 		cl.weaponstarttime = cl.time;
 	RI.currententity->curstate.animtime = cl.weaponstarttime;
 	RI.currententity->curstate.sequence = cl.weaponseq;
+
+	//If we aren't mirroring weapons, turn off culling for the viewmodel
+	if (!g_iBackFaceCull)
+		pglDisable(GL_CULL_FACE);
+	
 	pStudioDraw->StudioDrawModel( STUDIO_RENDER | STUDIO_VIEWMODEL );
+
+	if (!g_iBackFaceCull)
+		pglEnable(GL_CULL_FACE);
 
 	// restore depth range
 	pglDepthRange( gldepthmin, gldepthmax );
