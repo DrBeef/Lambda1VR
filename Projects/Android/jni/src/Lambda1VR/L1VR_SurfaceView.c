@@ -1329,6 +1329,7 @@ void VR_Init()
     vr_height_adjust = Cvar_Get( "vr_height_adjust", "0.0", CVAR_ARCHIVE, "Additional height adjustment for in-game player (in metres)" );
     vr_flashlight_model = Cvar_Get( "vr_flashlight_model", "1", CVAR_ARCHIVE, "Set to 0 to prevent drawing the flashlight model" );
 	vr_mirror_weapons = Cvar_Get( "vr_mirror_weapons", "0", CVAR_ARCHIVE, "Set to 1 to mirror the weapon models (for left handed use)" );
+    vr_weapon_backface_culling = Cvar_Get( "vr_weapon_backface_culling", "0", CVAR_ARCHIVE, "Use to enable whether back face culling is used on weapon viewmodel" );
 
     //Not to be changed by users, as it will be overwritten anyway
 	vr_stereo_side = Cvar_Get( "vr_stereo_side", "0", CVAR_READ_ONLY, "Eye being drawn" );
