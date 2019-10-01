@@ -224,12 +224,30 @@ import static android.system.Os.setenv;
 			copy_asset("/sdcard/xash/valve/", "sound/weapons/xbow_reload1.wav", true);
 
 
-			copy_asset("/sdcard/xash/valve/", "models/v_crowbar.mdl", true);
+			//Egon (Overhaul)
 			copy_asset("/sdcard/xash/valve/", "models/v_egon.mdl", true);
-			copy_asset("/sdcard/xash/valve/", "models/v_gauss.mdl", true);
-			copy_asset("/sdcard/xash/valve/", "models/v_hgun.mdl", true);
-			copy_asset("/sdcard/xash/valve/", "models/v_squeak.mdl", true);
+			copy_asset("/sdcard/xash/valve/", "models/p_egon.mdl", true);
+			copy_asset("/sdcard/xash/valve/", "models/w_egon.mdl", true);
 
+			//Gauss (Overhaul)
+			copy_asset("/sdcard/xash/valve/", "models/v_gauss.mdl", true);
+			copy_asset("/sdcard/xash/valve/", "models/p_gauss.mdl", true);
+			copy_asset("/sdcard/xash/valve/", "models/w_gauss.mdl", true);
+			copy_asset("/sdcard/xash/valve/", "models/w_gaussammo.mdl", true);
+
+			//HGun (Overhaul)
+			copy_asset("/sdcard/xash/valve/", "models/v_hgun.mdl", true);
+			copy_asset("/sdcard/xash/valve/", "models/p_hgun.mdl", true);
+			copy_asset("/sdcard/xash/valve/", "models/w_hgun.mdl", true);
+
+			//Squeak (Overhaul)
+			copy_asset("/sdcard/xash/valve/", "models/v_squeak.mdl", true);
+			copy_asset("/sdcard/xash/valve/", "models/p_squeak.mdl", true);
+			copy_asset("/sdcard/xash/valve/", "models/w_squeak.mdl", true);
+			copy_asset("/sdcard/xash/valve/", "models/w_sqknest.mdl", true);
+
+
+			copy_asset("/sdcard/xash/valve/", "models/v_crowbar.mdl", true);
 			copy_asset("/sdcard/xash/valve/", "models/v_torch.mdl", true);
 		}
 
