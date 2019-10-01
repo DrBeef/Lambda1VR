@@ -3723,6 +3723,8 @@ R_DrawViewModel
 */
 
 extern convar_t	*vr_mirror_weapons;
+extern convar_t	*vr_weapon_backface_culling;
+
 void R_DrawViewModel( void )
 {
 	if( RI.refdef.onlyClientDraw || r_drawviewmodel->integer == 0 )
@@ -3752,8 +3754,9 @@ void R_DrawViewModel( void )
 	// hack the depth range to prevent view model from poking into walls
 	pglDepthRange( gldepthmin, gldepthmin + 0.3f * ( gldepthmax - gldepthmin ));
 
-	// backface culling for mirrored weapons
-	g_iBackFaceCull = vr_mirror_weapons->integer == 1;//R_LeftHand(); // GL_FrontFace is called in SetupStudioRenderer
+	// face culling for mirrored weapons - not base on handedness
+	g_iBackFaceCull = vr_mirror_weapons->value == 1;
+
 	RI.currententity->curstate.scale = 1.0f;
 	RI.currententity->curstate.frame = 0;
 	RI.currententity->curstate.framerate = 1.0f;
@@ -3762,14 +3765,18 @@ void R_DrawViewModel( void )
 	RI.currententity->curstate.animtime = cl.weaponstarttime;
 	RI.currententity->curstate.sequence = cl.weaponseq;
 
-	//If we aren't mirroring weapons, turn off culling for the viewmodel
-	if (!g_iBackFaceCull)
-		pglDisable(GL_CULL_FACE);
-	
+	//Optional culling for the viewmodel
+	if (vr_weapon_backface_culling->value == 0) {
+        clgame.ds.cullMode = GL_NONE;
+        pglDisable(GL_CULL_FACE);
+    }
+
 	pStudioDraw->StudioDrawModel( STUDIO_RENDER | STUDIO_VIEWMODEL );
 
-	if (!g_iBackFaceCull)
-		pglEnable(GL_CULL_FACE);
+	if (vr_weapon_backface_culling->value == 0) {
+        clgame.ds.cullMode = GL_FRONT;
+        pglEnable(GL_CULL_FACE);
+    }
 
 	// restore depth range
 	pglDepthRange( gldepthmin, gldepthmax );
