@@ -50,6 +50,7 @@ Before you ask... YES!, the crowbar has to be swung in real life to smash stuff!
 ### Left-handed people
 
 Add the following cvar to your config.cfg file:  vr_control_scheme "10"
+
 If left handed players wish to mirror the weapons to avoid seeing the gaps in some of the weapon models then set the following cvar in config.cfg:  vr_mirror_weapons "1"
 
 
@@ -96,14 +97,12 @@ This is the primary/default button mapping, an alternative configuration that mi
 
 ## Known Issues
 
-Hopefully there will be fixes in time for most of the following, but rather than delay release any longer, none of could be considered show-stoppers:
-
 * Application crashes when you complete the Hazard Course
-* No way to enter text at the moment
+* No way to enter text
 * Positional tracking doesn't really work on multi-player servers (unless you run your own server and set the following cvar:  sv_accelerate 10000), it sort of works if you hold down the "run" trigger, but it isn't very good
 * Lambda1VR will crash if you haven't copied the half-life game assets to the right location, no warning, just crash
 * Complaint when you exit that the app did not shutdown properly (or crashed or something).. since you are quitting this wasn't considered serious enough to hold up the release, but will be fixed in a future update
-
+* The edges of some textures are still corrupting when the flashlight shines on them
 
 ## Future To-Dos
 
@@ -136,7 +135,7 @@ I would like to thank the following teams and individual for making this possibl
 * Max Vollmer for their 2017 Half-Life VR mod, of which I used and modified the 6DoF weapons code for this mod, the original code for which can be seen here: https://github.com/maxvollmer/Half-Life-VR
 * The SideQuest team - For making it easy for people to install this
 * https://github.com/formicsapien for the weapon models that were used in the first couple of releases
-* Please go to 
+* Please go to https://www.lambda1vr.com/modifications.html for a full list of credits for weapon models used in the current version
 
 
 ## Notice of Non-Affiliation and Disclaimers
