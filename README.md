@@ -39,17 +39,23 @@ Before attempting to start Lambda1VR you need to do the following:
 ## Save Games File
 
 Save game files are stored on the internal memory of your quest in the xash/valve folder. This means that if you uninstall/reinstall Lambda1VR all the saves are retained. If you change headset just make sure you copy {quest}/xash/valve/save to the new Quest.
+Any update will not affect any of your save game files.
 
 
 ## Controls
 
 Before you ask... YES!, the crowbar has to be swung in real life to smash stuff! (except in multi-player, you still have to press the trigger I'm afraid).
 
+
 ### Left-handed people
-add the following cvar to your config.cfg file:  hand "1"
+
+Add the following cvar to your config.cfg file:  vr_control_scheme "10"
+If left handed players wish to mirror the weapons to avoid seeing the gaps in some of the weapon models then set the following cvar in config.cfg:  vr_mirror_weapons "1"
 
 
-### Button / Controller Mappings
+### Button / Controller Mappings (Primary configuration)
+
+This is the primary/default button mapping, an alternative configuration that might suit smooth turn locomotion players will be coming soon..
 
 |Dominant Hand Controller||
 | --- | --- |
@@ -58,29 +64,25 @@ add the following cvar to your config.cfg file:  hand "1"
 |Grip (Hold)|Enable secondary fire|
 |Grip (Quick Click)|Reload|
 |Click Thumbstick|Use (action)|
+|Thumbstick Left/Right|Turn|
+|Thumbstick Up/Down|Select Weapon (Fire to accept new weapon)|
+|A / X (depending on dominant hand controller)|Crouch*|
+|B / Y (depending on dominant hand controller)|Jump|
+
+\* If you physically crouch in real life, then when the proper duck mechanic is triggered in-game you will see a HUD indicator in the top-right of the view
 
 |Off-hand Controller||
 | --- | --- |
+|Thumbstick|Move/Strafe|
+|Menu Button|Menu|
+|X / A (depending on off-hand controller)|Flashlight on/off|
+|Y / B (depending on off-hand controller)|Toggle screen mode for cut-scenes (Show multi-player score table in multi-player games)|
 |Orientation/Position|Flashlight Orientation/Position|
 |Trigger|Hold down to run)|
 |Grip (hold)|Weapon Stabilise (hold to remain active)*|
-|Click Thumbstick|**reserved for future use**|
+|Click Thumbstick|Enable/Disable Laser Aim|
 
-\* Weapon stabilisation has a deadzone when the two controllers are less than 15cm from each other to prevent screwing up aiming with the Glock etc
-
-|Left Controller Specific||
-| --- | --- |
-|Thumbstick|Move/Strafe|
-|Menu Button|Menu|
-|X|Flashlight on/off|
-|Y|Show multi-player score table (switches to screen layer view while Y is held down)|
-
-|Right Controller Specific||
-| --- | --- |
-|Thumbstick Left/Right|Turn|
-|Thumbstick Up/Down|Select Weapon (Fire to accept new weapon)|
-|A|Crouch|
-|B|Jump|
+\* Weapon stabilisation has a deadzone when the two controllers are less than 15cm from each other to prevent screwing up two-handed aiming with the Glock etc
 
 
 ## Things to note / FAQs
@@ -91,13 +93,12 @@ add the following cvar to your config.cfg file:  hand "1"
 * If the player height is messed up. Try reseting the view by holding the home button for 2 seconds. After that go into the main menu and back into the game.
 * After changing files in xash/vale folder, often the device needs to be restarted for the game to use the changed files.
 
+
 ## Known Issues
 
 Hopefully there will be fixes in time for most of the following, but rather than delay release any longer, none of could be considered show-stoppers:
 
-* *After a load or transition the crowbar and some other weapons' position is not located at the right controller, change weapon and then back again to resolve* - I am looking into this and hope to fix it in a future update
 * Application crashes when you complete the Hazard Course
-* RPG (and some other weapons) laser-targetting is based on head orientation
 * No way to enter text at the moment
 * Positional tracking doesn't really work on multi-player servers (unless you run your own server and set the following cvar:  sv_accelerate 10000), it sort of works if you hold down the "run" trigger, but it isn't very good
 * Lambda1VR will crash if you haven't copied the half-life game assets to the right location, no warning, just crash
@@ -107,8 +108,7 @@ Hopefully there will be fixes in time for most of the following, but rather than
 ## Future To-Dos
 
 * Text entry / Virtual Keyboard - Frustratingly the Quest virtual keyboard isn't available through the native SDK :(
-* Add a flashlight model for the left hand when not stabilising a weapon
-* Better grenade throwing mechanics (pretty janky at the moment)
+
 
 ## Building
 
@@ -130,12 +130,13 @@ Alternatively you can use the docker image created by BrainSlugs83 which can be 
 
 I would like to thank the following teams and individual for making this possible:
 
-* Baggyg - My long-time VR friend whose roles in this have been varied and all helpful, also the creator of excellent websites/artwork/assets for this mod
-* The Xash3D team
+* Baggyg - My long-time VR friend whose roles in this have been varied and all helpful, also the creator of excellent websites/artwork/assets for this mod and more recently becoming something of a MilkShape guru
+* The Xash3D team / Uncle Mike
 * GLE4ES without which this wouldn't have worked at all: https://github.com/ptitSeb/gl4es
 * Max Vollmer for their 2017 Half-Life VR mod, of which I used and modified the 6DoF weapons code for this mod, the original code for which can be seen here: https://github.com/maxvollmer/Half-Life-VR
 * The SideQuest team - For making it easy for people to install this
-* https://github.com/formicsapien for the weapon models that work much better with 6DoF
+* https://github.com/formicsapien for the weapon models that were used in the first couple of releases
+* Please go to 
 
 
 ## Notice of Non-Affiliation and Disclaimers
