@@ -246,8 +246,17 @@ import static android.system.Os.setenv;
 			copy_asset("/sdcard/xash/valve/", "models/w_squeak.mdl", true);
 			copy_asset("/sdcard/xash/valve/", "models/w_sqknest.mdl", true);
 
-
+			//Crowbar
 			copy_asset("/sdcard/xash/valve/", "models/v_crowbar.mdl", true);
+			copy_asset("/sdcard/xash/valve/", "models/w_crowbar.mdl", true);
+			copy_asset("/sdcard/xash/valve/", "sound/weapons/cbar_draw.wav", true);
+			copy_asset("/sdcard/xash/valve/", "sound/weapons/cbar_hit1.wav", true);
+			copy_asset("/sdcard/xash/valve/", "sound/weapons/cbar_hit2.wav", true);
+			copy_asset("/sdcard/xash/valve/", "sound/weapons/cbar_hitbod1.wav", true);
+			copy_asset("/sdcard/xash/valve/", "sound/weapons/cbar_hitbod2.wav", true);
+			copy_asset("/sdcard/xash/valve/", "sound/weapons/cbar_hitbod3.wav", true);
+			copy_asset("/sdcard/xash/valve/", "sound/weapons/cbar_miss1.wav", true);
+
 			copy_asset("/sdcard/xash/valve/", "models/v_torch.mdl", true);
 		}
 
