@@ -81,7 +81,7 @@ PFNEGLGETSYNCATTRIBKHRPROC		eglGetSyncAttribKHR;
 int CPU_LEVEL			= 2;
 int GPU_LEVEL			= 3;
 int NUM_MULTI_SAMPLES	= 1;
-float SS_MULTIPLIER    = 1.25f;
+float SS_MULTIPLIER    = 2.0f;
 
 vec2_t cylinderSize = {1280, 720};
 
