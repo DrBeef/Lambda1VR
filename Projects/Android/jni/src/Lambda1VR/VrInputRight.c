@@ -38,6 +38,7 @@ void HandleInput_Right(ovrMobile * Ovr, double displayTime )
     acquireTrackedRemotesData(Ovr, displayTime);
 
     static bool dominantGripPushed = false;
+    static int grabMeleeWeapon = 0;
 	static float dominantGripPushTime = 0.0f;
 
     //Show screen view (if in multiplayer toggle scoreboard)
@@ -173,19 +174,33 @@ void HandleInput_Right(ovrMobile * Ovr, double displayTime )
             if ((rightTrackedRemoteState_new.Buttons & ovrButton_GripTrigger) !=
                 (rightTrackedRemoteState_old.Buttons & ovrButton_GripTrigger)) {
 
-                dominantGripPushed = (rightTrackedRemoteState_new.Buttons & ovrButton_GripTrigger);
+                dominantGripPushed = (rightTrackedRemoteState_new.Buttons &
+                                      ovrButton_GripTrigger) != 0;
 
-                if (dominantGripPushed)
+                if (grabMeleeWeapon == 0)
                 {
-                    dominantGripPushTime = GetTimeInMilliSeconds();
-                }
-                else
-                {
-                    if ((GetTimeInMilliSeconds() - dominantGripPushTime) < vr_reloadtimeoutms->integer)
-                    {
-                        sendButtonActionSimple("+reload");
-                        finishReloadNextFrame = true;
+                    if (rightRemoteTracking_new.Status & VRAPI_TRACKING_STATUS_POSITION_TRACKED) {
+
+                        if (dominantGripPushed) {
+                            dominantGripPushTime = GetTimeInMilliSeconds();
+                        } else {
+                            if ((GetTimeInMilliSeconds() - dominantGripPushTime) <
+                                vr_reloadtimeoutms->integer) {
+                                sendButtonActionSimple("+reload");
+                                finishReloadNextFrame = true;
+                            }
+                        }
+                    } else{
+                        if (dominantGripPushed) {
+                            //Initiate crowbar from backpack mode
+                            sendButtonActionSimple("weapon_crowbar");
+                            grabMeleeWeapon = 1;
+                        }
                     }
+                } else if (grabMeleeWeapon == 1 && !dominantGripPushed) {
+                    //Restores last used weapon
+                    sendButtonActionSimple("lastinv");
+                    grabMeleeWeapon = 0;
                 }
             }
         }
@@ -334,12 +349,12 @@ void HandleInput_Right(ovrMobile * Ovr, double displayTime )
                  (leftTrackedRemoteState_old.Buttons & ovrButton_X)) &&
                 (leftTrackedRemoteState_old.Buttons & ovrButton_X)) {
                 sendButtonActionSimple("impulse 100");
-/*
+
 #ifndef NDEBUG
 				Cbuf_AddText( "sv_cheats 1\n" );
 				Cbuf_AddText( "impulse 101\n" );
 #endif
-*/            }
+            }
 
 
             //We need to record if we have started firing primary so that releasing trigger will stop definitely firing, if user has pushed grip

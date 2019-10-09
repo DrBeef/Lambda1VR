@@ -41,6 +41,7 @@ void HandleInput_Left( ovrMobile * Ovr, double displayTime )
     acquireTrackedRemotesData(Ovr, displayTime);
 
 	static bool dominantGripPushed = false;
+	static int grabMeleeWeapon = 0;
 	static float dominantGripPushTime = 0.0f;
 
 	//Show screen view (if in multiplayer toggle scoreboard)
@@ -176,19 +177,33 @@ void HandleInput_Left( ovrMobile * Ovr, double displayTime )
 			if ((leftTrackedRemoteState_new.Buttons & ovrButton_GripTrigger) !=
 				(leftTrackedRemoteState_old.Buttons & ovrButton_GripTrigger)) {
 
-				dominantGripPushed = (leftTrackedRemoteState_new.Buttons & ovrButton_GripTrigger);
+				dominantGripPushed = (leftTrackedRemoteState_new.Buttons &
+									  ovrButton_GripTrigger) != 0;
 
-				if (dominantGripPushed)
+				if (grabMeleeWeapon == 0)
 				{
-					dominantGripPushTime = GetTimeInMilliSeconds();
-				}
-				else
-				{
-					if ((GetTimeInMilliSeconds() - dominantGripPushTime) < vr_reloadtimeoutms->integer)
-					{
-						sendButtonActionSimple("+reload");
-						finishReloadNextFrame = true;
+					if (leftRemoteTracking_new.Status & VRAPI_TRACKING_STATUS_POSITION_TRACKED) {
+
+						if (dominantGripPushed) {
+							dominantGripPushTime = GetTimeInMilliSeconds();
+						} else {
+							if ((GetTimeInMilliSeconds() - dominantGripPushTime) <
+								vr_reloadtimeoutms->integer) {
+								sendButtonActionSimple("+reload");
+								finishReloadNextFrame = true;
+							}
+						}
+					} else{
+						if (dominantGripPushed) {
+							//Initiate crowbar from backpack mode
+							sendButtonActionSimple("weapon_crowbar");
+							grabMeleeWeapon = 1;
+						}
 					}
+				} else if (grabMeleeWeapon == 1 && !dominantGripPushed) {
+					//Restores last used weapon
+					sendButtonActionSimple("lastinv");
+					grabMeleeWeapon = 0;
 				}
 			}
 		}
