@@ -56,6 +56,12 @@ If left handed players wish to mirror the weapons to avoid seeing the gaps in so
 
 ### Button / Controller Mappings (Primary configuration)
 
+#### "BackPack"
+
+You can get quick access to the crowbar by reaching behind (so the controller is obscured) and then holding down the grip trigger, this will then auto-switch to the crowbar whilst the grip trigger remains held down. As soon as you release the grip you will switch back to the weapon you had selected previously. This is an excellent way to quickly smash boxes/vents etc without the hassle of cycling through the weapon selector for the crowbar.
+
+#### Mappings
+
 This is the primary/default button mapping, an alternative configuration that might suit smooth turn locomotion players will be coming soon..
 
 |Dominant Hand Controller||
@@ -84,6 +90,25 @@ This is the primary/default button mapping, an alternative configuration that mi
 |Click Thumbstick|Enable/Disable Laser Aim|
 
 \* Weapon stabilisation has a deadzone when the two controllers are less than 15cm from each other to prevent screwing up two-handed aiming with the Glock etc
+
+## Command Line Parameters
+
+It is possible to supply command line parameter to the xash engine (and the Lambda1VR wrapper) using the commandline.txt file. The following command line parameters are supported by Lambda1VR (for a list of command line params supported by the Xash3D engine please see the Xash3D documentation):
+
+for example you might use:
+
+```
+xash3d -log --supersampling 1.5 --msaa 2
+```
+
+Which will set super sampling to 1.5 and msaa to 2.
+
+|Parameter|Values|Desription|
+| --- | --- | --- |
+|supersampling|0.1 upwards (default: 1.25)|Sets the super (or under) sampling value|
+|msaa|1, 2, 4 (default: 4)|Sets the MSAA anti-aliasing value|
+|cpu|1-4 (default: 2)|Sets the CPU scaler|
+|gpu|1-4 (default: 3)|Sets the GPU scaler|
 
 
 ## Things to note / FAQs
