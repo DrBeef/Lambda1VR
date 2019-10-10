@@ -28,37 +28,27 @@ GNU General Public License for more details.
 
 mobile_engfuncs_t *gMobileEngfuncs;
 
-convar_t *vibration_length;
 convar_t *vibration_enable;
 
-static void pfnVibrate( float life, char flags )
+static void pfnVibrate( float duration, int channel, float intensity )
 {
-	if( !vibration_enable->integer )
-		return;
-
-	if( life < 0.0f )
-	{
-		MsgDev( D_WARN, "Negative vibrate time: %f\n", life );
-		return;
-	}
-
 	//MsgDev( D_NOTE, "Vibrate: %f %d\n", life, flags );
 
 	// here goes platform-specific backends
 #ifdef __ANDROID__
-	Android_Vibrate( life * vibration_length->value, flags );
+	Android_Vibrate( duration, channel, intensity );
 #endif
 }
 
 static void Vibrate_f()
 {
-	if( Cmd_Argc() != 2 )
+	if( Cmd_Argc() != 4 )
 	{
-		Msg( "Usage: vibrate <time>\n" );
+		Msg( "Usage: vibrate <time> <channel> <intensity>\n" );
 		return;
 	}
 
-	pfnVibrate( Q_atof( Cmd_Argv(1) ), VIBRATE_NORMAL );
+	pfnVibrate( Q_atof( Cmd_Argv(1) ), Q_atoi( Cmd_Argv(2) ), Q_atof( Cmd_Argv(3) ));
 }
 
 static void pfnEnableTextInput( int enable )
@@ -140,7 +130,6 @@ void Mobile_Init( void )
 	}
 
 	Cmd_AddCommand( "vibrate", (xcommand_t)Vibrate_f, "Vibrate for specified time");
-	vibration_length = Cvar_Get( "vibration_length", "1.0", CVAR_ARCHIVE, "Vibration length");
 	vibration_enable = Cvar_Get( "vibration_enable", "1", CVAR_ARCHIVE, "Enable vibration");
 }
 

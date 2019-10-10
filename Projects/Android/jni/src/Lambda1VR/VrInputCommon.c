@@ -135,9 +135,11 @@ void acquireTrackedRemotesData(const ovrMobile *Ovr, double displayTime) {//The 
                 if (remoteCapabilities.ControllerCapabilities & ovrControllerCaps_RightHand) {
                     rightTrackedRemoteState_new = trackedRemoteState;
                     rightRemoteTracking_new = remoteTracking;
+                    controllerIDs[1] = cap.DeviceID;
                 } else{
                     leftTrackedRemoteState_new = trackedRemoteState;
                     leftRemoteTracking_new = remoteTracking;
+                    controllerIDs[0] = cap.DeviceID;
                 }
             }
         }

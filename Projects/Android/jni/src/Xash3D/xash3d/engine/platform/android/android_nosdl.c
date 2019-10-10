@@ -946,19 +946,6 @@ void Android_EnableTextInput( qboolean enable, qboolean force )
 
 /*
 ========================
-Android_Vibrate
-========================
-*/
-void Android_Vibrate( float life, char flags )
-{
-    return;
-
-	if( life )
-		(*jni.env)->CallStaticVoidMethod( jni.env, jni.actcls, jni.vibrate, (int)life );
-}
-
-/*
-========================
 Android_GetNativeObject
 ========================
 */

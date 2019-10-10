@@ -39,7 +39,6 @@ private:
 	void _Init() override;
 	void _VidInit() override;
 	void GetConfig();
-	void VibrateChanged();
 	void SaveAndPopMenu() override;
 
 	void LerpingCvarWrite();
@@ -69,30 +68,12 @@ void CMenuAudio::GetConfig( void )
 	soundVolume.LinkCvar( "volume" );
 	musicVolume.LinkCvar( "MP3Volume" );
 	suitVolume.LinkCvar( "suitvolume" );
-	vibration.LinkCvar( "vibration_length" );
 
 	lerping.LinkCvar( "s_lerping", CMenuEditable::CVAR_VALUE );
 	noDSP.LinkCvar( "dsp_off" );
 	muteFocusLost.LinkCvar( "snd_mute_losefocus" );
 	vibrationEnable.LinkCvar( "vibration_enable" );
 	reverseChannels.LinkCvar( "s_reverse_channels" );
-
-	if( !vibrationEnable.bChecked )
-		vibration.SetGrayed( true );
-	oldVibrate = vibration.GetCurrentValue();
-}
-
-void CMenuAudio::VibrateChanged()
-{
-	float newVibrate = vibration.GetCurrentValue();
-	if( oldVibrate != newVibrate )
-	{
-		char cmd[64];
-		snprintf( cmd, 64, "vibrate %f", newVibrate );
-		EngFuncs::ClientCmd( FALSE, cmd );
-		vibration.WriteCvar();
-		oldVibrate = newVibrate;
-	}
 }
 
 /*
@@ -165,11 +146,6 @@ void CMenuAudio::_Init( void )
 	vibrationEnable.onChanged = CMenuCheckBox::BitMaskCb;
 	vibrationEnable.onChanged.pExtra = &vibration.iFlags;
 	vibrationEnable.SetCoord( 700, 470 );
-
-	vibration.SetNameAndStatus( "Vibration", "Default vibration length" );
-	vibration.Setup( 0.0f, 5.0f, 0.05f );
-	vibration.onChanged = VoidCb( &CMenuAudio::VibrateChanged );
-	vibration.SetCoord( 700, 570 );
 
 	reverseChannels.SetNameAndStatus( "Reverse audio channels", "Use it when you can't swap your headphones' speakers" );
 	reverseChannels.onChanged = CMenuEditable::WriteCvarCb;

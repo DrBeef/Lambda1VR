@@ -194,6 +194,7 @@ void HandleInput_Right(ovrMobile * Ovr, double displayTime )
                         if (dominantGripPushed) {
                             //Initiate crowbar from backpack mode
                             sendButtonActionSimple("weapon_crowbar");
+                            Android_Vibrate(80, 1, 0.8); // vibrate to let user know they switched
                             grabMeleeWeapon = 1;
                         }
                     }

@@ -19,7 +19,7 @@ GNU General Public License for more details.
 //
 // mobility interface implementation
 //
-void Android_Vibrate( float life, char flags );
+void Android_Vibrate( float duration, int channel, float intensity );
 void *Android_GetNativeObject( const char *obj );
 
 void Android_ShellExecute( const char *path, const char *parms );

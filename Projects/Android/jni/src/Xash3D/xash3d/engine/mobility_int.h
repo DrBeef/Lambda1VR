@@ -44,7 +44,7 @@ typedef struct mobile_engfuncs_s
 
 	// vibration control
 	// life -- time to vibrate in ms
-	void (*pfnVibrate)( float life, char flags );
+	void (*pfnVibrate)( float duration, int channel, float intensity );
 
 	// enable text input
 	void (*pfnEnableTextInput)( int enable );

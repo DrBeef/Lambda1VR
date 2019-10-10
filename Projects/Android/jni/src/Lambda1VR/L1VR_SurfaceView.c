@@ -1327,6 +1327,33 @@ void Android_MessageBox(const char *title, const char *text)
     ALOGE("%s %s", title, text);
 }
 
+
+/*
+========================
+Android_Vibrate
+========================
+*/
+
+//0 = left, 1 = right
+float vibration_channel_duration[2] = {0.0f, 0.0f};
+float vibration_channel_intensity[2] = {0.0f, 0.0f};
+extern convar_t *vibration_enable;
+
+void Android_Vibrate( float duration, int channel, float intensity )
+{
+	if( !vibration_enable->integer )
+		return;
+
+	if (vibration_channel_duration[channel] > 0.0f)
+		return;
+
+	if (vibration_channel_duration[channel] == -1.0f &&	duration != 0.0f)
+		return;
+
+	vibration_channel_duration[channel] = duration;
+	vibration_channel_intensity[channel] = intensity;
+}
+
 void initialize_gl4es();
 
 void VR_Init()
@@ -1530,6 +1557,31 @@ void * AppThreadFunction( void * parm )
 			frameDesc.Layers = layers;
 
 			vrapi_SubmitFrame2( appState.Ovr, &frameDesc );
+		}
+
+		//Handle haptics
+		static float lastFrameTime = 0.0f;
+		float timestamp = (float)(GetTimeInMilliSeconds());
+		float frametime = timestamp - lastFrameTime;
+		lastFrameTime = timestamp;
+
+		for (int i = 0; i < 2; ++i) {
+			if (vibration_channel_duration[i] > 0.0f ||
+				vibration_channel_duration[i] == -1.0f) {
+				vrapi_SetHapticVibrationSimple(appState.Ovr, controllerIDs[i],
+											   vibration_channel_intensity[i]);
+
+				if (vibration_channel_duration[i] != -1.0f) {
+					vibration_channel_duration[i] -= frametime;
+
+					if (vibration_channel_duration[i] < 0.0f) {
+						vibration_channel_duration[i] = 0.0f;
+						vibration_channel_intensity[i] = 0.0f;
+					}
+				}
+			} else {
+				vrapi_SetHapticVibrationSimple(appState.Ovr, controllerIDs[i], 0.0f);
+			}
 		}
 
         if (runStatus == -1) {

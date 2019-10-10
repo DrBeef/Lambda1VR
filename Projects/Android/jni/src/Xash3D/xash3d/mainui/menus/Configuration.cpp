@@ -67,11 +67,13 @@ void CMenuOptions::_Init( void )
 	AddButton( "Video",    "Change screen size, video mode and gamma",
 		PC_VIDEO, UI_Video_Menu, QMF_NOTIFY );
 
-	// Cheats
-	AddButton( "No Clip", "No Clip", PC_CONSOLE, UI_NoClip_Btn, QMF_NOTIFY );
-	AddButton( "God", "God", PC_CONSOLE, UI_God_Btn, QMF_NOTIFY );
-	AddButton( "Give Suit", "Give Suit", PC_CONSOLE, UI_GiveSuit_Btn, QMF_NOTIFY );
-	AddButton( "Give Crowbar", "Give Crowbar", PC_CONSOLE, UI_GiveCrowbar_Btn, QMF_NOTIFY );
+	// Cheats - Only add these if sv_cheats is enabled
+    if (EngFuncs::GetCvarFloat("sv_cheats") != 0.0f) {
+        AddButton("No Clip", "No Clip", PC_CONSOLE, UI_NoClip_Btn, QMF_NOTIFY);
+        AddButton("God", "God", PC_CONSOLE, UI_God_Btn, QMF_NOTIFY);
+        AddButton("Give Suit", "Give Suit", PC_CONSOLE, UI_GiveSuit_Btn, QMF_NOTIFY);
+        AddButton("Give Crowbar", "Give Crowbar", PC_CONSOLE, UI_GiveCrowbar_Btn, QMF_NOTIFY);
+    }
 	
 #ifndef VR
 	AddButton( "Touch",    "Change touch settings and buttons",
