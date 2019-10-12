@@ -48,7 +48,6 @@ public:
 
 	CMenuPicButton	done;
 
-	CMenuSlider	screenSize;
 	CMenuSlider	gammaIntensity;
 	CMenuSlider	glareReduction;
 	CMenuCheckBox	fastSky;
@@ -56,6 +55,7 @@ public:
 	CMenuCheckBox   vbo;
 	CMenuCheckBox   bump;
 	CMenuCheckBox   fps;
+	CMenuSlider		fov;
 
 	HIMAGE		hTestImage;
 } uiVidOptions;
@@ -85,13 +85,13 @@ void CMenuVidOptions::GammaGet( void )
 
 void CMenuVidOptions::SaveAndPopMenu( void )
 {
-	screenSize.WriteCvar();
 	glareReduction.WriteCvar();
 	fastSky.WriteCvar();
 	hiTextures.WriteCvar();
 	vbo.WriteCvar();
 	bump.WriteCvar();
 	fps.WriteCvar();
+	fov.WriteCvar();
 	// gamma is already written
 
 	CMenuFramework::SaveAndPopMenu();
@@ -155,25 +155,14 @@ void CMenuVidOptions::_Init( void )
 	testImage.SetRect( 390, 225, 480, 450 );
 	testImage.SetPicture( ART_GAMMA );
 
-	done.SetNameAndStatus( "Done", "Go back to the Video Menu" );
-	done.SetCoord( 72, 435 );
-	done.SetPicture( PC_DONE );
-	done.onActivated = VoidCb( &CMenuVidOptions::SaveAndPopMenu );
-
-	screenSize.SetNameAndStatus( "Screen size",  "Set the screen size" );
-	screenSize.SetCoord( 72, 280 );
-	screenSize.Setup( 30, 120, 10 );
-	screenSize.LinkCvar( "viewsize" );
-	screenSize.onChanged = CMenuEditable::WriteCvarCb;
-
 	gammaIntensity.SetNameAndStatus( "Gamma", "Set gamma value (0.5 - 2.3)" );
-	gammaIntensity.SetCoord( 72, 340 );
+	gammaIntensity.SetCoord( 72, 280 );
 	gammaIntensity.Setup( 0.0, 1.0, 0.025 );
 	gammaIntensity.onChanged = VoidCb( &CMenuVidOptions::GammaUpdate );
 	gammaIntensity.onCvarGet = VoidCb( &CMenuVidOptions::GammaGet );
 	gammaIntensity.LinkCvar( "gamma" );
 
-	glareReduction.SetCoord( 72, 400 );
+	glareReduction.SetCoord( 72, 340 );
 	if( UI_IsXashFWGS() )
 	{
 		glareReduction.SetNameAndStatus( "Glare reduction", "Set glare reduction level" );
@@ -187,14 +176,19 @@ void CMenuVidOptions::_Init( void )
 		glareReduction.LinkCvar( "brightness" );
 	}
 
+	fov.SetCoord( 72, 400 );
+	fov.SetNameAndStatus( "Field of View", "Set Field of View" );
+	fov.Setup( 100, 110, 1 );
+	fov.LinkCvar( "vr_fov" );
+
 	bump.SetNameAndStatus( "Bump-mapping", "Enable bump mapping" );
-	bump.SetCoord( 72, 505 );
+	bump.SetCoord( 72, 445 );
 	bump.LinkCvar( "r_bump" );
 	if( !EngFuncs::GetCvarFloat( "r_vbo" ) )
 		bump.SetGrayed( true );
 
-	vbo.SetNameAndStatus( "Use VBO", "Use new world renderer. Faster, but rarely glitchy" );
-	vbo.SetCoord( 72, 555 );
+	vbo.SetNameAndStatus( "Use VBO", "Use new world renderer. Faster, but causes issues with flashlight" );
+	vbo.SetCoord( 72, 495 );
 	vbo.LinkCvar( "r_vbo" );
 	vbo.onChanged = CMenuCheckBox::BitMaskCb;
 	vbo.onChanged.pExtra = &bump.iFlags;
@@ -202,26 +196,31 @@ void CMenuVidOptions::_Init( void )
 	vbo.iMask = QMF_GRAYED;
 
 	fastSky.SetNameAndStatus( "Draw simple sky", "enable/disable fast sky rendering (for old computers)" );
-	fastSky.SetCoord( 72, 605 );
+	fastSky.SetCoord( 72, 545 );
 	fastSky.LinkCvar( "r_fastsky" );
 
 	hiTextures.SetNameAndStatus( "Allow materials", "let engine replace 8-bit textures with full color hi-res prototypes (if present)" );
-	hiTextures.SetCoord( 72, 655 );
+	hiTextures.SetCoord( 72, 595 );
 	hiTextures.LinkCvar( "host_allow_materials" );
 
 	fps.SetNameAndStatus( "Show FPS", "Show FPS Counter" );
-	fps.SetCoord( 72, 705 );
+	fps.SetCoord( 72, 645 );
 	fps.LinkCvar( "cl_showfps" );
+
+	done.SetNameAndStatus( "Done", "Go back to the Video Menu" );
+	done.SetCoord( 72, 695 );
+	done.SetPicture( PC_DONE );
+	done.onActivated = VoidCb( &CMenuVidOptions::SaveAndPopMenu );
 
 	AddItem( background );
 	AddItem( banner );
 	AddItem( done );
-	AddItem( screenSize );
 	AddItem( gammaIntensity );
 	AddItem( glareReduction );
 	AddItem( bump );
 	AddItem( fps );
 	AddItem( vbo );
+	AddItem( fov );
 	AddItem( fastSky );
 	AddItem( hiTextures );
 	AddItem( testImage );

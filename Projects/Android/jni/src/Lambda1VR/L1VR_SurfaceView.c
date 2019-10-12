@@ -646,18 +646,24 @@ void ovrFramebuffer_ClearEdgeTexels( ovrFramebuffer * frameBuffer )
     // Clear to fully opaque black.
     GL( gles_glClearColor( 0.0f, 0.0f, 0.0f, 1.0f ) );
 
+    bool useMask = (vr_comfort_mask->value != 0.0f && player_moving);
+
+    float width = useMask ? (frameBuffer->Width / 2.0f) * vr_comfort_mask->value : 1;
+    float height = useMask ? (frameBuffer->Height / 2.0f) * vr_comfort_mask->value : 1;
+
     // bottom
-    GL( gles_glScissor( 0, 0, frameBuffer->Width, 1 ) );
+    GL( gles_glScissor( 0, 0, frameBuffer->Width, width ) );
     GL( gles_glClear( GL_COLOR_BUFFER_BIT ) );
     // top
-    GL( gles_glScissor( 0, frameBuffer->Height - 1, frameBuffer->Width, 1 ) );
+    GL( gles_glScissor( 0, frameBuffer->Height - height, frameBuffer->Width, height ) );
     GL( gles_glClear( GL_COLOR_BUFFER_BIT ) );
     // left
-    GL( gles_glScissor( 0, 0, 1, frameBuffer->Height ) );
+    GL( gles_glScissor( 0, 0, width, frameBuffer->Height ) );
     GL( gles_glClear( GL_COLOR_BUFFER_BIT ) );
     // right
-    GL( gles_glScissor( frameBuffer->Width - 1, 0, 1, frameBuffer->Height ) );
+    GL( gles_glScissor( frameBuffer->Width - width, 0, width, frameBuffer->Height ) );
     GL( gles_glClear( GL_COLOR_BUFFER_BIT ) );
+
 
     GL( gles_glScissor( 0, 0, 0, 0 ) );
     GL( gles_glDisable( GL_SCISSOR_TEST ) );
@@ -1367,6 +1373,7 @@ void VR_Init()
 	positional_movementForward = 0.0f;
 	snapTurn = 0.0f;
 	ducked = DUCK_NOTDUCKED;
+	player_moving = false;
 
 	//init randomiser
 	srand(time(NULL));
@@ -1374,19 +1381,20 @@ void VR_Init()
 	//Create Cvars
 	vr_snapturn_angle = Cvar_Get( "vr_snapturn_angle", "45", CVAR_ARCHIVE, "Sets the angle for snap-turn, set to < 10.0 to enable smooth turning" );
 	vr_reloadtimeoutms = Cvar_Get( "vr_reloadtimeoutms", "200", CVAR_ARCHIVE, "How quickly the grip trigger needs to be release to initiate a reload" );
-	vr_positional_factor = Cvar_Get( "vr_positional_factor", "2800", CVAR_ARCHIVE, "Arbitrary number that makes positional tracking work" );
+	vr_positional_factor = Cvar_Get( "vr_positional_factor", "2900", CVAR_ARCHIVE, "Arbitrary number that makes positional tracking work" );
     vr_walkdirection = Cvar_Get( "vr_walkdirection", "0", CVAR_ARCHIVE, "1 - Use HMD for direction, 0 - Use off-hand controller for direction" );
 	vr_weapon_pitchadjust = Cvar_Get( "vr_weapon_pitchadjust", "-20.0", CVAR_ARCHIVE, "gun pitch angle adjust" );
     vr_weapon_recoil = Cvar_Get( "vr_weapon_recoil", "0", CVAR_ARCHIVE, "Enables weapon recoil in VR, default is disabled, warning could make you sick" );
 	vr_weapon_stabilised = Cvar_Get( "vr_weapon_stabilised", "0", CVAR_READ_ONLY, "Whether user has engaged weapon stabilisation or not" );
     vr_lasersight = Cvar_Get( "vr_lasersight", "0", CVAR_ARCHIVE, "Enables laser-sight" );
-    vr_fov = Cvar_Get( "vr_fov", "107", CVAR_ARCHIVE, "FOV for Lambda1VR" );
+    vr_fov = Cvar_Get( "vr_fov", "104", CVAR_ARCHIVE, "FOV for Lambda1VR - Everyone claims 104 is correct, so who am I to argue?! (I prefer 107, but hey, I can set that locally)" );
 	vr_control_scheme = Cvar_Get( "vr_control_scheme", "0", CVAR_ARCHIVE, "Controller Layout scheme" );
 	vr_enable_crouching = Cvar_Get( "vr_enable_crouching", "0.85", CVAR_ARCHIVE, "To enable real-world crouching trigger, set this to a value that multiplied by the user's height will trigger crouch mechanic" );
     vr_height_adjust = Cvar_Get( "vr_height_adjust", "0.0", CVAR_ARCHIVE, "Additional height adjustment for in-game player (in metres)" );
     vr_flashlight_model = Cvar_Get( "vr_flashlight_model", "1", CVAR_ARCHIVE, "Set to 0 to prevent drawing the flashlight model" );
 	vr_mirror_weapons = Cvar_Get( "vr_mirror_weapons", "0", CVAR_ARCHIVE, "Set to 1 to mirror the weapon models (for left handed use)" );
     vr_weapon_backface_culling = Cvar_Get( "vr_weapon_backface_culling", "0", CVAR_ARCHIVE, "Use to enable whether back face culling is used on weapon viewmodel" );
+	vr_comfort_mask = Cvar_Get( "vr_comfort_mask", "0.75", CVAR_ARCHIVE, "Use to reduce motion sickness, 0.0 is off, 1.0 is fully obscured, probably go with 0.7, anything less than 0.5 is barely visible" );
 
     //Not to be changed by users, as it will be overwritten anyway
 	vr_stereo_side = Cvar_Get( "vr_stereo_side", "0", CVAR_READ_ONLY, "Eye being drawn" );

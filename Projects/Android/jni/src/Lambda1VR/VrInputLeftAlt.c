@@ -370,6 +370,9 @@ void HandleInput_LeftAlt( ovrMobile * Ovr, double displayTime )
 			float x = nlf * rightTrackedRemoteState_new.Joystick.x;
 			float y = nlf * rightTrackedRemoteState_new.Joystick.y;
 
+			player_moving = (fabs(x) + fabs(y)) > 0.01f;
+
+
 			//Adjust to be off-hand controller oriented
 			vec2_t v;
 			rotateAboutOrigin(x, y, controllerYawHeading,v);
