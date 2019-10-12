@@ -291,12 +291,12 @@ void HandleInput_Right(ovrMobile * Ovr, double displayTime )
 
 			//Weapon Chooser
 			static bool weaponSwitched = false;
-			if (between(-0.2f, rightTrackedRemoteState_new.Joystick.x, 0.2f) &&
-				(between(0.8f, rightTrackedRemoteState_new.Joystick.y, 1.0f) ||
-				 between(-1.0f, rightTrackedRemoteState_new.Joystick.y, -0.8f)))
+			if (between(-0.25f, rightTrackedRemoteState_new.Joystick.x, 0.25f) &&
+				(between(0.75f, rightTrackedRemoteState_new.Joystick.y, 1.0f) ||
+				 between(-1.0f, rightTrackedRemoteState_new.Joystick.y, -0.75f)))
 			{
 				if (!weaponSwitched) {
-					if (between(0.8f, rightTrackedRemoteState_new.Joystick.y, 1.0f))
+					if (between(0.75f, rightTrackedRemoteState_new.Joystick.y, 1.0f))
 					{
 						sendButtonActionSimple("invnext");
 					}

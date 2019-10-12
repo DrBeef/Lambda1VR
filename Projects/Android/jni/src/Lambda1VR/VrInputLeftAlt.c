@@ -1,7 +1,7 @@
 /************************************************************************************
 
-Filename	:	VrInputRightAlt.c
-Content		:	Handles controller input for the left-handed alternative configuration #1
+Filename	:	VrInputLeftAlt.c
+Content		:	Handles controller input for the left-handed
 Created		:	August 2019
 Authors		:	Simon Brown
 
@@ -29,15 +29,20 @@ extern cvar_t	*cl_movespeedkey;
 
 void Touch_Motion( touchEventType type, int fingerID, float x, float y, float dx, float dy );
 
+float initialTouchX, initialTouchY;
+
+
 void HandleInput_LeftAlt( ovrMobile * Ovr, double displayTime )
 {
 	//Ensure handedness is set to left
 	Cvar_Set("hand", "1");
 
-    //Get info for tracked remotes
-    acquireTrackedRemotesData(Ovr, displayTime);
+	//Get info for tracked remotes
+	acquireTrackedRemotesData(Ovr, displayTime);
 
 	static bool dominantGripPushed = false;
+	static int grabMeleeWeapon = 0;
+    static bool selectingWeapon = false;
 	static float dominantGripPushTime = 0.0f;
 
 	//Show screen view (if in multiplayer toggle scoreboard)
@@ -59,7 +64,7 @@ void HandleInput_LeftAlt( ovrMobile * Ovr, double displayTime )
 	//Menu control - Uses "touch"
 	if (useScreenLayer())
 	{
-        interactWithTouchScreen(&leftRemoteTracking_new, &leftTrackedRemoteState_new, &leftTrackedRemoteState_old);
+		interactWithTouchScreen(&leftRemoteTracking_new, &leftTrackedRemoteState_new, &leftTrackedRemoteState_old);
 	}
 	else
 	{
@@ -139,9 +144,9 @@ void HandleInput_LeftAlt( ovrMobile * Ovr, double displayTime )
 				float zxDist = length(x, z);
 
 				if (zxDist != 0.0f && z != 0.0f) {
-                    VectorSet(weaponangles[ADJUSTED], degrees(atanf(y / zxDist)), (cl.refdef.cl_viewangles[YAW] - hmdorientation[YAW]) - degrees(atan2f(x, -z)), weaponangles[ADJUSTED][ROLL]);
-                    VectorSet(weaponangles[UNADJUSTED], degrees(atanf(y / zxDist)), (cl.refdef.cl_viewangles[YAW] - hmdorientation[YAW]) - degrees(atan2f(x, -z)), weaponangles[UNADJUSTED][ROLL]);
-                    VectorSet(weaponangles[MELEE], degrees(atanf(y / zxDist)), (cl.refdef.cl_viewangles[YAW] - hmdorientation[YAW]) - degrees(atan2f(x, -z)), weaponangles[MELEE][ROLL]);
+					VectorSet(weaponangles[ADJUSTED], degrees(atanf(y / zxDist)), (cl.refdef.cl_viewangles[YAW] - hmdorientation[YAW]) - degrees(atan2f(x, -z)), weaponangles[ADJUSTED][ROLL]);
+					VectorSet(weaponangles[UNADJUSTED], degrees(atanf(y / zxDist)), (cl.refdef.cl_viewangles[YAW] - hmdorientation[YAW]) - degrees(atan2f(x, -z)), weaponangles[UNADJUSTED][ROLL]);
+					VectorSet(weaponangles[MELEE], degrees(atanf(y / zxDist)), (cl.refdef.cl_viewangles[YAW] - hmdorientation[YAW]) - degrees(atan2f(x, -z)), weaponangles[MELEE][ROLL]);
 				}
 			}
 			else
@@ -173,19 +178,34 @@ void HandleInput_LeftAlt( ovrMobile * Ovr, double displayTime )
 			if ((leftTrackedRemoteState_new.Buttons & ovrButton_GripTrigger) !=
 				(leftTrackedRemoteState_old.Buttons & ovrButton_GripTrigger)) {
 
-				dominantGripPushed = (leftTrackedRemoteState_new.Buttons & ovrButton_GripTrigger);
+				dominantGripPushed = (leftTrackedRemoteState_new.Buttons &
+									  ovrButton_GripTrigger) != 0;
 
-				if (dominantGripPushed)
+				if (grabMeleeWeapon == 0)
 				{
-					dominantGripPushTime = GetTimeInMilliSeconds();
-				}
-				else
-				{
-					if ((GetTimeInMilliSeconds() - dominantGripPushTime) < vr_reloadtimeoutms->integer)
-					{
-						sendButtonActionSimple("+reload");
-						finishReloadNextFrame = true;
+					if (leftRemoteTracking_new.Status & VRAPI_TRACKING_STATUS_POSITION_TRACKED) {
+
+						if (dominantGripPushed) {
+							dominantGripPushTime = GetTimeInMilliSeconds();
+						} else {
+							if ((GetTimeInMilliSeconds() - dominantGripPushTime) <
+								vr_reloadtimeoutms->integer) {
+								sendButtonActionSimple("+reload");
+								finishReloadNextFrame = true;
+							}
+						}
+					} else{
+						if (dominantGripPushed) {
+							//Initiate crowbar from backpack mode
+							sendButtonActionSimple("weapon_crowbar");
+							Android_Vibrate(80, 0, 0.8); // vibrate to let user know they switched
+							grabMeleeWeapon = 1;
+						}
 					}
+				} else if (grabMeleeWeapon == 1 && !dominantGripPushed) {
+					//Restores last used weapon
+					sendButtonActionSimple("lastinv");
+					grabMeleeWeapon = 0;
 				}
 			}
 		}
@@ -225,7 +245,7 @@ void HandleInput_LeftAlt( ovrMobile * Ovr, double displayTime )
 			//This section corrects for the fact that the controller actually controls direction of movement, but we want to move relative to the direction the
 			//player is facing for positional tracking
 			float multiplier = vr_positional_factor->value / (cl_forwardspeed->value *
-					((rightTrackedRemoteState_new.Buttons & ovrButton_Trigger) ? cl_movespeedkey->value : 1.0f));
+															  ((rightTrackedRemoteState_new.Buttons & ovrButton_Trigger) ? cl_movespeedkey->value : 1.0f));
 
 			vec2_t v;
 			rotateAboutOrigin(-positionDeltaThisFrame[0] * multiplier,
@@ -273,26 +293,59 @@ void HandleInput_LeftAlt( ovrMobile * Ovr, double displayTime )
 				sendButtonAction("+duck", (leftTrackedRemoteState_new.Buttons & ovrButton_X));
 			}
 
-			//Weapon Chooser
-			static bool weaponSwitched = false;
-			if (between(-0.2f, leftTrackedRemoteState_new.Joystick.x, 0.2f) &&
-				(between(0.8f, leftTrackedRemoteState_new.Joystick.y, 1.0f) ||
-				 between(-1.0f, leftTrackedRemoteState_new.Joystick.y, -0.8f)))
-			{
-				if (!weaponSwitched) {
-					if (between(0.8f, leftTrackedRemoteState_new.Joystick.y, 1.0f))
-					{
-						sendButtonActionSimple("invnext");
-					}
-					else
-					{
-						sendButtonActionSimple("invprev");
-					}
-					weaponSwitched = true;
-				}
-			} else {
-				weaponSwitched = false;
-			}
+            static bool sendUnAttackNextFrame = false;
+            if (sendUnAttackNextFrame)
+            {
+                sendUnAttackNextFrame = false;
+                sendButtonActionSimple("-attack");
+            }
+
+            //Weapon Chooser
+            static int scrollCount = 0;
+            if ((rightTrackedRemoteState_new.Buttons & ovrButton_B) !=
+                (rightTrackedRemoteState_old.Buttons & ovrButton_B)) {
+
+                selectingWeapon = (rightTrackedRemoteState_new.Buttons & ovrButton_B) > 0;
+                if (selectingWeapon)
+                {
+                    scrollCount++;
+                    sendButtonActionSimple("invnext");
+                } else{
+                    if (scrollCount == 0)
+                    {
+                        sendButtonActionSimple("cancelselect");
+                    } else{
+                        sendUnAttackNextFrame = true;
+                        sendButtonActionSimple("+attack");
+                    }
+                    scrollCount = 0;
+                }
+            }
+
+            //right and left on left controller
+            static bool weaponSwitched = false;
+            if (selectingWeapon)
+            {
+                if (between(0.4f, leftTrackedRemoteState_new.Joystick.x, 1.0f) ||
+                    between(-1.0f, leftTrackedRemoteState_new.Joystick.x, -0.4f))
+                {
+                    if (!weaponSwitched) {
+                        if (between(0.4f, leftTrackedRemoteState_new.Joystick.x, 1.0f))
+                        {
+                            scrollCount++;
+                            sendButtonActionSimple("invnext");
+                        }
+                        else
+                        {
+                            scrollCount--;
+                            sendButtonActionSimple("invprev");
+                        }
+                        weaponSwitched = true;
+                    }
+                } else {
+                    weaponSwitched = false;
+                }
+            }
 		}
 
 		//Left-hand specific stuff
@@ -346,46 +399,41 @@ void HandleInput_LeftAlt( ovrMobile * Ovr, double displayTime )
 										  &rightTrackedRemoteState_old,
 										  ovrButton_Trigger, K_SHIFT);
 
-			static increaseSnap = true;
-			if (leftTrackedRemoteState_new.Joystick.x > 0.6f)
-			{
-				if (increaseSnap)
-				{
-					snapTurn -= vr_snapturn_angle->value;
-					if (vr_snapturn_angle->value > 10.0f) {
-						increaseSnap = false;
-					}
+            if (!selectingWeapon) {
+                static bool increaseSnap = true;
+                if (leftTrackedRemoteState_new.Joystick.x > 0.6f) {
+                    if (increaseSnap) {
+                        snapTurn -= vr_snapturn_angle->value;
+                        if (vr_snapturn_angle->value > 10.0f) {
+                            increaseSnap = false;
+                        }
 
-					if (snapTurn < -180.0f)
-					{
-						snapTurn += 360.f;
-					}
-				}
-			} else if (leftTrackedRemoteState_new.Joystick.x < 0.4f) {
-				increaseSnap = true;
-			}
+                        if (snapTurn < -180.0f) {
+                            snapTurn += 360.f;
+                        }
+                    }
+                } else if (leftTrackedRemoteState_new.Joystick.x < 0.4f) {
+                    increaseSnap = true;
+                }
 
-			static decreaseSnap = true;
-			if (leftTrackedRemoteState_new.Joystick.x < -0.6f)
-			{
-				if (decreaseSnap)
-				{
-					snapTurn += vr_snapturn_angle->value;
+                static bool decreaseSnap = true;
+                if (leftTrackedRemoteState_new.Joystick.x < -0.6f) {
+                    if (decreaseSnap) {
+                        snapTurn += vr_snapturn_angle->value;
 
-					//If snap turn configured for less than 10 degrees
-					if (vr_snapturn_angle->value > 10.0f) {
-						decreaseSnap = false;
-					}
+                        //If snap turn configured for less than 10 degrees
+                        if (vr_snapturn_angle->value > 10.0f) {
+                            decreaseSnap = false;
+                        }
 
-					if (snapTurn > 180.0f)
-					{
-						snapTurn -= 360.f;
-					}
-				}
-			} else if (leftTrackedRemoteState_new.Joystick.x > -0.4f)
-			{
-				decreaseSnap = true;
-			}
+                        if (snapTurn > 180.0f) {
+                            snapTurn -= 360.f;
+                        }
+                    }
+                } else if (leftTrackedRemoteState_new.Joystick.x > -0.4f) {
+                    decreaseSnap = true;
+                }
+            }
 		}
 	}
 

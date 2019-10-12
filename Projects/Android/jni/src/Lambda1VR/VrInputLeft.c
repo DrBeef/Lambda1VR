@@ -1,6 +1,6 @@
 /************************************************************************************
 
-Filename	:	VrInputRight.c 
+Filename	:	VrInputLeft.c
 Content		:	Handles controller input for the left-handed
 Created		:	August 2019
 Authors		:	Simon Brown
@@ -294,12 +294,12 @@ void HandleInput_Left( ovrMobile * Ovr, double displayTime )
 
 			//Weapon Chooser
 			static bool weaponSwitched = false;
-			if (between(-0.2f, leftTrackedRemoteState_new.Joystick.x, 0.2f) &&
-				(between(0.8f, leftTrackedRemoteState_new.Joystick.y, 1.0f) ||
-				 between(-1.0f, leftTrackedRemoteState_new.Joystick.y, -0.8f)))
+			if (between(-0.25f, leftTrackedRemoteState_new.Joystick.x, 0.25f) &&
+				(between(0.75f, leftTrackedRemoteState_new.Joystick.y, 1.0f) ||
+				 between(-1.0f, leftTrackedRemoteState_new.Joystick.y, -0.75f)))
 			{
 				if (!weaponSwitched) {
-					if (between(0.8f, leftTrackedRemoteState_new.Joystick.y, 1.0f))
+					if (between(0.75f, leftTrackedRemoteState_new.Joystick.y, 1.0f))
 					{
 						sendButtonActionSimple("invnext");
 					}
