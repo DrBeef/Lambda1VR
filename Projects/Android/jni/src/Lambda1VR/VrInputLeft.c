@@ -246,6 +246,11 @@ void HandleInput_Left( ovrMobile * Ovr, double displayTime )
 			float multiplier = vr_positional_factor->value / (cl_forwardspeed->value *
 					((rightTrackedRemoteState_new.Buttons & ovrButton_Trigger) ? cl_movespeedkey->value : 1.0f));
 
+			if (ducked != DUCK_NOTDUCKED)
+			{
+				multiplier *= 3.0f;
+			}
+
 			vec2_t v;
 			rotateAboutOrigin(-positionDeltaThisFrame[0] * multiplier,
 							  positionDeltaThisFrame[2] * multiplier, -hmdorientation[YAW], v);
