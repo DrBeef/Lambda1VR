@@ -48,7 +48,7 @@ extern vec3_t weaponvelocity;
 extern vec3_t flashlightangles;
 extern vec3_t flashlightoffset;
 
-#define GORDON_FREEMAN_HEIGHT   1.57
+#define GORDON_FREEMAN_HEIGHT   1.60
 
 static void convertFromVRtoHL(vec3_t in, vec3_t out)
 {

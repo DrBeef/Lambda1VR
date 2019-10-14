@@ -33,6 +33,7 @@ convar_t *cl_allow_levelshots;
 convar_t *cl_levelshot_name;
 convar_t *cl_envshot_size;
 convar_t *scr_dark;
+extern convar_t *vr_stereo_side;
 
 typedef struct
 {
@@ -41,6 +42,11 @@ typedef struct
 
 static dirty_t	scr_dirty, scr_old_dirty[2];
 static qboolean	scr_init = false;
+
+int GetStereoDepthOffset()
+{
+	return (int)( ( vr_stereo_side->value * -2.0f ) + 1.0f) * (scr_width->integer / 36.0f);
+}
 
 /*
 ==============
@@ -125,7 +131,7 @@ void SCR_DrawFPS( void )
 	}
 
 	Con_DrawStringLen( fpsstring, &offset, NULL );
-	Con_DrawString( (scr_width->integer / 2) - offset - 2, (int)(scr_height->integer * 0.6f), fpsstring, color );
+	Con_DrawString( (scr_width->integer / 2) - offset - 2 + GetStereoDepthOffset(), (int)(scr_height->integer * 0.7f), fpsstring, color );
 }
 
 /*

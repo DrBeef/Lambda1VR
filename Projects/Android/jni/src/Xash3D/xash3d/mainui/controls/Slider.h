@@ -52,6 +52,7 @@ public:
 	// void SetDrawStep( float drawStep, int numSteps );
 
 	void SetKeepSlider( int keepSlider ) { m_iKeepSlider = keepSlider; }
+	void SetDrawValue( bool drawValue ) { m_DrawValue = drawValue; }
 private:
 	float	m_flMinValue;
 	float	m_flMaxValue;
@@ -60,6 +61,7 @@ private:
 	int		m_iNumSteps;
 	float	m_flRange;
 	int		m_iKeepSlider;	// when mouse button is holds
+	bool	m_DrawValue; // Draws value as part of name
 
 	int m_iSliderOutlineWidth;
 	Size m_scCenterBox;

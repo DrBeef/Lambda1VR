@@ -55,7 +55,7 @@ public:
 	CMenuCheckBox   vbo;
 	CMenuCheckBox   bump;
 	CMenuCheckBox   fps;
-	CMenuSlider		fov;
+	CMenuSlider		height;
 
 	HIMAGE		hTestImage;
 } uiVidOptions;
@@ -91,7 +91,7 @@ void CMenuVidOptions::SaveAndPopMenu( void )
 	vbo.WriteCvar();
 	bump.WriteCvar();
 	fps.WriteCvar();
-	fov.WriteCvar();
+	height.WriteCvar();
 	// gamma is already written
 
 	CMenuFramework::SaveAndPopMenu();
@@ -176,10 +176,11 @@ void CMenuVidOptions::_Init( void )
 		glareReduction.LinkCvar( "brightness" );
 	}
 
-	fov.SetCoord( 72, 400 );
-	fov.SetNameAndStatus( "Field of View", "Set Field of View" );
-	fov.Setup( 100, 110, 1 );
-	fov.LinkCvar( "vr_fov" );
+	height.SetCoord( 72, 400 );
+	height.SetNameAndStatus( "Height Offset: %.1fm", "Set Player Height Adjustment" );
+	height.Setup( -0.5, 1.0, 0.1 );
+	height.SetDrawValue(true);
+	height.LinkCvar( "vr_height_adjust" );
 
 	bump.SetNameAndStatus( "Bump-mapping", "Enable bump mapping" );
 	bump.SetCoord( 72, 445 );
@@ -220,7 +221,7 @@ void CMenuVidOptions::_Init( void )
 	AddItem( bump );
 	AddItem( fps );
 	AddItem( vbo );
-	AddItem( fov );
+	AddItem( height );
 	AddItem( fastSky );
 	AddItem( hiTextures );
 	AddItem( testImage );

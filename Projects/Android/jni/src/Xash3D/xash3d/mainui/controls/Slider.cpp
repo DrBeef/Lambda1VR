@@ -20,7 +20,7 @@ GNU General Public License for more details.
 #include "Utils.h"
 
 CMenuSlider::CMenuSlider() : BaseClass(), m_flMinValue(), m_flMaxValue(), m_flCurValue(),
-	m_flDrawStep(), m_iNumSteps(), m_flRange(), m_iKeepSlider()
+	m_flDrawStep(), m_iNumSteps(), m_flRange(), m_iKeepSlider(), m_DrawValue(false)
 {
 	m_iSliderOutlineWidth = 6;
 
@@ -200,7 +200,18 @@ void CMenuSlider::Draw( void )
 
 
 	textHeight = m_scPos.y - (m_scChSize * 1.5f);
-	UI_DrawString( font, m_scPos.x, textHeight, m_scSize.w, m_scChSize, szName, uiColorHelp, m_scChSize, eTextAlignment, textflags | ETF_FORCECOL );
+
+	if (m_DrawValue)
+	{
+		char buffer[512];
+		sprintf(buffer, szName, m_flCurValue);
+		UI_DrawString(font, m_scPos.x, textHeight, m_scSize.w, m_scChSize, buffer, uiColorHelp,
+					  m_scChSize, eTextAlignment, textflags | ETF_FORCECOL);
+	}
+	else {
+		UI_DrawString(font, m_scPos.x, textHeight, m_scSize.w, m_scChSize, szName, uiColorHelp,
+					  m_scChSize, eTextAlignment, textflags | ETF_FORCECOL);
+	}
 }
 
 void CMenuSlider::UpdateEditable()
