@@ -136,143 +136,8 @@ import static android.system.Os.setenv;
 	public void create()
 	{
 		copy_asset(getFilesDir().getPath(), "extras.pak", false);
-		copy_asset("/sdcard/xash/valve/", "config.cfg", false); // Copy in case user has deleted their config
 		copy_asset("/sdcard/xash/", "commandline.txt", false); // Copy in case user has deleted their config
 
-		//Copy our special sprites
-		copy_asset("/sdcard/xash/valve/", "sprites/s_stealth.spr", true);
-
-		//Copy modified weapon models
-		if (!(new File("/sdcard/xash/valve/models/no_copy").exists()))
-		{
-			//Colt (A-16)
-			copy_asset("/sdcard/xash/valve/", "models/v_9mmar.mdl", true);
-			copy_asset("/sdcard/xash/valve/", "models/p_9mmar.mdl", true);
-			copy_asset("/sdcard/xash/valve/", "models/w_9mmar.mdl", true);
-			copy_asset("/sdcard/xash/valve/", "sound/items/clipinsert1.wav", true);
-			copy_asset("/sdcard/xash/valve/", "sound/items/cliprelease1.wav", true);
-			copy_asset("/sdcard/xash/valve/", "sound/weapons/t_m4_boltpull.wav", true);
-			copy_asset("/sdcard/xash/valve/", "sound/weapons/t_m4_deploy.wav", true);
-			copy_asset("/sdcard/xash/valve/", "sound/weapons/t_m4_m203_in.wav", true);
-			copy_asset("/sdcard/xash/valve/", "sound/weapons/t_m4_m203_out.wav", true);
-			copy_asset("/sdcard/xash/valve/", "sound/weapons/t_m4_m203_shell.wav", true);
-
-			//Colt Pistol M1911
-			copy_asset("/sdcard/xash/valve/", "models/v_9mmhandgun.mdl", true);
-			copy_asset("/sdcard/xash/valve/", "models/p_9mmhandgun.mdl", true);
-			copy_asset("/sdcard/xash/valve/", "models/w_9mmhandgun.mdl", true);
-
-			//357 Python
-			copy_asset("/sdcard/xash/valve/", "models/v_357.mdl", true);
-			copy_asset("/sdcard/xash/valve/", "models/p_357.mdl", true);
-			copy_asset("/sdcard/xash/valve/", "models/w_357.mdl", true);
-			copy_asset("/sdcard/xash/valve/", "sound/weapons/357_shot1.wav", true);
-			copy_asset("/sdcard/xash/valve/", "sound/weapons/357_shot2.wav", true);
-
-			//RGD Grenade
-			copy_asset("/sdcard/xash/valve/", "models/v_grenade.mdl", true);
-			copy_asset("/sdcard/xash/valve/", "models/w_grenade.mdl", true);
-			copy_asset("/sdcard/xash/valve/", "models/p_grenade.mdl", true);
-			copy_asset("/sdcard/xash/valve/", "sound/weapons/grenade_pinpull.wav", true);
-			copy_asset("/sdcard/xash/valve/", "sound/weapons/grenade_throw.wav", true);
-			copy_asset("/sdcard/xash/valve/", "sound/weapons/grenade_draw.wav", true);
-			copy_asset("/sdcard/xash/valve/", "sound/weapons/explode3.wav", true);
-			copy_asset("/sdcard/xash/valve/", "sound/weapons/explode4.wav", true);
-			copy_asset("/sdcard/xash/valve/", "sound/weapons/explode5.wav", true);
-
-			//Shotgun Benelli M3
-			copy_asset("/sdcard/xash/valve/", "models/v_shotgun.mdl", true);
-			copy_asset("/sdcard/xash/valve/", "models/p_shotgun.mdl", true);
-			copy_asset("/sdcard/xash/valve/", "models/w_shotgun.mdl", true);
-			copy_asset("/sdcard/xash/valve/", "sound/weapons/m3_insertshell.wav", true);
-			copy_asset("/sdcard/xash/valve/", "sound/weapons/m3_pump.wav", true);
-
-			//Stalker Rocket
-			copy_asset("/sdcard/xash/valve/", "models/v_rpg.mdl", true);
-			copy_asset("/sdcard/xash/valve/", "models/p_rpg.mdl", true);
-			copy_asset("/sdcard/xash/valve/", "models/w_rpg.mdl", true);
-			copy_asset("/sdcard/xash/valve/", "models/rpgrocket.mdl", true);
-			copy_asset("/sdcard/xash/valve/", "models/v_rpgammo.mdl", true);
-			copy_asset("/sdcard/xash/valve/", "sound/weapons/rocket1.wav", true);
-			copy_asset("/sdcard/xash/valve/", "sound/weapons/rocketfire1.wav", true);
-			copy_asset("/sdcard/xash/valve/", "sound/weapons/rpg7_reload.wav", true);
-
-			//Satchel
-			copy_asset("/sdcard/xash/valve/", "models/v_satchel.mdl", true);
-			copy_asset("/sdcard/xash/valve/", "models/v_satchel_radio.mdl", true);
-			copy_asset("/sdcard/xash/valve/", "models/w_satchel.mdl", true);
-			copy_asset("/sdcard/xash/valve/", "models/p_satchel.mdl", true);
-			copy_asset("/sdcard/xash/valve/", "models/p_satchel_radio.mdl", true);
-
-			//Tripmine
-			copy_asset("/sdcard/xash/valve/", "models/v_tripmine.mdl", true);
-			copy_asset("/sdcard/xash/valve/", "models/p_tripmine.mdl", true);
-			copy_asset("/sdcard/xash/valve/", "sound/weapons/mine_activate.wav", true);
-			copy_asset("/sdcard/xash/valve/", "sound/weapons/mine_deploy.wav", true);
-			copy_asset("/sdcard/xash/valve/", "sound/weapons/tripmine_ant.wav", true);
-			copy_asset("/sdcard/xash/valve/", "sound/weapons/tripmine_button.wav", true);
-			copy_asset("/sdcard/xash/valve/", "sound/weapons/tripmine_move.wav", true);
-
-			//BMS Crossbow
-			copy_asset("/sdcard/xash/valve/", "models/v_crossbow.mdl", true);
-			copy_asset("/sdcard/xash/valve/", "models/p_crossbow.mdl", true);
-			copy_asset("/sdcard/xash/valve/", "models/w_crossbow.mdl", true);
-			copy_asset("/sdcard/xash/valve/", "models/w_crossbow_clip.mdl", true);
-			copy_asset("/sdcard/xash/valve/", "sound/weapons/natianul.wav", true);
-			copy_asset("/sdcard/xash/valve/", "sound/weapons/xbow.wav", true);
-			copy_asset("/sdcard/xash/valve/", "sound/weapons/xbow_fire1.wav", true);
-			copy_asset("/sdcard/xash/valve/", "sound/weapons/xbow_reload1.wav", true);
-
-
-			//Egon (Overhaul)
-			copy_asset("/sdcard/xash/valve/", "models/v_egon.mdl", true);
-			copy_asset("/sdcard/xash/valve/", "models/p_egon.mdl", true);
-			copy_asset("/sdcard/xash/valve/", "models/w_egon.mdl", true);
-
-			//Gauss (Overhaul)
-			copy_asset("/sdcard/xash/valve/", "models/v_gauss.mdl", true);
-			copy_asset("/sdcard/xash/valve/", "models/p_gauss.mdl", true);
-			copy_asset("/sdcard/xash/valve/", "models/w_gauss.mdl", true);
-			copy_asset("/sdcard/xash/valve/", "models/w_gaussammo.mdl", true);
-
-			//HGun (Overhaul)
-			copy_asset("/sdcard/xash/valve/", "models/v_hgun.mdl", true);
-			copy_asset("/sdcard/xash/valve/", "models/p_hgun.mdl", true);
-			copy_asset("/sdcard/xash/valve/", "models/w_hgun.mdl", true);
-
-			//Squeak (Overhaul)
-			copy_asset("/sdcard/xash/valve/", "models/v_squeak.mdl", true);
-			copy_asset("/sdcard/xash/valve/", "models/p_squeak.mdl", true);
-			copy_asset("/sdcard/xash/valve/", "models/w_squeak.mdl", true);
-			copy_asset("/sdcard/xash/valve/", "models/w_sqknest.mdl", true);
-
-			//Crowbar
-			copy_asset("/sdcard/xash/valve/", "models/v_crowbar.mdl", true);
-			copy_asset("/sdcard/xash/valve/", "models/w_crowbar.mdl", true);
-			copy_asset("/sdcard/xash/valve/", "sound/weapons/cbar_draw.wav", true);
-			copy_asset("/sdcard/xash/valve/", "sound/weapons/cbar_hit1.wav", true);
-			copy_asset("/sdcard/xash/valve/", "sound/weapons/cbar_hit2.wav", true);
-			copy_asset("/sdcard/xash/valve/", "sound/weapons/cbar_hitbod1.wav", true);
-			copy_asset("/sdcard/xash/valve/", "sound/weapons/cbar_hitbod2.wav", true);
-			copy_asset("/sdcard/xash/valve/", "sound/weapons/cbar_hitbod3.wav", true);
-			copy_asset("/sdcard/xash/valve/", "sound/weapons/cbar_miss1.wav", true);
-
-			copy_asset("/sdcard/xash/valve/", "models/v_torch.mdl", true);
-		}
-
-		//Set default environment
-		try {
-			setenv("XASH3D_BASEDIR", "/sdcard/xash/", true);
-			setenv("XASH3D_ENGLIBDIR", getFilesDir().getParentFile().getPath() + "/lib", true);
-			setenv("XASH3D_GAMELIBDIR", getFilesDir().getParentFile().getPath() + "/lib", true);
-			setenv("XASH3D_GAMEDIR", "valve", true);
-			setenv( "XASH3D_EXTRAS_PAK1", getFilesDir().getPath() + "/extras.pak", true );
-		}
-		catch (Exception e)
-		{
-
-		}
-		
 
 		//Read these from a file and pass through
 		commandLineParams = new String("xash3d -dev 3 -log");
@@ -299,6 +164,159 @@ import static android.system.Os.setenv;
 			}
 		}
 
+		String[] params = commandLineParams.split(" ");
+		
+		String game = "valve";
+		
+		int i = 0;
+		for (i = 0; i < params.length; ++i)
+		{
+			if (params[i].compareTo("-game") == 0)
+			{
+				game = params[i+1];
+			}
+		}
+
+		//game configuration
+		copy_asset("/sdcard/xash/" + game + "/", "config.cfg", false); // Copy in case user has deleted their config
+
+		//special commands
+		copy_asset("/sdcard/xash/" + game + "/", "commands.lst", false); // Copy in case user has deleted their config
+
+		//Copy our special sprites
+		copy_asset("/sdcard/xash/" + game + "/", "sprites/s_stealth.spr", true);
+
+		//Copy modified weapon models
+		if (!(new File("/sdcard/xash/" + game + "/models/no_copy").exists()))
+		{
+			//Colt (A-16)
+			copy_asset("/sdcard/xash/" + game + "/", "models/v_9mmar.mdl", true);
+			copy_asset("/sdcard/xash/" + game + "/", "models/p_9mmar.mdl", true);
+			copy_asset("/sdcard/xash/" + game + "/", "models/w_9mmar.mdl", true);
+			copy_asset("/sdcard/xash/" + game + "/", "sound/items/clipinsert1.wav", true);
+			copy_asset("/sdcard/xash/" + game + "/", "sound/items/cliprelease1.wav", true);
+			copy_asset("/sdcard/xash/" + game + "/", "sound/weapons/t_m4_boltpull.wav", true);
+			copy_asset("/sdcard/xash/" + game + "/", "sound/weapons/t_m4_deploy.wav", true);
+			copy_asset("/sdcard/xash/" + game + "/", "sound/weapons/t_m4_m203_in.wav", true);
+			copy_asset("/sdcard/xash/" + game + "/", "sound/weapons/t_m4_m203_out.wav", true);
+			copy_asset("/sdcard/xash/" + game + "/", "sound/weapons/t_m4_m203_shell.wav", true);
+
+			//Colt Pistol M1911
+			copy_asset("/sdcard/xash/" + game + "/", "models/v_9mmhandgun.mdl", true);
+			copy_asset("/sdcard/xash/" + game + "/", "models/p_9mmhandgun.mdl", true);
+			copy_asset("/sdcard/xash/" + game + "/", "models/w_9mmhandgun.mdl", true);
+
+			//357 Python
+			copy_asset("/sdcard/xash/" + game + "/", "models/v_357.mdl", true);
+			copy_asset("/sdcard/xash/" + game + "/", "models/p_357.mdl", true);
+			copy_asset("/sdcard/xash/" + game + "/", "models/w_357.mdl", true);
+			copy_asset("/sdcard/xash/" + game + "/", "sound/weapons/357_shot1.wav", true);
+			copy_asset("/sdcard/xash/" + game + "/", "sound/weapons/357_shot2.wav", true);
+
+			//RGD Grenade
+			copy_asset("/sdcard/xash/" + game + "/", "models/v_grenade.mdl", true);
+			copy_asset("/sdcard/xash/" + game + "/", "models/w_grenade.mdl", true);
+			copy_asset("/sdcard/xash/" + game + "/", "models/p_grenade.mdl", true);
+			copy_asset("/sdcard/xash/" + game + "/", "sound/weapons/grenade_pinpull.wav", true);
+			copy_asset("/sdcard/xash/" + game + "/", "sound/weapons/grenade_throw.wav", true);
+			copy_asset("/sdcard/xash/" + game + "/", "sound/weapons/grenade_draw.wav", true);
+			copy_asset("/sdcard/xash/" + game + "/", "sound/weapons/explode3.wav", true);
+			copy_asset("/sdcard/xash/" + game + "/", "sound/weapons/explode4.wav", true);
+			copy_asset("/sdcard/xash/" + game + "/", "sound/weapons/explode5.wav", true);
+
+			//Shotgun Benelli M3
+			copy_asset("/sdcard/xash/" + game + "/", "models/v_shotgun.mdl", true);
+			copy_asset("/sdcard/xash/" + game + "/", "models/p_shotgun.mdl", true);
+			copy_asset("/sdcard/xash/" + game + "/", "models/w_shotgun.mdl", true);
+			copy_asset("/sdcard/xash/" + game + "/", "sound/weapons/m3_insertshell.wav", true);
+			copy_asset("/sdcard/xash/" + game + "/", "sound/weapons/m3_pump.wav", true);
+
+			//Stalker Rocket
+			copy_asset("/sdcard/xash/" + game + "/", "models/v_rpg.mdl", true);
+			copy_asset("/sdcard/xash/" + game + "/", "models/p_rpg.mdl", true);
+			copy_asset("/sdcard/xash/" + game + "/", "models/w_rpg.mdl", true);
+			copy_asset("/sdcard/xash/" + game + "/", "models/rpgrocket.mdl", true);
+			copy_asset("/sdcard/xash/" + game + "/", "models/v_rpgammo.mdl", true);
+			copy_asset("/sdcard/xash/" + game + "/", "sound/weapons/rocket1.wav", true);
+			copy_asset("/sdcard/xash/" + game + "/", "sound/weapons/rocketfire1.wav", true);
+			copy_asset("/sdcard/xash/" + game + "/", "sound/weapons/rpg7_reload.wav", true);
+
+			//Satchel
+			copy_asset("/sdcard/xash/" + game + "/", "models/v_satchel.mdl", true);
+			copy_asset("/sdcard/xash/" + game + "/", "models/v_satchel_radio.mdl", true);
+			copy_asset("/sdcard/xash/" + game + "/", "models/w_satchel.mdl", true);
+			copy_asset("/sdcard/xash/" + game + "/", "models/p_satchel.mdl", true);
+			copy_asset("/sdcard/xash/" + game + "/", "models/p_satchel_radio.mdl", true);
+
+			//Tripmine
+			copy_asset("/sdcard/xash/" + game + "/", "models/v_tripmine.mdl", true);
+			copy_asset("/sdcard/xash/" + game + "/", "models/p_tripmine.mdl", true);
+			copy_asset("/sdcard/xash/" + game + "/", "sound/weapons/mine_activate.wav", true);
+			copy_asset("/sdcard/xash/" + game + "/", "sound/weapons/mine_deploy.wav", true);
+			copy_asset("/sdcard/xash/" + game + "/", "sound/weapons/tripmine_ant.wav", true);
+			copy_asset("/sdcard/xash/" + game + "/", "sound/weapons/tripmine_button.wav", true);
+			copy_asset("/sdcard/xash/" + game + "/", "sound/weapons/tripmine_move.wav", true);
+
+			//BMS Crossbow
+			copy_asset("/sdcard/xash/" + game + "/", "models/v_crossbow.mdl", true);
+			copy_asset("/sdcard/xash/" + game + "/", "models/p_crossbow.mdl", true);
+			copy_asset("/sdcard/xash/" + game + "/", "models/w_crossbow.mdl", true);
+			copy_asset("/sdcard/xash/" + game + "/", "models/w_crossbow_clip.mdl", true);
+			copy_asset("/sdcard/xash/" + game + "/", "sound/weapons/natianul.wav", true);
+			copy_asset("/sdcard/xash/" + game + "/", "sound/weapons/xbow.wav", true);
+			copy_asset("/sdcard/xash/" + game + "/", "sound/weapons/xbow_fire1.wav", true);
+			copy_asset("/sdcard/xash/" + game + "/", "sound/weapons/xbow_reload1.wav", true);
+
+
+			//Egon (Overhaul)
+			copy_asset("/sdcard/xash/" + game + "/", "models/v_egon.mdl", true);
+			copy_asset("/sdcard/xash/" + game + "/", "models/p_egon.mdl", true);
+			copy_asset("/sdcard/xash/" + game + "/", "models/w_egon.mdl", true);
+
+			//Gauss (Overhaul)
+			copy_asset("/sdcard/xash/" + game + "/", "models/v_gauss.mdl", true);
+			copy_asset("/sdcard/xash/" + game + "/", "models/p_gauss.mdl", true);
+			copy_asset("/sdcard/xash/" + game + "/", "models/w_gauss.mdl", true);
+			copy_asset("/sdcard/xash/" + game + "/", "models/w_gaussammo.mdl", true);
+
+			//HGun (Overhaul)
+			copy_asset("/sdcard/xash/" + game + "/", "models/v_hgun.mdl", true);
+			copy_asset("/sdcard/xash/" + game + "/", "models/p_hgun.mdl", true);
+			copy_asset("/sdcard/xash/" + game + "/", "models/w_hgun.mdl", true);
+
+			//Squeak (Overhaul)
+			copy_asset("/sdcard/xash/" + game + "/", "models/v_squeak.mdl", true);
+			copy_asset("/sdcard/xash/" + game + "/", "models/p_squeak.mdl", true);
+			copy_asset("/sdcard/xash/" + game + "/", "models/w_squeak.mdl", true);
+			copy_asset("/sdcard/xash/" + game + "/", "models/w_sqknest.mdl", true);
+
+			//Crowbar
+			copy_asset("/sdcard/xash/" + game + "/", "models/v_crowbar.mdl", true);
+			copy_asset("/sdcard/xash/" + game + "/", "models/w_crowbar.mdl", true);
+			copy_asset("/sdcard/xash/" + game + "/", "sound/weapons/cbar_draw.wav", true);
+			copy_asset("/sdcard/xash/" + game + "/", "sound/weapons/cbar_hit1.wav", true);
+			copy_asset("/sdcard/xash/" + game + "/", "sound/weapons/cbar_hit2.wav", true);
+			copy_asset("/sdcard/xash/" + game + "/", "sound/weapons/cbar_hitbod1.wav", true);
+			copy_asset("/sdcard/xash/" + game + "/", "sound/weapons/cbar_hitbod2.wav", true);
+			copy_asset("/sdcard/xash/" + game + "/", "sound/weapons/cbar_hitbod3.wav", true);
+			copy_asset("/sdcard/xash/" + game + "/", "sound/weapons/cbar_miss1.wav", true);
+
+			copy_asset("/sdcard/xash/" + game + "/", "models/v_torch.mdl", true);
+		}
+
+		//Set default environment
+		try {
+			setenv("XASH3D_BASEDIR", "/sdcard/xash/", true);
+			setenv("XASH3D_ENGLIBDIR", getFilesDir().getParentFile().getPath() + "/lib", true);
+			setenv("XASH3D_GAMELIBDIR", getFilesDir().getParentFile().getPath() + "/lib", true);
+			setenv("XASH3D_GAMEDIR", "valve", true);
+			setenv( "XASH3D_EXTRAS_PAK1", getFilesDir().getPath() + "/extras.pak", true );
+		}
+		catch (Exception e)
+		{
+
+		}
+		
 		mNativeHandle = GLES3JNILib.onCreate( this, commandLineParams );
 	}
 	

@@ -297,6 +297,7 @@ void UI_AdvControls_Menu( void );
 void UI_GameOptions_Menu( void );
 void UI_CreateGame_Menu( void );
 void UI_Audio_Menu( void );
+void UI_ConsoleCommands_Menu( void );
 void UI_Video_Menu( void );
 void UI_VidOptions_Menu( void );
 void UI_VidModes_Menu( void );

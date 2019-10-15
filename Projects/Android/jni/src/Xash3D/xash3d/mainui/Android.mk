@@ -52,6 +52,7 @@ LOCAL_SRC_FILES := \
 	controls/ScrollView.cpp				\
 	menus/AdvancedControls.cpp                      \
 	menus/Audio.cpp                                 \
+	menus/ConsoleCommands.cpp                       \
 	menus/Configuration.cpp                         \
 	menus/ConnectionProgress.cpp                    \
 	menus/ConnectionWarning.cpp                     \
