@@ -46,6 +46,7 @@ LAMBDA1VR_SRC_FILES := \
 		   $(LOCAL_PATH)/../../../Lambda1VR/VrInputRight.c \
 		   $(LOCAL_PATH)/../../../Lambda1VR/VrInputLeft.c \
 		   $(LOCAL_PATH)/../../../Lambda1VR/VrInputLeftAlt.c \
+		   $(LOCAL_PATH)/../../../Lambda1VR/VrInputLeftAlt2.c \
 		   $(LOCAL_PATH)/../../../Lambda1VR/argtable3.c
 
 LOCAL_SRC_FILES := \

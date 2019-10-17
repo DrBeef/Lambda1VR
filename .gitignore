@@ -30,7 +30,7 @@ $RECYCLE.BIN/
 *.class
 drbeef-release-key.keystore
 projects/Android/build/*
-assets/oculussig*
+assets/*
 Projects/Android/.externalNativeBuild/ndkBuild/debug/arm64-v8a/android_gradle_build.json
 *.json
 Projects/Android/.externalNativeBuild/ndkBuild/debug/arm64-v8a/ndkBuild_build_command.txt

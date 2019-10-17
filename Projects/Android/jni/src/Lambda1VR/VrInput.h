@@ -31,5 +31,6 @@ void HandleInput_Right( ovrMobile * Ovr, double displayTime );
 void HandleInput_RightAlt( ovrMobile * Ovr, double displayTime );
 void HandleInput_Left( ovrMobile * Ovr, double displayTime );
 void HandleInput_LeftAlt( ovrMobile * Ovr, double displayTime );
+void HandleInput_LeftAlt2( ovrMobile * Ovr, double displayTime );
 
 

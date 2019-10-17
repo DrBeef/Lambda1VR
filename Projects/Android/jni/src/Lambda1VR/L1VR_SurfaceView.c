@@ -111,6 +111,7 @@ enum control_scheme {
 	RIGHT_HANDED_ALT = 1,
 	LEFT_HANDED_DEFAULT = 10,
 	LEFT_HANDED_ALT = 11,
+	LEFT_HANDED_ALT_2 = 12,
 	GAMEPAD = 20 //Not implemented, someone else can do this!
 };
 
@@ -1639,6 +1640,9 @@ void * AppThreadFunction( void * parm )
 					break;
 				case LEFT_HANDED_ALT:
 					HandleInput_LeftAlt(appState.Ovr, appState.DisplayTime);
+					break;
+				case LEFT_HANDED_ALT_2:
+					HandleInput_LeftAlt2(appState.Ovr, appState.DisplayTime);
 					break;
                 case GAMEPAD:
                     //HandleInput_Gamepad(appState.Ovr, appState.DisplayTime); // Someone else can implement this
