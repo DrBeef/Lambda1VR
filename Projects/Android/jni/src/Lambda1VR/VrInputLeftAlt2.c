@@ -29,13 +29,10 @@ extern cvar_t	*cl_movespeedkey;
 
 void Touch_Motion( touchEventType type, int fingerID, float x, float y, float dx, float dy );
 
-void HandleInput_LeftAlt2(ovrMobile * Ovr, double displayTime )
+void HandleInput_LeftAlt2()
 {
-	//Ensure handedness is set to right
-	Cvar_Set("hand", "0");
-
-	//Get info for tracked remotes
-	acquireTrackedRemotesData(Ovr, displayTime);
+	//Ensure handedness is set to left
+	Cvar_Set("hand", "1");
 
 	static bool dominantGripPushed = false;
 	static int grabMeleeWeapon = 0;
@@ -60,14 +57,14 @@ void HandleInput_LeftAlt2(ovrMobile * Ovr, double displayTime )
 	//Menu control - Uses "touch"
 	if (useScreenLayer())
 	{
-		interactWithTouchScreen(&rightRemoteTracking_new, &rightTrackedRemoteState_new, &rightTrackedRemoteState_old);
+        interactWithTouchScreen(&leftRemoteTracking_new, &leftTrackedRemoteState_new, &leftTrackedRemoteState_old);
 	}
 	else
 	{
 		//If distance to off-hand remote is less than 35cm and user pushes grip, then we enable weapon stabilisation
-		float distance = sqrtf(powf(leftRemoteTracking_new.HeadPose.Pose.Position.x - rightRemoteTracking_new.HeadPose.Pose.Position.x, 2) +
-							   powf(leftRemoteTracking_new.HeadPose.Pose.Position.y - rightRemoteTracking_new.HeadPose.Pose.Position.y, 2) +
-							   powf(leftRemoteTracking_new.HeadPose.Pose.Position.z - rightRemoteTracking_new.HeadPose.Pose.Position.z, 2));
+		float distance = sqrtf(powf(rightRemoteTracking_new.HeadPose.Pose.Position.x - leftRemoteTracking_new.HeadPose.Pose.Position.x, 2) +
+							   powf(rightRemoteTracking_new.HeadPose.Pose.Position.y - leftRemoteTracking_new.HeadPose.Pose.Position.y, 2) +
+							   powf(rightRemoteTracking_new.HeadPose.Pose.Position.z - leftRemoteTracking_new.HeadPose.Pose.Position.z, 2));
 
 		//Turn on weapon stabilisation?
 		if ((rightTrackedRemoteState_new.Buttons & ovrButton_GripTrigger) !=
@@ -194,7 +191,7 @@ void HandleInput_LeftAlt2(ovrMobile * Ovr, double displayTime )
 						if (dominantGripPushed) {
 							//Initiate crowbar from backpack mode
 							sendButtonActionSimple("weapon_crowbar");
-							Android_Vibrate(80, 1, 0.8); // vibrate to let user know they switched
+							Android_Vibrate(80, 0, 0.8); // vibrate to let user know they switched
 							grabMeleeWeapon = 1;
 						}
 					}
@@ -227,17 +224,11 @@ void HandleInput_LeftAlt2(ovrMobile * Ovr, double displayTime )
 			}
 			else
 			{
-				controllerYawHeading = 0.0f;//-cl.refdef.cl_viewangles[YAW];
+				controllerYawHeading = 0.0f;
 			}
 		}
 
-		//Right-hand specific stuff
 		{
-			ALOGV("        Right-Controller-Position: %f, %f, %f",
-				  rightRemoteTracking_new.HeadPose.Pose.Position.x,
-				  rightRemoteTracking_new.HeadPose.Pose.Position.y,
-				  rightRemoteTracking_new.HeadPose.Pose.Position.z);
-
 			//This section corrects for the fact that the controller actually controls direction of movement, but we want to move relative to the direction the
 			//player is facing for positional tracking
 			float multiplier = vr_positional_factor->value / (cl_forwardspeed->value *
@@ -317,11 +308,7 @@ void HandleInput_LeftAlt2(ovrMobile * Ovr, double displayTime )
 		}
 
 		{
-			ALOGV("        Left-Controller-Position: %f, %f, %f",
-				  leftRemoteTracking_new.HeadPose.Pose.Position.x,
-				  leftRemoteTracking_new.HeadPose.Pose.Position.y,
-				  leftRemoteTracking_new.HeadPose.Pose.Position.z);
-
+			//Use (Action)
 			if ((rightTrackedRemoteState_new.Buttons & ovrButton_Joystick) !=
 				(rightTrackedRemoteState_old.Buttons & ovrButton_Joystick)
 				&& (rightTrackedRemoteState_new.Buttons & ovrButton_Joystick)) {
@@ -367,7 +354,7 @@ void HandleInput_LeftAlt2(ovrMobile * Ovr, double displayTime )
 										  &rightTrackedRemoteState_old,
 										  ovrButton_Trigger, K_SHIFT);
 
-			static increaseSnap = true;
+			static bool increaseSnap = true;
 			if (rightTrackedRemoteState_new.Joystick.x > 0.6f)
 			{
 				if (increaseSnap)
@@ -386,7 +373,7 @@ void HandleInput_LeftAlt2(ovrMobile * Ovr, double displayTime )
 				increaseSnap = true;
 			}
 
-			static decreaseSnap = true;
+			static bool decreaseSnap = true;
 			if (rightTrackedRemoteState_new.Joystick.x < -0.6f)
 			{
 				if (decreaseSnap)

@@ -27,10 +27,16 @@ void interactWithTouchScreen(ovrTracking *tracking, ovrInputStateTrackedRemote *
 
 void acquireTrackedRemotesData(const ovrMobile *Ovr, double displayTime);
 
-void HandleInput_Right( ovrMobile * Ovr, double displayTime );
-void HandleInput_RightAlt( ovrMobile * Ovr, double displayTime );
-void HandleInput_Left( ovrMobile * Ovr, double displayTime );
-void HandleInput_LeftAlt( ovrMobile * Ovr, double displayTime );
-void HandleInput_LeftAlt2( ovrMobile * Ovr, double displayTime );
+
+void HandleInput_Default( ovrInputStateTrackedRemote *pDominantTrackedRemoteNew, ovrInputStateTrackedRemote *pDominantTrackedRemoteOld, ovrTracking* pDominantTracking,
+                          ovrInputStateTrackedRemote *pOffTrackedRemoteNew, ovrInputStateTrackedRemote *pOffTrackedRemoteOld, ovrTracking* pOffTracking,
+                          int domButton1, int domButton2, int offButton1, int offButton2 );
+void HandleInput_Alt( ovrInputStateTrackedRemote *pDominantTrackedRemoteNew, ovrInputStateTrackedRemote *pDominantTrackedRemoteOld, ovrTracking* pDominantTracking,
+                       ovrInputStateTrackedRemote *pOffTrackedRemoteNew, ovrInputStateTrackedRemote *pOffTrackedRemoteOld, ovrTracking* pOffTracking,
+                       int domButton1, int domButton2, int offButton1, int offButton2 );
+
+//A specific custom for left alt 2
+void HandleInput_LeftAlt2( );
+
 
 

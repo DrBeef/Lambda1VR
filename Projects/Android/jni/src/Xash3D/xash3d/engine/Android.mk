@@ -42,10 +42,8 @@ LAMBDA1VR_SRC_FILES := \
 		   $(LOCAL_PATH)/../../../Lambda1VR/L1VR_SurfaceView.c \
 		   $(LOCAL_PATH)/../../../Lambda1VR/VrCompositor.c \
 		   $(LOCAL_PATH)/../../../Lambda1VR/VrInputCommon.c \
-		   $(LOCAL_PATH)/../../../Lambda1VR/VrInputRightAlt.c \
-		   $(LOCAL_PATH)/../../../Lambda1VR/VrInputRight.c \
-		   $(LOCAL_PATH)/../../../Lambda1VR/VrInputLeft.c \
-		   $(LOCAL_PATH)/../../../Lambda1VR/VrInputLeftAlt.c \
+		   $(LOCAL_PATH)/../../../Lambda1VR/VrInputDefault.c \
+		   $(LOCAL_PATH)/../../../Lambda1VR/VrInputAlt.c \
 		   $(LOCAL_PATH)/../../../Lambda1VR/VrInputLeftAlt2.c \
 		   $(LOCAL_PATH)/../../../Lambda1VR/argtable3.c
 
