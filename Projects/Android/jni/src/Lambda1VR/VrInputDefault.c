@@ -343,7 +343,7 @@ void HandleInput_Default( ovrInputStateTrackedRemote *pDominantTrackedRemoteNew,
 							}
 							else if (between(-1.0f, pDominantTrackedRemoteNew->Joystick.y, -0.75f))
 							{
-								sendButtonActionSimple("invpnext");
+								sendButtonActionSimple("invnext");
 							}
 							else if (between(0.75f, pDominantTrackedRemoteNew->Joystick.x, 1.0f))
 							{
