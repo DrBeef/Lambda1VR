@@ -305,23 +305,62 @@ void HandleInput_Default( ovrInputStateTrackedRemote *pDominantTrackedRemoteNew,
 
 			//Weapon Chooser
 			static bool weaponSwitched = false;
-			if (between(-0.25f, pDominantTrackedRemoteNew->Joystick.x, 0.25f) &&
-				(between(0.75f, pDominantTrackedRemoteNew->Joystick.y, 1.0f) ||
-				 between(-1.0f, pDominantTrackedRemoteNew->Joystick.y, -0.75f)))
+			if (vr_snapturn_angle->value != 0) // if snap angle feature is enabled
 			{
-				if (!weaponSwitched) {
-					if (between(0.75f, pDominantTrackedRemoteNew->Joystick.y, 1.0f))
-					{
-						sendButtonActionSimple("invnext");
+				if (between(-0.25f, pDominantTrackedRemoteNew->Joystick.x, 0.25f) &&
+					(between(0.75f, pDominantTrackedRemoteNew->Joystick.y, 1.0f) ||
+						between(-1.0f, pDominantTrackedRemoteNew->Joystick.y, -0.75f)))
+				{
+					if (!weaponSwitched) {
+						if (between(0.75f, pDominantTrackedRemoteNew->Joystick.y, 1.0f))
+						{
+							sendButtonActionSimple("invnext");
+						}
+						else
+						{
+							sendButtonActionSimple("invprev");
+						}
+						weaponSwitched = true;
 					}
-					else
-					{
-						sendButtonActionSimple("invprev");
-					}
-					weaponSwitched = true;
 				}
-			} else {
-				weaponSwitched = false;
+				else {
+					weaponSwitched = false;
+				}
+			}
+			else // allow slot selection (columns of weapon hud)
+			{
+				if (between(0.75f, pDominantTrackedRemoteNew->Joystick.y, 1.0f) ||
+					between(-1.0f, pDominantTrackedRemoteNew->Joystick.y, -0.75f) ||
+					between(0.75f, pDominantTrackedRemoteNew->Joystick.x, 1.0f) ||
+					between(-1.0f, pDominantTrackedRemoteNew->Joystick.x, -0.75f))
+				{
+					if (!weaponSwitched) {
+						if (!weaponSwitched)
+						{
+							if (between(0.75f, pDominantTrackedRemoteNew->Joystick.y, 1.0f))
+							{
+								sendButtonActionSimple("invprev"); // in this mode is makes more sense to select the next item with Joystick down; this is the mouse wheel behaviour in hl
+							}
+							else if (between(-1.0f, pDominantTrackedRemoteNew->Joystick.y, -0.75f))
+							{
+								sendButtonActionSimple("invpnext");
+							}
+							else if (between(0.75f, pDominantTrackedRemoteNew->Joystick.x, 1.0f))
+							{
+								sendButtonActionSimple("invnextslot"); // not an original hl methode -> needs update from hlsdk-xash3d
+							}
+							else if (between(-1.0f, pDominantTrackedRemoteNew->Joystick.x, -0.75f))
+							{
+								sendButtonActionSimple("invprevslot");
+							}
+							weaponSwitched = true;
+						}
+						weaponSwitched = true;
+					}
+				}
+				else {
+					weaponSwitched = false;
+				}
 			}
 		}
 
