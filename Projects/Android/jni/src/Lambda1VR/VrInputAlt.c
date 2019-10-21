@@ -42,6 +42,7 @@ void HandleInput_Alt( ovrInputStateTrackedRemote *pDominantTrackedRemoteNew, ovr
 
 	static bool dominantGripPushed = false;
 	static int grabMeleeWeapon = 0;
+	static bool canUseBackpack = false;
 	static float dominantGripPushTime = 0.0f;
     static bool selectingWeapon = false;
 
@@ -160,6 +161,15 @@ void HandleInput_Alt( ovrInputStateTrackedRemote *pDominantTrackedRemoteNew, ovr
 			{
 				sendButtonActionSimple("-reload");
 				finishReloadNextFrame = false;
+			}
+
+			if (pDominantTracking->Status & VRAPI_TRACKING_STATUS_POSITION_TRACKED) {
+				canUseBackpack = false;
+			}
+			else if (!canUseBackpack && grabMeleeWeapon == 0) {
+				int channel = (vr_control_scheme->integer >= 10) ? 0 : 1;
+				Android_Vibrate(40, channel, 0.5); // vibrate to let user know they can switch
+				canUseBackpack = true;
 			}
 
 			if ((pDominantTrackedRemoteNew->Buttons & ovrButton_GripTrigger) !=
