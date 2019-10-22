@@ -293,6 +293,13 @@ void HandleInput_Default( ovrInputStateTrackedRemote *pDominantTrackedRemoteNew,
 					firingPrimary = (pDominantTrackedRemoteNew->Buttons & ovrButton_Trigger);
 					sendButtonAction("+attack", firingPrimary);
 				}
+				// we need to release secondary fire if dominantGripPushed has been released before releasing trigger -> should fix the gun jamming and non stop firing secondary attack bug
+				if ((pDominantTrackedRemoteNew->Buttons & ovrButton_Trigger) !=
+					(pDominantTrackedRemoteOld->Buttons & ovrButton_Trigger) &&
+					(pDominantTrackedRemoteNew->Buttons& ovrButton_Trigger) == false)
+				{
+					sendButtonAction("+attack2", false);
+				}
 			}
 
 			//Duck
