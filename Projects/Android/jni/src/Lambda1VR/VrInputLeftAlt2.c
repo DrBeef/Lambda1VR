@@ -36,6 +36,7 @@ void HandleInput_LeftAlt2()
 
 	static bool dominantGripPushed = false;
 	static int grabMeleeWeapon = 0;
+	static bool canUseBackpack = false;
 	static float dominantGripPushTime = 0.0f;
 
 	//Show screen view (if in multiplayer toggle scoreboard)
@@ -168,6 +169,15 @@ void HandleInput_LeftAlt2()
 				finishReloadNextFrame = false;
 			}
 
+			if (pDominantTracking->Status & VRAPI_TRACKING_STATUS_POSITION_TRACKED) {
+				canUseBackpack = false;
+			}
+			else if (!canUseBackpack && grabMeleeWeapon == 0) {
+				int channel = (vr_control_scheme->integer >= 10) ? 0 : 1;
+				Android_Vibrate(40, channel, 0.5); // vibrate to let user know they can switch
+				canUseBackpack = true;
+			}
+
 			if ((leftTrackedRemoteState_new.Buttons & ovrButton_GripTrigger) !=
 				(leftTrackedRemoteState_old.Buttons & ovrButton_GripTrigger)) {
 
@@ -274,6 +284,13 @@ void HandleInput_LeftAlt2()
 
 					firingPrimary = (leftTrackedRemoteState_new.Buttons & ovrButton_Trigger);
 					sendButtonAction("+attack", firingPrimary);
+				}
+				// we need to release secondary fire if dominantGripPushed has been released before releasing trigger -> should fix the gun jamming and non stop firing secondary attack bug
+				if ((pDominantTrackedRemoteNew->Buttons & ovrButton_Trigger) !=
+					(pDominantTrackedRemoteOld->Buttons & ovrButton_Trigger) &&
+					(pDominantTrackedRemoteNew->Buttons & ovrButton_Trigger) == false)
+				{
+					sendButtonAction("+attack2", false);
 				}
 			}
 
