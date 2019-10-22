@@ -169,7 +169,7 @@ void HandleInput_LeftAlt2()
 				finishReloadNextFrame = false;
 			}
 
-			if (pDominantTracking->Status & VRAPI_TRACKING_STATUS_POSITION_TRACKED) {
+			if (leftRemoteTracking_new.Status & VRAPI_TRACKING_STATUS_POSITION_TRACKED) {
 				canUseBackpack = false;
 			}
 			else if (!canUseBackpack && grabMeleeWeapon == 0) {
@@ -286,9 +286,9 @@ void HandleInput_LeftAlt2()
 					sendButtonAction("+attack", firingPrimary);
 				}
 				// we need to release secondary fire if dominantGripPushed has been released before releasing trigger -> should fix the gun jamming and non stop firing secondary attack bug
-				if ((pDominantTrackedRemoteNew->Buttons & ovrButton_Trigger) !=
-					(pDominantTrackedRemoteOld->Buttons & ovrButton_Trigger) &&
-					(pDominantTrackedRemoteNew->Buttons & ovrButton_Trigger) == false)
+				if ((leftTrackedRemoteState_new.Buttons & ovrButton_Trigger) !=
+					(leftTrackedRemoteState_old.Buttons & ovrButton_Trigger) &&
+					(leftTrackedRemoteState_new.Buttons & ovrButton_Trigger) == false)
 				{
 					sendButtonAction("+attack2", false);
 				}
