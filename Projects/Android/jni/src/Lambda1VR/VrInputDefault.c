@@ -373,7 +373,7 @@ void HandleInput_Default( ovrInputStateTrackedRemote *pDominantTrackedRemoteNew,
 										  pOffTrackedRemoteOld,
 										  ovrButton_Trigger, K_SHIFT);
 
-			static increaseSnap = true;
+			static bool increaseSnap = true;
 			if (pDominantTrackedRemoteNew->Joystick.x > 0.6f)
 			{
 				if (increaseSnap)
@@ -392,7 +392,7 @@ void HandleInput_Default( ovrInputStateTrackedRemote *pDominantTrackedRemoteNew,
 				increaseSnap = true;
 			}
 
-			static decreaseSnap = true;
+			static bool decreaseSnap = true;
 			if (pDominantTrackedRemoteNew->Joystick.x < -0.6f)
 			{
 				if (decreaseSnap)
