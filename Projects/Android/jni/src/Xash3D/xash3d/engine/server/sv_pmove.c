@@ -644,6 +644,11 @@ static void PM_CheckMovingGround( edict_t *ent, float frametime )
 	ent->v.flags &= ~FL_BASEVELOCITY;
 }
 
+#ifdef VR
+extern vec3_t offhandangles;
+extern convar_t *vr_legacy_ladders;
+#endif
+
 static void SV_SetupPMove( playermove_t *pmove, sv_client_t *cl, usercmd_t *ucmd, const char *physinfo )
 {
 	vec3_t	absmin, absmax;
@@ -657,6 +662,13 @@ static void SV_SetupPMove( playermove_t *pmove, sv_client_t *cl, usercmd_t *ucmd
 	pmove->time = cl->timebase * 1000; // probably never used
 	VectorCopy( clent->v.origin, pmove->origin );
 	VectorCopy( clent->v.v_angle, pmove->angles );
+#ifdef VR
+	if (pmove->multiplayer || vr_legacy_ladders->value == 1.0f) {
+		VectorCopy(clent->v.v_angle, pmove->angles2);
+	} else {
+		VectorCopy(offhandangles, pmove->angles2);
+	}
+#endif
 	VectorCopy( clent->v.v_angle, pmove->oldangles );
 	VectorCopy( clent->v.velocity, pmove->velocity );
 	VectorCopy( clent->v.basevelocity, pmove->basevelocity );

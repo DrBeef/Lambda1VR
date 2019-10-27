@@ -220,9 +220,11 @@ void HandleInput_Alt( ovrInputStateTrackedRemote *pDominantTrackedRemoteNew, ovr
 			flashlightoffset[0] = v[0];
 			flashlightoffset[2] = v[1];
 
+			QuatToYawPitchRoll(pOffTracking->HeadPose.Pose.Orientation, 0.0f, offhandangles);
 			QuatToYawPitchRoll(pOffTracking->HeadPose.Pose.Orientation, 15.0f, flashlightangles);
 
 			flashlightangles[YAW] += (cl.refdef.cl_viewangles[YAW] - hmdorientation[YAW]);
+			offhandangles[YAW] = flashlightangles[YAW];
 
 			if (vr_walkdirection->integer == 0) {
 				controllerYawHeading = -cl.refdef.cl_viewangles[YAW] + flashlightangles[YAW];

@@ -887,7 +887,10 @@ void S_StartSound( const vec3_t pos, int ent, int chan, sound_t handle, float fv
 		return;
 	}
 
-	if( !pos ) pos = cl.refdef.vieworg;
+	if( !pos )
+	{
+		pos = cl.refdef.vieworg;
+	}
 
 	// pick a channel to play on
 	if( chan == CHAN_STATIC ) target_chan = SND_PickStaticChannel( pos, sfx );

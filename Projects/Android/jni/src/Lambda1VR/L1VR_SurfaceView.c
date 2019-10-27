@@ -1395,6 +1395,7 @@ void VR_Init()
 	vr_mirror_weapons = Cvar_Get( "vr_mirror_weapons", "0", CVAR_ARCHIVE, "Set to 1 to mirror the weapon models (for left handed use)" );
     vr_weapon_backface_culling = Cvar_Get( "vr_weapon_backface_culling", "0", CVAR_ARCHIVE, "Use to enable whether back face culling is used on weapon viewmodel" );
 	vr_comfort_mask = Cvar_Get( "vr_comfort_mask", "0.0", CVAR_ARCHIVE, "Use to reduce motion sickness, 0.0 is off, 1.0 is fully obscured, probably go with 0.7, anything less than 0.5 is barely visible" );
+    vr_legacy_ladders = Cvar_Get( "vr_legacy_ladders", "0", CVAR_ARCHIVE, "Set to 1 to use ladder climb direction based on HMD, otherwise off-hand controller angle is used" );
 
     //Not to be changed by users, as it will be overwritten anyway
 	vr_stereo_side = Cvar_Get( "vr_stereo_side", "0", CVAR_READ_ONLY, "Eye being drawn" );

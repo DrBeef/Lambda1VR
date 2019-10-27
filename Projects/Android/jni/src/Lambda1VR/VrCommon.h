@@ -45,6 +45,8 @@ vec3_t weaponangles[3];
 vec3_t weaponoffset;
 vec3_t weaponvelocity;
 
+vec3_t offhandangles;
+
 vec3_t flashlightangles;
 vec3_t flashlightoffset;
 
