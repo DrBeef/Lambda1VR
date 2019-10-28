@@ -19,6 +19,7 @@ convar_t	*vr_mirror_weapons;
 convar_t	*vr_weapon_backface_culling;
 convar_t	*vr_comfort_mask;
 convar_t	*vr_legacy_ladders;
+convar_t	*vr_controller_tracking_haptic;
 
 //Used and updated continuously during rendering
 convar_t	*vr_stereo_side;

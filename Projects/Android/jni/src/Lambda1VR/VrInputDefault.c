@@ -180,7 +180,10 @@ void HandleInput_Default( ovrInputStateTrackedRemote *pDominantTrackedRemoteNew,
 			}
 			else if (!canUseBackpack && grabMeleeWeapon == 0) {
 					int channel = (vr_control_scheme->integer >= 10) ? 0 : 1;
-					Android_Vibrate(40, channel, 0.5); // vibrate to let user know they can switch
+					if (vr_controller_tracking_haptic->value == 1.0f) {
+						Android_Vibrate(40, channel,
+										0.5); // vibrate to let user know they can switch
+					}
 					canUseBackpack = true;
 				}
 

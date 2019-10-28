@@ -46,12 +46,11 @@ private:
 	CMenuSlider	soundVolume;
 	CMenuSlider	musicVolume;
 	CMenuSlider	suitVolume;
-	CMenuSlider	vibration;
 	CMenuSpinControl lerping;
 	CMenuCheckBox noDSP;
 	CMenuCheckBox muteFocusLost;
 	CMenuCheckBox vibrationEnable;
-	CMenuCheckBox reverseChannels;
+	CMenuCheckBox enableTrackingLostBlip;
 
 	float oldVibrate;
 };
@@ -73,7 +72,7 @@ void CMenuAudio::GetConfig( void )
 	noDSP.LinkCvar( "dsp_off" );
 	muteFocusLost.LinkCvar( "snd_mute_losefocus" );
 	vibrationEnable.LinkCvar( "vibration_enable" );
-	reverseChannels.LinkCvar( "s_reverse_channels" );
+	enableTrackingLostBlip.LinkCvar( "vr_controller_tracking_haptic" );
 }
 
 /*
@@ -86,12 +85,11 @@ void CMenuAudio::SaveAndPopMenu()
 	soundVolume.WriteCvar();
 	musicVolume.WriteCvar();
 	suitVolume.WriteCvar();
-	vibration.WriteCvar();
 	lerping.WriteCvar();
 	noDSP.WriteCvar();
 	muteFocusLost.WriteCvar();
 	vibrationEnable.WriteCvar();
-	reverseChannels.WriteCvar();
+	enableTrackingLostBlip.WriteCvar();
 
 	CMenuFramework::SaveAndPopMenu();
 }
@@ -140,16 +138,17 @@ void CMenuAudio::_Init( void )
 	muteFocusLost.onChanged = CMenuEditable::WriteCvarCb;
 	muteFocusLost.SetCoord( 320, 570 );
 
-	vibrationEnable.SetNameAndStatus( "Enable vibration", "In-game vibration(when player injured, etc)");
+	vibrationEnable.SetNameAndStatus( "Enable vibration", "Controller vibration(weapon shoot, when player injured, etc)");
 	vibrationEnable.iMask = (QMF_GRAYED|QMF_INACTIVE);
 	vibrationEnable.bInvertMask = true;
 	vibrationEnable.onChanged = CMenuCheckBox::BitMaskCb;
-	vibrationEnable.onChanged.pExtra = &vibration.iFlags;
-	vibrationEnable.SetCoord( 700, 470 );
+	vibrationEnable.onChanged.pExtra = &enableTrackingLostBlip.iFlags;
+	vibrationEnable.SetCoord( 700, 420 );
 
-	reverseChannels.SetNameAndStatus( "Reverse audio channels", "Use it when you can't swap your headphones' speakers" );
-	reverseChannels.onChanged = CMenuEditable::WriteCvarCb;
-	reverseChannels.SetCoord( 320, 620 );
+	enableTrackingLostBlip.SetNameAndStatus( "\"Tracking Lost\" Haptic Blip", "Enables haptic indicator when backpack crowbar can be grabbed");
+	enableTrackingLostBlip.iMask = (QMF_GRAYED|QMF_INACTIVE);
+	enableTrackingLostBlip.bInvertMask = true;
+	enableTrackingLostBlip.SetCoord( 700, 470 );
 
 	AddItem( background );
 	AddItem( banner );
@@ -161,9 +160,8 @@ void CMenuAudio::_Init( void )
 	AddItem( lerping );
 	AddItem( noDSP );
 	AddItem( muteFocusLost );
-	AddItem( reverseChannels );
+	AddItem( enableTrackingLostBlip );
 	AddItem( vibrationEnable );
-	AddItem( vibration );
 }
 
 void CMenuAudio::_VidInit( )
