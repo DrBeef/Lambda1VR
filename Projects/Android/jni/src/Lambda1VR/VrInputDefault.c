@@ -175,7 +175,8 @@ void HandleInput_Default( ovrInputStateTrackedRemote *pDominantTrackedRemoteNew,
 				finishReloadNextFrame = false;
 			}
 
-			if (pDominantTracking->Status & VRAPI_TRACKING_STATUS_POSITION_TRACKED) {
+			if ((pDominantTracking->Status & VRAPI_TRACKING_STATUS_POSITION_TRACKED) ||
+				(pDominantTracking->Status & VRAPI_TRACKING_STATUS_POSITION_VALID)) {
 				canUseBackpack = false;
 			}
 			else if (!canUseBackpack && grabMeleeWeapon == 0) {
