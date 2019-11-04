@@ -169,7 +169,8 @@ void HandleInput_LeftAlt2()
 				finishReloadNextFrame = false;
 			}
 
-			if (leftRemoteTracking_new.Status & VRAPI_TRACKING_STATUS_POSITION_TRACKED) {
+			if ((leftRemoteTracking_new.Status & VRAPI_TRACKING_STATUS_POSITION_TRACKED) ||
+				(leftRemoteTracking_new.Status & VRAPI_TRACKING_STATUS_POSITION_VALID)) {
 				canUseBackpack = false;
 			}
 			else if (!canUseBackpack && grabMeleeWeapon == 0) {
