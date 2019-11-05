@@ -205,6 +205,9 @@ import static android.system.Os.setenv;
 			copy_asset("/sdcard/xash/" + game + "/", "models/v_9mmhandgun.mdl", true);
 			copy_asset("/sdcard/xash/" + game + "/", "models/p_9mmhandgun.mdl", true);
 			copy_asset("/sdcard/xash/" + game + "/", "models/w_9mmhandgun.mdl", true);
+			copy_asset("/sdcard/xash/" + game + "/", "sound/weapons/glock_magin.wav", true);
+			copy_asset("/sdcard/xash/" + game + "/", "sound/weapons/glock_magout.wav", true);
+			copy_asset("/sdcard/xash/" + game + "/", "sound/weapons/glock_slideforward.wav", true);
 
 			//357 Python
 			copy_asset("/sdcard/xash/" + game + "/", "models/v_357.mdl", true);
