@@ -39,6 +39,34 @@ void HandleInput_LeftAlt2()
 	static bool canUseBackpack = false;
 	static float dominantGripPushTime = 0.0f;
 
+	static bool canUseQuickSave = false;
+	if (rightRemoteTracking_new.Status & (VRAPI_TRACKING_STATUS_POSITION_TRACKED | VRAPI_TRACKING_STATUS_POSITION_VALID)) {
+		canUseQuickSave = false;
+	}
+	else if (!canUseQuickSave) {
+		int channel = (vr_control_scheme->integer >= 10) ? 1 : 0;
+		if (vr_controller_tracking_haptic->value == 1.0f) {
+			Android_Vibrate(40, channel,
+							0.5); // vibrate to let user know they can switch
+		}
+		canUseQuickSave = true;
+	}
+
+	if (canUseQuickSave && !isMultiplayer())
+	{
+		if (((rightTrackedRemoteState_new.Buttons & ovrButton_A) !=
+			 (rightTrackedRemoteState_old.Buttons & ovrButton_A)) &&
+			(rightTrackedRemoteState_new.Buttons & ovrButton_A)) {
+			sendButtonActionSimple("savequick");
+		}
+
+		if (((rightTrackedRemoteState_new.Buttons & ovrButton_B) !=
+			 (rightTrackedRemoteState_old.Buttons & ovrButton_B)) &&
+			(rightTrackedRemoteState_new.Buttons & ovrButton_B)) {
+			sendButtonActionSimple("loadquick");
+		}
+	}
+	else
 	//Show screen view (if in multiplayer toggle scoreboard)
 	if (((leftTrackedRemoteState_new.Buttons & ovrButton_Y) !=
 		 (leftTrackedRemoteState_old.Buttons & ovrButton_Y)) &&
@@ -169,8 +197,7 @@ void HandleInput_LeftAlt2()
 				finishReloadNextFrame = false;
 			}
 
-			if ((leftRemoteTracking_new.Status & VRAPI_TRACKING_STATUS_POSITION_TRACKED) ||
-				(leftRemoteTracking_new.Status & VRAPI_TRACKING_STATUS_POSITION_VALID)) {
+			if (leftRemoteTracking_new.Status  & (VRAPI_TRACKING_STATUS_POSITION_TRACKED | VRAPI_TRACKING_STATUS_POSITION_VALID)) {
 				canUseBackpack = false;
 			}
 			else if (!canUseBackpack && grabMeleeWeapon == 0) {
@@ -190,7 +217,7 @@ void HandleInput_LeftAlt2()
 
 				if (grabMeleeWeapon == 0)
 				{
-					if (leftRemoteTracking_new.Status & VRAPI_TRACKING_STATUS_POSITION_TRACKED) {
+					if (leftRemoteTracking_new.Status & (VRAPI_TRACKING_STATUS_POSITION_TRACKED | VRAPI_TRACKING_STATUS_POSITION_VALID)) {
 
 						if (dominantGripPushed) {
 							dominantGripPushTime = GetTimeInMilliSeconds();

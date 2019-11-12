@@ -46,6 +46,35 @@ void HandleInput_Alt( ovrInputStateTrackedRemote *pDominantTrackedRemoteNew, ovr
 	static float dominantGripPushTime = 0.0f;
     static bool selectingWeapon = false;
 
+	static bool canUseQuickSave = false;
+	if (pOffTracking->Status & (VRAPI_TRACKING_STATUS_POSITION_TRACKED | VRAPI_TRACKING_STATUS_POSITION_VALID)) {
+		canUseQuickSave = false;
+	}
+	else if (!canUseQuickSave) {
+		int channel = (vr_control_scheme->integer >= 10) ? 1 : 0;
+		if (vr_controller_tracking_haptic->value == 1.0f) {
+			Android_Vibrate(40, channel,
+							0.5); // vibrate to let user know they can switch
+		}
+		canUseQuickSave = true;
+	}
+
+	if (canUseQuickSave && !isMultiplayer())
+	{
+		if (((pOffTrackedRemoteNew->Buttons & offButton1) !=
+			 (pOffTrackedRemoteOld->Buttons & offButton1)) &&
+			(pOffTrackedRemoteNew->Buttons & offButton1)) {
+			sendButtonActionSimple("savequick");
+		}
+
+		if (((pOffTrackedRemoteNew->Buttons & offButton2) !=
+			 (pOffTrackedRemoteOld->Buttons & offButton2)) &&
+			(pOffTrackedRemoteNew->Buttons & offButton2)) {
+			sendButtonActionSimple("loadquick");
+		}
+	}
+
+
 	//Menu button - always on the left controller
 	handleTrackedControllerButton(&leftTrackedRemoteState_new, &leftTrackedRemoteState_old, ovrButton_Enter, K_ESCAPE);
 
@@ -163,8 +192,7 @@ void HandleInput_Alt( ovrInputStateTrackedRemote *pDominantTrackedRemoteNew, ovr
 				finishReloadNextFrame = false;
 			}
 
-			if ((pDominantTracking->Status & VRAPI_TRACKING_STATUS_POSITION_TRACKED) ||
-				(pDominantTracking->Status & VRAPI_TRACKING_STATUS_POSITION_VALID)) {
+			if (pDominantTracking->Status & (VRAPI_TRACKING_STATUS_POSITION_TRACKED | VRAPI_TRACKING_STATUS_POSITION_VALID)) {
 				canUseBackpack = false;
 			}
 			else if (!canUseBackpack && grabMeleeWeapon == 0) {
@@ -184,7 +212,7 @@ void HandleInput_Alt( ovrInputStateTrackedRemote *pDominantTrackedRemoteNew, ovr
 
 				if (grabMeleeWeapon == 0)
 				{
-					if (pDominantTracking->Status & VRAPI_TRACKING_STATUS_POSITION_TRACKED) {
+					if (pDominantTracking->Status & (VRAPI_TRACKING_STATUS_POSITION_TRACKED | VRAPI_TRACKING_STATUS_POSITION_VALID)) {
 
 						if (dominantGripPushed) {
 							dominantGripPushTime = GetTimeInMilliSeconds();
@@ -391,7 +419,8 @@ void HandleInput_Alt( ovrInputStateTrackedRemote *pDominantTrackedRemoteNew, ovr
 
 
 			//flashlight on/off
-			if (((pOffTrackedRemoteNew->Buttons & offButton1) !=
+			if (!canUseQuickSave &&
+                ((pOffTrackedRemoteNew->Buttons & offButton1) !=
 				 (pOffTrackedRemoteOld->Buttons & offButton1)) &&
 				(pOffTrackedRemoteOld->Buttons & offButton1)) {
 				sendButtonActionSimple("impulse 100");
