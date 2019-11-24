@@ -15,6 +15,7 @@ GNU General Public License for more details.
 
 #ifndef XASH_DEDICATED
 
+#include <stdbool.h>
 #include "common.h"
 #include "client.h"
 #include "const.h"
@@ -31,6 +32,7 @@ GNU General Public License for more details.
 #include "library.h"
 #include "vgui_draw.h"
 #include "sound.h"		// SND_STOP_LOOPING
+#include "../../../../Lambda1VR/VrCvars.h"
 
 #define MAX_LINELENGTH		80
 #define MAX_TEXTCHANNELS	8		// must be power of two (GoldSrc uses 4 channels)
@@ -647,6 +649,49 @@ void CL_DrawCenterPrint( void )
 		y += charHeight;
 	}
 }
+
+
+/*
+=============
+CL_DrawVignette
+
+
+=============
+*/
+extern bool player_moving;
+
+void CL_DrawVignette( void )
+{
+    if (vr_comfort_mask->value <= 0.0f ||
+        vr_comfort_mask->value > 1.0f)
+    {
+        return;
+    }
+
+    static float currentVLevel = 0.0f;
+
+    if (player_moving)
+    {
+        if (currentVLevel <  vr_comfort_mask->value)
+            currentVLevel += vr_comfort_mask->value * 0.05;
+    } else{
+        if (currentVLevel >  0.0f)
+            currentVLevel -= vr_comfort_mask->value * 0.05;
+    }
+
+    if (currentVLevel > 0.0f &&
+            currentVLevel < 1.0f)
+    {
+		int x = (int)((scr_width->integer / 2) * currentVLevel);
+		int y = (int)((scr_height->integer / 2) * currentVLevel);
+
+		GL_SetRenderMode(kRenderTransTexture);
+		R_DrawStretchPic(x, y, scr_width->integer - (2 * x), scr_height->integer - (2 * y), 0, 0, 1, 1,
+						 cls.vignetteImage);
+		pglColor4ub(255, 255, 255, 255);
+	}
+}
+
 
 /*
 =============

@@ -53,9 +53,10 @@ public:
 	CMenuCheckBox	fastSky;
 	CMenuCheckBox	hiTextures;
 	CMenuCheckBox   vbo;
-	CMenuCheckBox   bump;
+	//CMenuCheckBox   bump;
 	CMenuCheckBox   fps;
 	CMenuSlider		height;
+	CMenuSlider		vignette;
 
 	HIMAGE		hTestImage;
 } uiVidOptions;
@@ -89,9 +90,10 @@ void CMenuVidOptions::SaveAndPopMenu( void )
 	fastSky.WriteCvar();
 	hiTextures.WriteCvar();
 	vbo.WriteCvar();
-	bump.WriteCvar();
+	//bump.WriteCvar();
 	fps.WriteCvar();
 	height.WriteCvar();
+	vignette.WriteCvar();
 	// gamma is already written
 
 	CMenuFramework::SaveAndPopMenu();
@@ -182,17 +184,24 @@ void CMenuVidOptions::_Init( void )
 	height.SetDrawValue(true);
 	height.LinkCvar( "vr_height_adjust" );
 
+	vignette.SetCoord( 72, 450 );
+	vignette.SetNameAndStatus( "Comfort Vignette", "Set Comfort Vignette" );
+	vignette.Setup( 0.0, 0.7, 0.05 );
+	vignette.SetDrawValue(true);
+	vignette.LinkCvar( "vr_comfort_mask" );
+
+/*
 	bump.SetNameAndStatus( "Bump-mapping", "Enable bump mapping" );
 	bump.SetCoord( 72, 445 );
 	bump.LinkCvar( "r_bump" );
 	if( !EngFuncs::GetCvarFloat( "r_vbo" ) )
 		bump.SetGrayed( true );
-
+*/
 	vbo.SetNameAndStatus( "Use VBO", "Use new world renderer. Faster, but causes issues with flashlight" );
 	vbo.SetCoord( 72, 495 );
 	vbo.LinkCvar( "r_vbo" );
-	vbo.onChanged = CMenuCheckBox::BitMaskCb;
-	vbo.onChanged.pExtra = &bump.iFlags;
+//	vbo.onChanged = CMenuCheckBox::BitMaskCb;
+//	vbo.onChanged.pExtra = &bump.iFlags;
 	vbo.bInvertMask = true;
 	vbo.iMask = QMF_GRAYED;
 
@@ -218,10 +227,11 @@ void CMenuVidOptions::_Init( void )
 	AddItem( done );
 	AddItem( gammaIntensity );
 	AddItem( glareReduction );
-	AddItem( bump );
+	//AddItem( bump );
 	AddItem( fps );
 	AddItem( vbo );
 	AddItem( height );
+	AddItem( vignette );
 	AddItem( fastSky );
 	AddItem( hiTextures );
 	AddItem( testImage );

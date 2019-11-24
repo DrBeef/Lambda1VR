@@ -183,8 +183,9 @@ import static android.system.Os.setenv;
 		//special commands
 		copy_asset("/sdcard/xash/" + game + "/", "commands.lst", false); // Copy in case user has deleted their config
 
-		//Copy our special sprites
+		//Copy our special stuff
 		copy_asset("/sdcard/xash/" + game + "/", "sprites/s_stealth.spr", true);
+		copy_asset("/sdcard/xash/" + game + "/", "sprites/vignette.tga", true);
 
 		//Copy modified weapon models
 		if (!(new File("/sdcard/xash/" + game + "/models/no_copy").exists()))

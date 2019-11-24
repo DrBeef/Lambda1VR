@@ -646,10 +646,22 @@ void ovrFramebuffer_ClearEdgeTexels( ovrFramebuffer * frameBuffer )
     // Clear to fully opaque black.
     GL( gles_glClearColor( 0.0f, 0.0f, 0.0f, 1.0f ) );
 
-    bool useMask = (vr_comfort_mask->value != 0.0f && player_moving);
+    //Glide comfort mask in and out
+    static float currentVLevel = 0.0f;
+    if (player_moving)
+    {
+        if (currentVLevel <  vr_comfort_mask->value)
+            currentVLevel += vr_comfort_mask->value * 0.05;
+    } else{
+        if (currentVLevel >  0.0f)
+            currentVLevel -= vr_comfort_mask->value * 0.05;
+    }
 
-    float width = useMask ? (frameBuffer->Width / 2.0f) * vr_comfort_mask->value : 1;
-    float height = useMask ? (frameBuffer->Height / 2.0f) * vr_comfort_mask->value : 1;
+
+    bool useMask = (currentVLevel > 0.0f && currentVLevel <= 1.0f);
+
+    float width = useMask ? (frameBuffer->Width / 2.0f) * currentVLevel : 1;
+    float height = useMask ? (frameBuffer->Height / 2.0f) * currentVLevel : 1;
 
     // bottom
     GL( gles_glScissor( 0, 0, frameBuffer->Width, width ) );

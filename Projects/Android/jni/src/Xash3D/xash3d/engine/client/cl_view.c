@@ -450,6 +450,7 @@ void V_PostRender( void )
 	if( cls.state == ca_active )
 	{
 		SCR_TileClear();
+        CL_DrawVignette();
 		CL_DrawHUD( CL_ACTIVE );
 		VGui_Paint();
 	}
@@ -481,7 +482,7 @@ void V_PostRender( void )
 		CL_DrawDemoRecording();
 		R_ShowTextures();
 		CL_DrawHUD( CL_CHANGELEVEL );
-		
+
 		Con_DrawConsole();
 		UI_UpdateMenu( host.realtime );
 		SCR_DrawNetGraph();

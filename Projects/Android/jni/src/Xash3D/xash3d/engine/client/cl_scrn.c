@@ -606,6 +606,7 @@ void SCR_InstallParticlePalette( void )
 void SCR_RegisterTextures( void )
 {
 	cls.fillImage = GL_LoadTexture( "*white", NULL, 0, TF_IMAGE, NULL ); // used for FillRGBA
+	cls.vignetteImage = GL_LoadTexture( "sprites/vignette.tga", NULL, 0, TF_IMAGE, NULL ); // used for puke reducing vignette
 	cls.particleImage = GL_LoadTexture( "*particle", NULL, 0, TF_IMAGE, NULL );
 
 	// register gfx.wad images
