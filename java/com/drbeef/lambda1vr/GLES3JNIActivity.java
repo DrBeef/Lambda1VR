@@ -186,6 +186,7 @@ import static android.system.Os.setenv;
 		//Copy our special stuff
 		copy_asset("/sdcard/xash/" + game + "/", "sprites/s_stealth.spr", true);
 		copy_asset("/sdcard/xash/" + game + "/", "sprites/vignette.tga", true);
+		copy_asset("/sdcard/xash/valve/", "sprites/vignette.tga", true); //seems to need to be here for some people
 
 		//Copy modified weapon models
 		if (!(new File("/sdcard/xash/" + game + "/models/no_copy").exists()))
