@@ -438,6 +438,11 @@ void HandleInput_Alt( ovrInputStateTrackedRemote *pDominantTrackedRemoteNew, ovr
 
 			static bool increaseSnap = true;
             if (!selectingWeapon) {
+
+                //engage comfort mask if using smooth rotation
+                player_moving |= (vr_snapturn_angle->value <= 10.0f &&
+                                  fabs(pDominantTrackedRemoteNew->Joystick.x) > 0.6f);
+
 				if (pDominantTrackedRemoteNew->Joystick.x > 0.6f)
 				{
 					if (increaseSnap)

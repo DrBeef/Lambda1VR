@@ -453,6 +453,11 @@ void HandleInput_Default( ovrInputStateTrackedRemote *pDominantTrackedRemoteNew,
 										  pOffTrackedRemoteOld,
 										  ovrButton_Trigger, K_SHIFT);
 
+
+			//engage comfort mask if using smooth rotation
+            player_moving |= (vr_snapturn_angle->value <= 10.0f &&
+				fabs(pDominantTrackedRemoteNew->Joystick.x) > 0.6f);
+
 			static bool increaseSnap = true;
 			if (pDominantTrackedRemoteNew->Joystick.x > 0.6f)
 			{
