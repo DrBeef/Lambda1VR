@@ -148,7 +148,7 @@ void HandleInput_Alt( ovrInputStateTrackedRemote *pDominantTrackedRemoteNew, ovr
 			const ovrQuatf quatRemote = pDominantTracking->HeadPose.Pose.Orientation;
 			QuatToYawPitchRoll(quatRemote, vr_weapon_pitchadjust->value, weaponangles[ADJUSTED]);
 			QuatToYawPitchRoll(quatRemote, 0.0f, weaponangles[UNADJUSTED]);
-			QuatToYawPitchRoll(quatRemote, -30.0f, weaponangles[MELEE]);
+			QuatToYawPitchRoll(quatRemote, vr_crowbar_pitchadjust->value, weaponangles[MELEE]);
 
 
 			if (vr_weapon_stabilised->integer &&

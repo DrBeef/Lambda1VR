@@ -7,6 +7,7 @@ convar_t	*vr_reloadtimeoutms;
 convar_t	*vr_positional_factor;
 convar_t	*vr_walkdirection;
 convar_t	*vr_weapon_pitchadjust;
+convar_t	*vr_crowbar_pitchadjust;
 convar_t	*vr_weapon_recoil;
 convar_t	*vr_weapon_stabilised;
 convar_t	*vr_lasersight;
