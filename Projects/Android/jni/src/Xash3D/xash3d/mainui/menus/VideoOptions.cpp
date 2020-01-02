@@ -50,10 +50,10 @@ public:
 
 	CMenuSlider	gammaIntensity;
 	CMenuSlider	glareReduction;
-	CMenuCheckBox	fastSky;
+	//CMenuCheckBox	fastSky;
 	CMenuCheckBox	hiTextures;
 	CMenuCheckBox   vbo;
-	//CMenuCheckBox   bump;
+	CMenuCheckBox   actionables;
 	CMenuCheckBox   fps;
 	CMenuSlider		height;
 	CMenuSlider		vignette;
@@ -87,10 +87,10 @@ void CMenuVidOptions::GammaGet( void )
 void CMenuVidOptions::SaveAndPopMenu( void )
 {
 	glareReduction.WriteCvar();
-	fastSky.WriteCvar();
+	//fastSky.WriteCvar();
 	hiTextures.WriteCvar();
 	vbo.WriteCvar();
-	//bump.WriteCvar();
+	actionables.WriteCvar();
 	fps.WriteCvar();
 	height.WriteCvar();
 	vignette.WriteCvar();
@@ -190,13 +190,6 @@ void CMenuVidOptions::_Init( void )
 	vignette.SetDrawValue(true);
 	vignette.LinkCvar( "vr_comfort_mask" );
 
-/*
-	bump.SetNameAndStatus( "Bump-mapping", "Enable bump mapping" );
-	bump.SetCoord( 72, 445 );
-	bump.LinkCvar( "r_bump" );
-	if( !EngFuncs::GetCvarFloat( "r_vbo" ) )
-		bump.SetGrayed( true );
-*/
 	vbo.SetNameAndStatus( "Use VBO", "Use new world renderer. Faster, but causes issues with flashlight" );
 	vbo.SetCoord( 72, 495 );
 	vbo.LinkCvar( "r_vbo" );
@@ -205,9 +198,13 @@ void CMenuVidOptions::_Init( void )
 	vbo.bInvertMask = true;
 	vbo.iMask = QMF_GRAYED;
 
-	fastSky.SetNameAndStatus( "Draw simple sky", "enable/disable fast sky rendering (for old computers)" );
-	fastSky.SetCoord( 72, 545 );
-	fastSky.LinkCvar( "r_fastsky" );
+	actionables.SetNameAndStatus( "Highlight Usable Objects", "Enables highlighting of objects when they can be \"used\"" );
+	actionables.SetCoord( 72, 545 );
+	actionables.LinkCvar( "vr_highlight_actionables" );
+
+	//fastSky.SetNameAndStatus( "Draw simple sky", "enable/disable fast sky rendering (for old computers)" );
+	//fastSky.SetCoord( 72, 545 );
+	//fastSky.LinkCvar( "r_fastsky" );
 
 	hiTextures.SetNameAndStatus( "Allow materials", "let engine replace 8-bit textures with full color hi-res prototypes (if present)" );
 	hiTextures.SetCoord( 72, 595 );
@@ -227,12 +224,12 @@ void CMenuVidOptions::_Init( void )
 	AddItem( done );
 	AddItem( gammaIntensity );
 	AddItem( glareReduction );
-	//AddItem( bump );
+	AddItem( actionables );
 	AddItem( fps );
 	AddItem( vbo );
 	AddItem( height );
 	AddItem( vignette );
-	AddItem( fastSky );
+	//AddItem( fastSky );
 	AddItem( hiTextures );
 	AddItem( testImage );
 }
