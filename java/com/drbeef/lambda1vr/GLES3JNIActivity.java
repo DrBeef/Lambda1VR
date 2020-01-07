@@ -188,7 +188,7 @@ import static android.system.Os.setenv;
 		copy_asset("/sdcard/xash/" + game + "/", "sprites/vignette.tga", true);
 		copy_asset("/sdcard/xash/valve/", "sprites/vignette.tga", true); //seems to need to be here for some people
 
-		//Copy modified weapon models
+		//Copy modified weapon models - This is the base set
 		if (!(new File("/sdcard/xash/" + game + "/models/no_copy").exists()))
 		{
 			//Colt (A-16)
@@ -309,6 +309,13 @@ import static android.system.Os.setenv;
 			copy_asset("/sdcard/xash/" + game + "/", "models/v_torch.mdl", true);
 		}
 
+		//Copy Opposing Force specific models
+		if (game.equalsIgnoreCase("gearbox") &&
+				!(new File("/sdcard/xash/" + game + "/models/no_copy").exists()))
+		{
+			
+		}
+
 		//Set default environment
 		try {
 			setenv("XASH3D_BASEDIR", "/sdcard/xash/", true);
@@ -316,6 +323,16 @@ import static android.system.Os.setenv;
 			setenv("XASH3D_GAMELIBDIR", getFilesDir().getParentFile().getPath() + "/lib", true);
 			setenv("XASH3D_GAMEDIR", "valve", true);
 			setenv( "XASH3D_EXTRAS_PAK1", getFilesDir().getPath() + "/extras.pak", true );
+
+			//If game is gearbox (Opposing Force) set the library file suffix to op4
+			if (game.equalsIgnoreCase("gearbox"))
+			{
+				setenv("XASH3D_LIBSUFFIX", "_opfor", true);
+			}
+			else
+			{
+				setenv("XASH3D_LIBSUFFIX", "", true);
+			}
 		}
 		catch (Exception e)
 		{

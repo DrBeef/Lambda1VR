@@ -186,15 +186,19 @@ void *Com_LoadLibrary( const char *dllname, int build_ordinals_table )
 #elif defined( __ANDROID__ )
 	{
 		char path[MAX_SYSPATH];
-		const char *libdir[2];
+		const char *libdir;
+		const char *libSuffix[2];
 		int i;
 
-		libdir[0] = getenv("XASH3D_GAMELIBDIR");
-		libdir[1] = getenv("XASH3D_ENGLIBDIR");
+		libdir = getenv("XASH3D_GAMELIBDIR");
+
+		libSuffix[0] =  getenv("XASH3D_LIBSUFFIX");
+		libSuffix[1] =  ""; // try without
 
 		for( i = 0; i < 2; i++ )
 		{
-			Q_snprintf( path, MAX_SYSPATH, "%s/lib%s"POSTFIX"."OS_LIB_EXT, libdir[i], dllname );
+			memset(path, 0, MAX_SYSPATH);
+			Q_snprintf( path, MAX_SYSPATH, "%s/lib%s%s"POSTFIX"."OS_LIB_EXT, libdir, dllname, libSuffix[i] );
 			pHandle = dlopen( path, RTLD_NOW );
 			if( pHandle )
 				return pHandle;
