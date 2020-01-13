@@ -313,7 +313,10 @@ import static android.system.Os.setenv;
 		if (game.equalsIgnoreCase("gearbox") &&
 				!(new File("/sdcard/xash/" + game + "/models/no_copy").exists()))
 		{
-			
+			//Scope vignette texture
+			copy_asset("/sdcard/xash/" + game + "/", "sprites/scope.tga", true);
+			copy_asset("/sdcard/xash/valve/", "sprites/scope.tga", true);
+
 		}
 
 		//Set default environment

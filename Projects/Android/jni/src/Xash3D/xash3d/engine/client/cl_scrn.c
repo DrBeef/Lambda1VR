@@ -45,6 +45,9 @@ static qboolean	scr_init = false;
 
 int GetStereoDepthOffset()
 {
+	if (vr_stereo_side->value >= VR_EYE_LEFT_MONO)
+		return 0;
+
 	return (int)( ( vr_stereo_side->value * -2.0f ) + 1.0f) * (scr_width->integer / 36.0f);
 }
 
@@ -607,6 +610,7 @@ void SCR_RegisterTextures( void )
 {
 	cls.fillImage = GL_LoadTexture( "*white", NULL, 0, TF_IMAGE, NULL ); // used for FillRGBA
 	cls.vignetteImage = GL_LoadTexture( "sprites/vignette.tga", NULL, 0, TF_IMAGE, NULL ); // used for puke reducing vignette
+	cls.scopeImage = GL_LoadTexture( "sprites/scope.tga", NULL, 0, TF_IMAGE, NULL ); // used for weapons with scopes
 	cls.particleImage = GL_LoadTexture( "*particle", NULL, 0, TF_IMAGE, NULL );
 
 	// register gfx.wad images

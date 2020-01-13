@@ -648,15 +648,23 @@ void ovrFramebuffer_ClearEdgeTexels( ovrFramebuffer * frameBuffer )
 
     //Glide comfort mask in and out
     static float currentVLevel = 0.0f;
-    if (player_moving)
+
+    //Hack to surround scope sight with blackness
+    const float scopeSize = 0.75;
+    if (isScopeEngaged())
+    {
+        if (currentVLevel < scopeSize)
+            currentVLevel += scopeSize * 0.05;
+    }
+	else if (player_moving && vr_comfort_mask->value > 0.0f)
     {
         if (currentVLevel <  vr_comfort_mask->value)
             currentVLevel += vr_comfort_mask->value * 0.05;
     } else{
+	    float v = (vr_comfort_mask->value == 0) ? scopeSize : vr_comfort_mask->value;
         if (currentVLevel >  0.0f)
-            currentVLevel -= vr_comfort_mask->value * 0.05;
+            currentVLevel -= v * 0.05;
     }
-
 
     bool useMask = (currentVLevel > 0.0f && currentVLevel <= 1.0f);
 
@@ -893,15 +901,32 @@ bool isMultiplayer()
 	return (CL_GetMaxClients() > 1);
 }
 
+bool isScopeEngaged()
+{
+	return (cl.scr_fov != 0 &&	cl.scr_fov  < VR_FOV);
+}
+
 void Host_BeginFrame();
 void Host_Frame();
 void Host_EndFrame();
 
 void VR_GetMove( float *forward, float *side, float *yaw, float *pitch, float *roll )
 {
-    *forward = remote_movementForward + positional_movementForward;
+	//This is pretty crazy, but due to the way the angles are sent between the client and server
+	//they are truncated, which results in a small rounding down, over time this leads to a yaw drift
+	//which doesn't take long to start affecting the accuracy of the sniper rifle, or simply leave you
+	// not facing the direction you started in!
+	static float driftCorrection = 0;
+	//Update our drift correction
+	driftCorrection += YAWDRIFTPERFRAME;
+	if (driftCorrection > 360.0F)
+	{
+		driftCorrection = 0;
+	}
+
+	*forward = remote_movementForward + positional_movementForward;
     *side = remote_movementSideways + positional_movementSideways;
-	*yaw = hmdorientation[YAW] + snapTurn;
+	*yaw = hmdorientation[YAW] + snapTurn + driftCorrection;
 	*pitch = hmdorientation[PITCH];
 	*roll = hmdorientation[ROLL];
 }
@@ -945,8 +970,20 @@ void RenderFrame( ovrRenderer * renderer, const ovrJava * java,
                 GL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
                 GL(glDisable(GL_SCISSOR_TEST));
 
-                //Now do the drawing for this eye - Force the set as it is a "read only" cvar
-                Cvar_Set2("vr_stereo_side", eye == 0 ? "0" : "1", true);
+                if (isScopeEngaged()) {
+					//Now do the drawing for this eye - Force the set as it is a "read only" cvar
+					char buffer[5];
+					Q_snprintf(buffer, 5, "%i", eye+2);
+					Cvar_Set2("vr_stereo_side", buffer, true);
+				}
+				else
+				{
+					//Now do the drawing for this eye - Force the set as it is a "read only" cvar
+					char buffer[5];
+					Q_snprintf(buffer, 5, "%i", eye);
+					Cvar_Set2("vr_stereo_side", buffer, true);
+				}
+
 
                 //Sow the seed
 				COM_SetRandomSeed(lSeed);

@@ -693,6 +693,41 @@ void CL_DrawVignette( void )
 }
 
 
+
+/*
+=============
+CL_DrawScope
+
+
+=============
+*/
+bool isScopeEngaged();
+
+void CL_DrawScope( void )
+{
+    const float scopeSize = 0.75;
+    static float currentVLevel = 0.0;
+    if (isScopeEngaged())
+    {
+        if (currentVLevel <  scopeSize)
+            currentVLevel += scopeSize * 0.05;
+    } else{
+        if (currentVLevel >  0.0)
+            currentVLevel -= scopeSize * 0.05;
+    }
+
+    if (currentVLevel > 0.0 &&
+        currentVLevel < 1.0) {
+        int x = (int) ((scr_width->integer / 2) * currentVLevel);
+        int y = (int) ((scr_height->integer / 2) * currentVLevel);
+
+        GL_SetRenderMode(kRenderTransTexture);
+        R_DrawStretchPic(x, y, scr_width->integer - (2 * x), scr_height->integer - (2 * y), 0, 0, 1,
+                         1,
+                         cls.scopeImage);
+        pglColor4ub(255, 255, 255, 255);
+    }
+}
 /*
 =============
 CL_DrawScreenFade
@@ -940,7 +975,7 @@ void CL_DrawCrosshair( void )
 	int		x, y, width, height;
 	cl_entity_t	*pPlayer;
 
-	if( !crosshair_state.pCrosshair || cl.refdef.crosshairangle[2] || !cl_crosshair->integer )
+	if( !crosshair_state.pCrosshair || !isScopeEngaged() )
 		return;
 
 	pPlayer = CL_GetLocalPlayer();
@@ -961,7 +996,7 @@ void CL_DrawCrosshair( void )
 
 	// g-cont - cl.refdef.crosshairangle is the autoaim angle.
 	// if we're not using autoaim, just draw in the middle of the screen
-	if( !VectorIsNull( cl.refdef.crosshairangle ))
+/*	if( !VectorIsNull( cl.refdef.crosshairangle ))
 	{
 		vec3_t	angles;
 		vec3_t	forward;
@@ -974,7 +1009,7 @@ void CL_DrawCrosshair( void )
 
 		x += 0.5f * screen[0] * scr_width->value + 0.5f;
 		y += 0.5f * screen[1] * scr_height->value + 0.5f;
-	}
+	}*/
 
 	clgame.ds.pSprite = crosshair_state.pCrosshair;
 
@@ -1851,7 +1886,7 @@ like trigger_multiple message in q1
 static void GAME_EXPORT pfnCenterPrint( const char *string )
 {
 	if( !string || !*string ) return; // someone stupid joke
-	CL_CenterPrint( string, 0.25f );
+	CL_CenterPrint( string, -1.0f );
 }
 
 /*

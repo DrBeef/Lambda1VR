@@ -1,4 +1,6 @@
 
+#ifndef VRCOMMON_H
+#define VRCOMMON_H
 
 #include <xash3d_types.h>
 #include <VrApi_Ext.h>
@@ -57,9 +59,11 @@ int ducked;
 
 bool player_moving;
 
+bool isMultiplayer();
+bool isScopeEngaged();
+
 float radians(float deg);
 float degrees(float rad);
-bool isMultiplayer();
 double GetTimeInMilliSeconds();
 float length(float x, float y);
 float nonLinearFilter(float in);
@@ -69,3 +73,5 @@ void QuatToYawPitchRoll(ovrQuatf q, float pitchAdjust, vec3_t out);
 bool useScreenLayer();
 void handleTrackedControllerButton(ovrInputStateTrackedRemote * trackedRemoteState, ovrInputStateTrackedRemote * prevTrackedRemoteState, uint32_t button, int key);
 void Android_Vibrate( float duration, int channel, float intensity );
+
+#endif //VRCOMMON_H

@@ -90,6 +90,16 @@ void HandleInput_Alt( ovrInputStateTrackedRemote *pDominantTrackedRemoteNew, ovr
 							   powf(pOffTracking->HeadPose.Pose.Position.y - pDominantTracking->HeadPose.Pose.Position.y, 2) +
 							   powf(pOffTracking->HeadPose.Pose.Position.z - pDominantTracking->HeadPose.Pose.Position.z, 2));
 
+		float distanceToHMD = sqrtf(powf(hmdPosition[0] - pDominantTracking->HeadPose.Pose.Position.x, 2) +
+									powf(hmdPosition[1] - pDominantTracking->HeadPose.Pose.Position.y, 2) +
+									powf(hmdPosition[2] - pDominantTracking->HeadPose.Pose.Position.z, 2));
+
+		static float forwardYaw = 0;
+		if (!isScopeEngaged())
+		{
+			forwardYaw = (cl.refdef.cl_viewangles[YAW] - hmdorientation[YAW]) - snapTurn;
+		}
+
 		//Turn on weapon stabilisation?
 		if ((pOffTrackedRemoteNew->Buttons & ovrButton_GripTrigger) !=
 			(pOffTrackedRemoteOld->Buttons & ovrButton_GripTrigger)) {
@@ -105,6 +115,16 @@ void HandleInput_Alt( ovrInputStateTrackedRemote *pDominantTrackedRemoteNew, ovr
 			{
 				Cvar_Set2("vr_weapon_stabilised", "0", true);
 			}
+		}
+
+		//Engage scope if conditions are right
+		if (vr_weapon_stabilised->value == 1 && !isScopeEngaged() && distanceToHMD < 0.25)
+		{
+			sendButtonActionSimple("+alt1");
+		}
+		else if (isScopeEngaged() && (distanceToHMD > 0.25 || vr_weapon_stabilised->value != 1))
+		{
+			sendButtonActionSimple("-alt1");
 		}
 
 		//dominant hand stuff first
@@ -163,7 +183,6 @@ void HandleInput_Alt( ovrInputStateTrackedRemote *pDominantTrackedRemoteNew, ovr
 				if (zxDist != 0.0f && z != 0.0f) {
                     VectorSet(weaponangles[ADJUSTED], degrees(atanf(y / zxDist)), (cl.refdef.cl_viewangles[YAW] - hmdorientation[YAW]) - degrees(atan2f(x, -z)), weaponangles[ADJUSTED][ROLL]);
                     VectorSet(weaponangles[UNADJUSTED], degrees(atanf(y / zxDist)), (cl.refdef.cl_viewangles[YAW] - hmdorientation[YAW]) - degrees(atan2f(x, -z)), weaponangles[UNADJUSTED][ROLL]);
-                    VectorSet(weaponangles[MELEE], degrees(atanf(y / zxDist)), (cl.refdef.cl_viewangles[YAW] - hmdorientation[YAW]) - degrees(atan2f(x, -z)), weaponangles[MELEE][ROLL]);
 				}
 			}
 			else
@@ -173,10 +192,10 @@ void HandleInput_Alt( ovrInputStateTrackedRemote *pDominantTrackedRemoteNew, ovr
 
 				weaponangles[UNADJUSTED][YAW] += (cl.refdef.cl_viewangles[YAW] - hmdorientation[YAW]);
 				weaponangles[UNADJUSTED][PITCH] *= -1.0f;
-
-				weaponangles[MELEE][YAW] += (cl.refdef.cl_viewangles[YAW] - hmdorientation[YAW]);
-				weaponangles[MELEE][PITCH] *= -1.0f;
 			}
+
+			weaponangles[MELEE][YAW] += (cl.refdef.cl_viewangles[YAW] - hmdorientation[YAW]);
+			weaponangles[MELEE][PITCH] *= -1.0f;
 
 			//Use (Action)
 			if ((pDominantTrackedRemoteNew->Buttons & ovrButton_Joystick) !=
@@ -397,25 +416,49 @@ void HandleInput_Alt( ovrInputStateTrackedRemote *pDominantTrackedRemoteNew, ovr
 
 			}
 
-			//Apply a filter and quadratic scaler so small movements are easier to make
-			float dist = length(pOffTrackedRemoteNew->Joystick.x, pOffTrackedRemoteNew->Joystick.y);
-			float nlf = nonLinearFilter(dist);
-			float x = nlf * pOffTrackedRemoteNew->Joystick.x;
-			float y = nlf * pOffTrackedRemoteNew->Joystick.y;
+			if (!isScopeEngaged()) {
+				//Apply a filter and quadratic scaler so small movements are easier to make
+				float dist = length(pOffTrackedRemoteNew->Joystick.x, pOffTrackedRemoteNew->Joystick.y);
+				float nlf = nonLinearFilter(dist);
+				float x = nlf * pOffTrackedRemoteNew->Joystick.x;
+				float y = nlf * pOffTrackedRemoteNew->Joystick.y;
 
-			player_moving = (fabs(x) + fabs(y)) > 0.01f;
+				player_moving = (fabs(x) + fabs(y)) > 0.01f;
 
 
-			//Adjust to be off-hand controller oriented
-			vec2_t v;
-			rotateAboutOrigin(x, y, controllerYawHeading,v);
+				//Adjust to be off-hand controller oriented
+				vec2_t v;
+				rotateAboutOrigin(x, y, controllerYawHeading,v);
 
-			remote_movementSideways = v[0];
-			remote_movementForward = v[1];
+				remote_movementSideways = v[0];
+				remote_movementForward = v[1];
 
-			ALOGV("        remote_movementSideways: %f, remote_movementForward: %f",
-				  remote_movementSideways,
-				  remote_movementForward);
+				ALOGV("        remote_movementSideways: %f, remote_movementForward: %f",
+					  remote_movementSideways,
+					  remote_movementForward);
+			} else {
+				static bool scopeZoomed = false;
+				if (between(0.75f, pOffTrackedRemoteNew->Joystick.y, 1.0f) ||
+					between(-1.0f, pOffTrackedRemoteNew->Joystick.y, -0.75f))
+				{
+					if (!scopeZoomed)
+					{
+						if (between(0.75f, pOffTrackedRemoteNew->Joystick.y, 1.0f))
+						{
+							sendButtonActionSimple("impulse 104"); //zoom in
+						}
+						else if (between(-1.0f, pOffTrackedRemoteNew->Joystick.y, -0.75f))
+						{
+							sendButtonActionSimple("impulse 105"); //zoom out
+						}
+						scopeZoomed = true;
+					}
+				}
+				else
+				{
+					scopeZoomed = false;
+				}
+			}
 
 
 			//flashlight on/off
@@ -487,6 +530,25 @@ void HandleInput_Alt( ovrInputStateTrackedRemote *pDominantTrackedRemoteNew, ovr
 				}
 			}
 		}
+
+		//YAW:  Left increase, Right decrease
+
+		//Bit of a hack, but use weapon orientation / position for view when scope is engaged
+		if (isScopeEngaged())
+		{
+			//Set Position
+			VectorSet(hmdPosition, hmdPosition[0] + weaponoffset[0], hmdPosition[1] + weaponoffset[1], hmdPosition[2] + weaponoffset[2]);
+			VectorSet(weaponoffset, 0, 0, 0);
+
+			//Set "view" Angles
+			VectorSet(hmdorientation, -weaponangles[ADJUSTED][PITCH], weaponangles[ADJUSTED][YAW] - (forwardYaw+snapTurn), hmdorientation[ROLL]);
+		}
+
+		//Debugging
+/*        char buffer[1024];
+        Q_snprintf(buffer, 1024, "Snap Turn:\t\t%.2f\nForward:\t\t%.2f\nDrift:\t\t%.2f\nWeapon:\t\t%.2f\nOriginal HMD:\t\t%.2f\nHMD:\t\t%.2f\ncl.refdef.viewangles Yaw:\t\t%.2f",
+                   snapTurn, forwardYaw, driftCorrection, weaponangles[ADJUSTED][YAW], orighmdorientationyaw, hmdorientation[YAW], cl.refdef.viewangles[YAW]);
+        CL_CenterPrint(buffer, -1);*/
 	}
 
 	//Save state

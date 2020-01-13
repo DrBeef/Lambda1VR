@@ -154,6 +154,12 @@ void V_SetupRefDef( void )
 	VectorCopy(weaponangles[1], cl.refdef.weapon.angles.unadjusted);
 	VectorCopy(weaponangles[2], cl.refdef.weapon.angles.melee);
 
+	//Scope
+	if (cl.scr_fov < 90) {
+		VectorAdd(cl.refdef.simorg, cl.refdef.weapon.org, cl.refdef.simorg);
+		VectorSet(cl.refdef.weapon.org, 0, 0, 0);
+	}
+
 	//Flashlight
 	convertFromVRtoHL(flashlightoffset, cl.refdef.flashlight.org);
 	cl.refdef.flashlight.org[2] += cl.refdef.viewheight[2]; // Have to do this for some reason..
@@ -359,7 +365,8 @@ void V_CalcRefDef( void )
 	do
 	{
 	    //Only recalc refdef once
-	    if (vr_stereo_side->integer == VR_EYE_LEFT || vr_stereo_side->integer == VR_EYE_MONO) {
+	    int eye = vr_stereo_side->integer;
+	    if (eye == VR_EYE_LEFT || eye == VR_EYE_LEFT_MONO) {
             clgame.dllFuncs.pfnCalcRefdef(&cl.refdef);
             V_MergeOverviewRefdef(&cl.refdef);
         }
@@ -389,7 +396,7 @@ void V_RenderView( void )
 
 	int eye = Cvar_VariableInteger("vr_stereo_side");
 
-	if( eye == VR_EYE_LEFT && cl.frame.valid && ( cl.force_refdef || !cl.refdef.paused ))
+	if( (eye == VR_EYE_LEFT || eye == VR_EYE_LEFT_MONO) && cl.frame.valid && ( cl.force_refdef || !cl.refdef.paused ))
 	{
 		cl.force_refdef = false;
 
@@ -451,6 +458,7 @@ void V_PostRender( void )
 	{
 		SCR_TileClear();
         CL_DrawVignette();
+        CL_DrawScope();
 		CL_DrawHUD( CL_ACTIVE );
 		VGui_Paint();
 	}

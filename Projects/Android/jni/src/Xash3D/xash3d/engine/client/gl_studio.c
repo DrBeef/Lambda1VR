@@ -3724,10 +3724,14 @@ R_DrawViewModel
 
 extern convar_t	*vr_mirror_weapons;
 extern convar_t	*vr_weapon_backface_culling;
+int bScopeEngaged()
+{
+	return (cl.scr_fov != 0 &&	cl.scr_fov  < 90.0f);
+}
 
 void R_DrawViewModel( void )
 {
-	if( RI.refdef.onlyClientDraw || r_drawviewmodel->integer == 0 )
+	if( RI.refdef.onlyClientDraw || r_drawviewmodel->integer == 0 || bScopeEngaged())
 		return;
 
 	// ignore in thirdperson, camera view or client is died

@@ -2281,7 +2281,7 @@ void Host_ClientFrame( )
 
 	int eye = Cvar_VariableInteger("vr_stereo_side");
 
-	if (eye == VR_EYE_MONO || eye == VR_EYE_LEFT ) {
+	if (eye == VR_EYE_LEFT || eye == VR_EYE_LEFT_MONO) {
 #endif
 		cl.oldtime = cl.time;
 		cl.time += host.frametime;
@@ -2327,7 +2327,7 @@ void Host_ClientFrame( )
 	SCR_UpdateScreen ();
 
 #ifdef VR
-	if (eye == VR_EYE_MONO || eye == VR_EYE_RIGHT)
+	if (eye == VR_EYE_RIGHT || eye == VR_EYE_RIGHT_MONO)
 #endif
 	{
 		if( cls.initialized )

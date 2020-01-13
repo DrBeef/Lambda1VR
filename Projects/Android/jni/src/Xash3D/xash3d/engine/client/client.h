@@ -490,6 +490,7 @@ typedef struct
 	int		glowShell;		// for renderFxGlowShell
 	int		tileImage;		// for draw any areas not covered by the refresh
 	int 	vignetteImage;
+	int 	scopeImage;
 	HSPRITE		hChromeSprite;		// this is a really HudSprite handle, not texnum!
 	cl_font_t		creditsFont;		// shared creditsfont
 
@@ -690,6 +691,7 @@ void CL_FreeEdicts( void );
 void CL_ClearWorld( void );
 void CL_DrawCenterPrint( void );
 void CL_DrawVignette( void );
+void CL_DrawScope( void );
 void CL_FreeEntity( cl_entity_t *pEdict );
 void CL_CenterPrint( const char *text, float y );
 void CL_TextMessageParse( byte *pMemFile, int fileSize );

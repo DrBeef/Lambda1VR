@@ -1,8 +1,12 @@
+#ifndef VRINPUT_H
+#define VRINPUT_H
 
 #include "VrCommon.h"
 
 //New control scheme definitions to be defined L1VR_SurfaceView.c enumeration
 enum control_scheme;
+
+#define YAWDRIFTPERFRAME 0.0026F;
 
 ovrInputStateTrackedRemote leftTrackedRemoteState_old;
 ovrInputStateTrackedRemote leftTrackedRemoteState_new;
@@ -38,5 +42,5 @@ void HandleInput_Alt( ovrInputStateTrackedRemote *pDominantTrackedRemoteNew, ovr
 //A specific custom for left alt 2
 void HandleInput_LeftAlt2( );
 
-
+#endif //VRINPUT_H
 

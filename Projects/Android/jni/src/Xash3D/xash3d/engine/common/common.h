@@ -180,9 +180,12 @@ typedef enum
 #define MAX_FPS         	500.0		// upper limit for maxfps.
 
 #ifdef VR
-#define VR_EYE_MONO		-1
+#define VR_IPD				0.065f
 #define VR_EYE_LEFT 		0
 #define VR_EYE_RIGHT 		1
+#define VR_EYE_LEFT_MONO 		2
+#define VR_EYE_RIGHT_MONO 		3
+#define VR_FOV				104.0f
 #endif
 
 #define MAX_FRAMETIME	0.1
