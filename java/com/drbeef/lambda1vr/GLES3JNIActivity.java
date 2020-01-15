@@ -316,7 +316,12 @@ import static android.system.Os.setenv;
 			//Scope vignette texture
 			copy_asset("/sdcard/xash/" + game + "/", "sprites/scope.tga", true);
 			copy_asset("/sdcard/xash/valve/", "sprites/scope.tga", true);
-
+			//Sniper Rifle
+			copy_asset("/sdcard/xash/", "gearbox/models/v_m40a1.mdl", true);
+			copy_asset("/sdcard/xash/", "gearbox/models/w_m40a1.mdl", true);
+			copy_asset("/sdcard/xash/", "gearbox/sound/weapons/scout_clipin.wav", true);
+			copy_asset("/sdcard/xash/", "gearbox/sound/weapons/scout_clipout.wav", true);
+			copy_asset("/sdcard/xash/", "gearbox/sound/weapons/sniper_fire.wav", true);
 		}
 
 		//Set default environment
