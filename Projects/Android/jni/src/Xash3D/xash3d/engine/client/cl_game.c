@@ -528,14 +528,15 @@ static qboolean SPR_Scissor( float *x, float *y, float *width, float *height, fl
 	return true;
 }
 
+
 /*
 ====================
-SPR_DrawGeneric
+SPR_DrawRotated
 
 draw hudsprite routine
 ====================
 */
-static void SPR_DrawGeneric( int frame, float x, float y, float width, float height, const wrect_t *prc )
+static void SPR_DrawRotated( int frame, float x, float y, float width, float height, const wrect_t *prc, const float rotation )
 {
 	float	s1, s2, t1, t2;
 	int	texnum;
@@ -557,7 +558,7 @@ static void SPR_DrawGeneric( int frame, float x, float y, float width, float hei
 
 		rc = *prc;
 
-		// Sigh! some stupid modmakers set wrong rectangles in hud.txt 
+		// Sigh! some stupid modmakers set wrong rectangles in hud.txt
 		if( rc.left <= 0 || rc.left >= width ) rc.left = 0;
 		if( rc.top <= 0 || rc.top >= height ) rc.top = 0;
 		if( rc.right <= 0 || rc.right > width ) rc.right = width;
@@ -585,8 +586,22 @@ static void SPR_DrawGeneric( int frame, float x, float y, float width, float hei
 	SPR_AdjustSize( &x, &y, &width, &height );
 	texnum = R_GetSpriteTexture( clgame.ds.pSprite, frame );
 	pglColor4ubv( clgame.ds.spriteColor );
-	R_DrawStretchPic( x, y, width, height, s1, t1, s2, t2, texnum );
+	R_DrawRotateStretchPic( x, y, width, height, s1, t1, s2, t2, rotation, texnum );
 }
+
+/*
+====================
+SPR_DrawGeneric
+
+draw hudsprite routine
+====================
+*/
+static void SPR_DrawGeneric( int frame, float x, float y, float width, float height, const wrect_t *prc )
+{
+	SPR_DrawRotated(frame, x, y, width, height, prc, 0);
+}
+
+
 
 /*
 =============
@@ -970,6 +985,10 @@ CL_DrawCrosshair
 Render crosshair
 ====================
 */
+
+vec3_t weaponangles[3];
+vec3_t hmdorientation;
+
 void CL_DrawCrosshair( void )
 {
 	int		x, y, width, height;
@@ -1017,7 +1036,7 @@ void CL_DrawCrosshair( void )
 	*(int *)clgame.ds.spriteColor = *(int *)crosshair_state.rgbaCrosshair;
 
 	SPR_EnableScissor( x - 0.5f * width, y - 0.5f * height, width, height );
-	SPR_DrawGeneric( 0, x - 0.5f * width, y - 0.5f * height, -1, -1, &crosshair_state.rcCrosshair );
+	SPR_DrawRotated( 0, x - 0.5f * width, y - 0.5f * height, -1, -1, &crosshair_state.rcCrosshair, hmdorientation[ROLL]-weaponangles[0][ROLL] );
 	SPR_DisableScissor();
 }
 
