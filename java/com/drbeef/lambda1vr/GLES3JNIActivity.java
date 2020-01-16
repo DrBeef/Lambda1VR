@@ -322,6 +322,10 @@ import static android.system.Os.setenv;
 			copy_asset("/sdcard/xash/", "gearbox/sound/weapons/scout_clipin.wav", true);
 			copy_asset("/sdcard/xash/", "gearbox/sound/weapons/scout_clipout.wav", true);
 			copy_asset("/sdcard/xash/", "gearbox/sound/weapons/sniper_fire.wav", true);
+			//Pipe Wrench
+			copy_asset("/sdcard/xash/", "gearbox/models/v_pipe_wrench.mdl", true);
+			copy_asset("/sdcard/xash/", "gearbox/models/w_pipe_wrench.mdl", true);
+			copy_asset("/sdcard/xash/", "gearbox/models/p_pipe_wrench.mdl", true);
 		}
 
 		//Set default environment
