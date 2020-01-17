@@ -326,6 +326,11 @@ import static android.system.Os.setenv;
 			copy_asset("/sdcard/xash/", "gearbox/models/v_pipe_wrench.mdl", true);
 			copy_asset("/sdcard/xash/", "gearbox/models/w_pipe_wrench.mdl", true);
 			copy_asset("/sdcard/xash/", "gearbox/models/p_pipe_wrench.mdl", true);
+			//Knife
+			copy_asset("/sdcard/xash/", "gearbox/models/v_knife.mdl", true);
+			copy_asset("/sdcard/xash/", "gearbox/models/w_knife.mdl", true);
+			copy_asset("/sdcard/xash/", "gearbox/models/p_knife.mdl", true);
+
 		}
 
 		//Set default environment
