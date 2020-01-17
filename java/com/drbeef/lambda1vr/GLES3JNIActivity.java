@@ -336,6 +336,11 @@ import static android.system.Os.setenv;
 			copy_asset("/sdcard/xash/", "gearbox/sound/penguin/penguin_hunt1.wav", true);
 			copy_asset("/sdcard/xash/", "gearbox/sound/penguin/penguin_hunt2.wav", true);
 			copy_asset("/sdcard/xash/", "gearbox/sound/penguin/penguin_hunt3.wav", true);
+
+			//Knife
+			copy_asset("/sdcard/xash/", "gearbox/models/v_knife.mdl", true);
+			copy_asset("/sdcard/xash/", "gearbox/models/w_knife.mdl", true);
+			copy_asset("/sdcard/xash/", "gearbox/models/p_knife.mdl", true);
 		}
 
 		//Set default environment
