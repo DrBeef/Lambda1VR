@@ -87,6 +87,41 @@ void R_DrawStretchPic( float x, float y, float w, float h, float s1, float t1, f
 
 /*
 =============
+R_DrawRotateStretchPic
+=============
+*/
+void R_DrawRotateStretchPic( float x, float y, float w, float h, float s1, float t1, float s2, float t2, float rotation, int texnum )
+{
+	float centerX = x + ( w / 2.0 );
+	float centerY = y + ( h / 2.0 );
+	
+	float txl = -( w / 2.0 );
+	float txr = ( w / 2.0 );
+	float tyb = -( h / 2.0 );
+	float tyt = ( h / 2.0 );
+	
+	float sr = sinf(DEG2RAD(rotation));
+	float cr = cosf(DEG2RAD(rotation));
+	
+	GL_Bind( XASH_TEXTURE0, texnum );
+
+	pglBegin( GL_QUADS );
+		pglTexCoord2f( s1, t1 );
+		pglVertex2f( (tyb*sr + txl*cr) + centerX, (tyb*cr - txl*sr) + centerY );
+
+		pglTexCoord2f( s2, t1 );
+		pglVertex2f( (tyb*sr + txr*cr) + centerX, (tyb*cr - txr*sr) + centerY );
+
+		pglTexCoord2f( s2, t2 );
+		pglVertex2f( (tyt*sr + txr*cr) + centerX, (tyt*cr - txr*sr) + centerY );
+
+		pglTexCoord2f( s1, t2 );
+		pglVertex2f( (tyt*sr + txl*cr) + centerX, (tyt*cr - txl*sr) + centerY );
+	pglEnd();
+}
+
+/*
+=============
 Draw_TileClear
 
 This repeats a 64*64 tile graphic to fill the screen around a sized down

@@ -480,6 +480,7 @@ void R_GetTextureParms( int *w, int *h, int texnum );
 void R_GetSpriteParms( int *frameWidth, int *frameHeight, int *numFrames, int curFrame, const struct model_s *pSprite );
 void R_DrawStretchRaw( float x, float y, float w, float h, int cols, int rows, const byte *data, qboolean dirty );
 void R_DrawStretchPic( float x, float y, float w, float h, float s1, float t1, float s2, float t2, int texnum );
+void R_DrawRotateStretchPic( float x, float y, float w, float h, float s1, float t1, float s2, float t2, float rotation, int texnum );
 qboolean R_SpeedsMessage( char *out, size_t size );
 void R_SetupSky( const char *skyboxname );
 qboolean R_CullBox( const vec3_t mins, const vec3_t maxs, uint clipflags );
