@@ -118,11 +118,11 @@ void HandleInput_Alt( ovrInputStateTrackedRemote *pDominantTrackedRemoteNew, ovr
 		}
 
 		//Engage scope if conditions are right
-		if (vr_weapon_stabilised->value == 1 && !isScopeEngaged() && distanceToHMD < 0.25)
+		if (vr_weapon_stabilised->value == 1 && !isScopeEngaged() && distanceToHMD < SCOPE_ENGAGE_DISTANCE)
 		{
 			sendButtonActionSimple("+alt1");
 		}
-		else if (isScopeEngaged() && (distanceToHMD > 0.25 || vr_weapon_stabilised->value != 1))
+		else if (isScopeEngaged() && (distanceToHMD > SCOPE_ENGAGE_DISTANCE || vr_weapon_stabilised->value != 1))
 		{
 			sendButtonActionSimple("-alt1");
 		}
@@ -245,7 +245,7 @@ void HandleInput_Alt( ovrInputStateTrackedRemote *pDominantTrackedRemoteNew, ovr
 					} else{
 						if (dominantGripPushed) {
 							//Initiate crowbar from backpack mode
-							sendButtonActionSimple("weapon_crowbar");
+							sendButtonActionSimple(g_pszBackpackWeapon);
 							int channel = (vr_control_scheme->integer >= 10) ? 0 : 1;
 							Android_Vibrate(80, channel, 0.8); // vibrate to let user know they switched
 							grabMeleeWeapon = 1;

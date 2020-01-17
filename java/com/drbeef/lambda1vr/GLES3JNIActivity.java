@@ -316,16 +316,26 @@ import static android.system.Os.setenv;
 			//Scope vignette texture
 			copy_asset("/sdcard/xash/" + game + "/", "sprites/scope.tga", true);
 			copy_asset("/sdcard/xash/valve/", "sprites/scope.tga", true);
+
 			//Sniper Rifle
 			copy_asset("/sdcard/xash/", "gearbox/models/v_m40a1.mdl", true);
 			copy_asset("/sdcard/xash/", "gearbox/models/w_m40a1.mdl", true);
 			copy_asset("/sdcard/xash/", "gearbox/sound/weapons/scout_clipin.wav", true);
 			copy_asset("/sdcard/xash/", "gearbox/sound/weapons/scout_clipout.wav", true);
 			copy_asset("/sdcard/xash/", "gearbox/sound/weapons/sniper_fire.wav", true);
+
 			//Pipe Wrench
 			copy_asset("/sdcard/xash/", "gearbox/models/v_pipe_wrench.mdl", true);
 			copy_asset("/sdcard/xash/", "gearbox/models/w_pipe_wrench.mdl", true);
 			copy_asset("/sdcard/xash/", "gearbox/models/p_pipe_wrench.mdl", true);
+
+			//Penguins
+			new File("/sdcard/xash/gearbox/sound/penguin/").mkdirs(); // Make the penguin directory as it won't exist
+			copy_asset("/sdcard/xash/", "gearbox/sound/penguin/penguin_die1.wav", true);
+			copy_asset("/sdcard/xash/", "gearbox/sound/penguin/penguin_deploy1.wav", true);
+			copy_asset("/sdcard/xash/", "gearbox/sound/penguin/penguin_hunt1.wav", true);
+			copy_asset("/sdcard/xash/", "gearbox/sound/penguin/penguin_hunt2.wav", true);
+			copy_asset("/sdcard/xash/", "gearbox/sound/penguin/penguin_hunt3.wav", true);
 		}
 
 		//Set default environment
@@ -336,10 +346,13 @@ import static android.system.Os.setenv;
 			setenv("XASH3D_GAMEDIR", "valve", true);
 			setenv( "XASH3D_EXTRAS_PAK1", getFilesDir().getPath() + "/extras.pak", true );
 
-			//If game is gearbox (Opposing Force) set the library file suffix to op4
+			//If game is gearbox (Opposing Force) set the library file suffix to opfor
 			if (game.equalsIgnoreCase("gearbox"))
 			{
 				setenv("XASH3D_LIBSUFFIX", "_opfor", true);
+
+				//Use pipewrench as backpack weapon in opposing force
+				setenv("VR_BACKPACK_WEAPON", "weapon_pipewrench", true);
 			}
 			else
 			{

@@ -8,6 +8,8 @@ enum control_scheme;
 
 #define YAWDRIFTPERFRAME 0.0026F;
 
+#define SCOPE_ENGAGE_DISTANCE 0.28
+
 ovrInputStateTrackedRemote leftTrackedRemoteState_old;
 ovrInputStateTrackedRemote leftTrackedRemoteState_new;
 ovrTracking leftRemoteTracking_new;
@@ -41,6 +43,8 @@ void HandleInput_Alt( ovrInputStateTrackedRemote *pDominantTrackedRemoteNew, ovr
 
 //A specific custom for left alt 2
 void HandleInput_LeftAlt2( );
+
+char * g_pszBackpackWeapon;
 
 #endif //VRINPUT_H
 
