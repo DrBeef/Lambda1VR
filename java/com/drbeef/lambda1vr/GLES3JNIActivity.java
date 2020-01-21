@@ -330,6 +330,9 @@ import static android.system.Os.setenv;
 			copy_asset("/sdcard/xash/", "gearbox/models/v_knife.mdl", true);
 			copy_asset("/sdcard/xash/", "gearbox/models/w_knife.mdl", true);
 			copy_asset("/sdcard/xash/", "gearbox/models/p_knife.mdl", true);
+			//Desert Eagle
+			copy_asset("/sdcard/xash/", "gearbox/models/v_desert_eagle.mdl", true);
+			copy_asset("/sdcard/xash/", "gearbox/models/w_desert_eagle.mdl", true);
 
 		}
 
