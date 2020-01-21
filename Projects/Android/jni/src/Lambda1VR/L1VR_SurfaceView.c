@@ -1451,6 +1451,13 @@ void VR_Init()
 
     //Not to be changed by users, as it will be overwritten anyway
 	vr_stereo_side = Cvar_Get( "vr_stereo_side", "0", CVAR_READ_ONLY, "Eye being drawn" );
+
+	//Set up backpack weapon string (this depends on the game)
+	g_pszBackpackWeapon = getenv("VR_BACKPACK_WEAPON");
+	if (g_pszBackpackWeapon == NULL)
+	{
+		g_pszBackpackWeapon = "weapon_crowbar";
+	}
 }
 
 void * AppThreadFunction( void * parm )
