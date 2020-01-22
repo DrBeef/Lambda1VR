@@ -1,7 +1,7 @@
 /************************************************************************************
 
-Filename	:	VrInputLeftAlt2.c
-Content		:	Handles controller input for the second alternative left-handed
+Filename	:	VrInputAlt2.c
+Content		:	Handles controller input for the second alternative
 Created		:	August 2019
 Authors		:	Simon Brown
 
@@ -29,10 +29,16 @@ extern cvar_t	*cl_movespeedkey;
 
 void Touch_Motion( touchEventType type, int fingerID, float x, float y, float dx, float dy );
 
-void HandleInput_LeftAlt2()
+float initialTouchX, initialTouchY;
+
+
+void HandleInput_Alt2( ovrInputStateTrackedRemote *pDominantTrackedRemoteNew, ovrInputStateTrackedRemote *pDominantTrackedRemoteOld, ovrTracking* pDominantTracking,
+                          ovrInputStateTrackedRemote *pOffTrackedRemoteNew, ovrInputStateTrackedRemote *pOffTrackedRemoteOld, ovrTracking* pOffTracking,
+                          int domButton1, int domButton2, int offButton1, int offButton2 )
 {
-	//Ensure handedness is set to left
-	Cvar_Set("hand", "1");
+	//Ensure handedness is set correctly
+	const char* pszHand = (vr_control_scheme->integer >= 10) ? "1" : "0";
+	Cvar_Set("hand", pszHand);
 
 	static bool dominantGripPushed = false;
 	static int grabMeleeWeapon = 0;
@@ -40,7 +46,7 @@ void HandleInput_LeftAlt2()
 	static float dominantGripPushTime = 0.0f;
 
 	static bool canUseQuickSave = false;
-	if (rightRemoteTracking_new.Status & (VRAPI_TRACKING_STATUS_POSITION_TRACKED | VRAPI_TRACKING_STATUS_POSITION_VALID)) {
+	if (pOffTracking->Status & (VRAPI_TRACKING_STATUS_POSITION_TRACKED | VRAPI_TRACKING_STATUS_POSITION_VALID)) {
 		canUseQuickSave = false;
 	}
 	else if (!canUseQuickSave) {
@@ -54,23 +60,23 @@ void HandleInput_LeftAlt2()
 
 	if (canUseQuickSave && !isMultiplayer())
 	{
-		if (((rightTrackedRemoteState_new.Buttons & ovrButton_A) !=
-			 (rightTrackedRemoteState_old.Buttons & ovrButton_A)) &&
-			(rightTrackedRemoteState_new.Buttons & ovrButton_A)) {
+		if (((pOffTrackedRemoteNew->Buttons & offButton1) !=
+			 (pOffTrackedRemoteOld->Buttons & offButton1)) &&
+			(pOffTrackedRemoteNew->Buttons & offButton1)) {
 			sendButtonActionSimple("savequick");
 		}
 
-		if (((rightTrackedRemoteState_new.Buttons & ovrButton_B) !=
-			 (rightTrackedRemoteState_old.Buttons & ovrButton_B)) &&
-			(rightTrackedRemoteState_new.Buttons & ovrButton_B)) {
+		if (((pOffTrackedRemoteNew->Buttons & offButton2) !=
+			 (pOffTrackedRemoteOld->Buttons & offButton2)) &&
+			(pOffTrackedRemoteNew->Buttons & offButton2)) {
 			sendButtonActionSimple("loadquick");
 		}
 	}
 	else
 	//Show screen view (if in multiplayer toggle scoreboard)
-	if (((leftTrackedRemoteState_new.Buttons & ovrButton_Y) !=
-		 (leftTrackedRemoteState_old.Buttons & ovrButton_Y)) &&
-		(leftTrackedRemoteState_new.Buttons & ovrButton_Y)) {
+	if (((pDominantTrackedRemoteNew->Buttons & domButton2) !=
+		 (pDominantTrackedRemoteOld->Buttons & domButton2)) &&
+		(pDominantTrackedRemoteNew->Buttons & domButton2)) {
 
 		showingScreenLayer = !showingScreenLayer;
 
@@ -80,24 +86,24 @@ void HandleInput_LeftAlt2()
 		}
 	}
 
-	//Menu button
+	//Menu button - always on the left controller
 	handleTrackedControllerButton(&leftTrackedRemoteState_new, &leftTrackedRemoteState_old, ovrButton_Enter, K_ESCAPE);
 
 	//Menu control - Uses "touch"
 	if (useScreenLayer())
 	{
-        interactWithTouchScreen(&leftRemoteTracking_new, &leftTrackedRemoteState_new, &leftTrackedRemoteState_old);
+        interactWithTouchScreen(pDominantTracking, pDominantTrackedRemoteNew, pDominantTrackedRemoteOld);
 	}
 	else
 	{
 		//If distance to off-hand remote is less than 35cm and user pushes grip, then we enable weapon stabilisation
-		float distance = sqrtf(powf(rightRemoteTracking_new.HeadPose.Pose.Position.x - leftRemoteTracking_new.HeadPose.Pose.Position.x, 2) +
-							   powf(rightRemoteTracking_new.HeadPose.Pose.Position.y - leftRemoteTracking_new.HeadPose.Pose.Position.y, 2) +
-							   powf(rightRemoteTracking_new.HeadPose.Pose.Position.z - leftRemoteTracking_new.HeadPose.Pose.Position.z, 2));
+		float distance = sqrtf(powf(pOffTracking->HeadPose.Pose.Position.x - pDominantTracking->HeadPose.Pose.Position.x, 2) +
+							   powf(pOffTracking->HeadPose.Pose.Position.y - pDominantTracking->HeadPose.Pose.Position.y, 2) +
+							   powf(pOffTracking->HeadPose.Pose.Position.z - pDominantTracking->HeadPose.Pose.Position.z, 2));
 
-		float distanceToHMD = sqrtf(powf(hmdPosition[0] - leftRemoteTracking_new.HeadPose.Pose.Position.x, 2) +
-									powf(hmdPosition[1] - leftRemoteTracking_new.HeadPose.Pose.Position.y, 2) +
-									powf(hmdPosition[2] - leftRemoteTracking_new.HeadPose.Pose.Position.z, 2));
+		float distanceToHMD = sqrtf(powf(hmdPosition[0] - pDominantTracking->HeadPose.Pose.Position.x, 2) +
+									powf(hmdPosition[1] - pDominantTracking->HeadPose.Pose.Position.y, 2) +
+									powf(hmdPosition[2] - pDominantTracking->HeadPose.Pose.Position.z, 2));
 
 		static float forwardYaw = 0;
 		if (!isScopeEngaged())
@@ -106,10 +112,10 @@ void HandleInput_LeftAlt2()
 		}
 
 		//Turn on weapon stabilisation?
-		if ((rightTrackedRemoteState_new.Buttons & ovrButton_GripTrigger) !=
-			(rightTrackedRemoteState_old.Buttons & ovrButton_GripTrigger)) {
+		if ((pOffTrackedRemoteNew->Buttons & ovrButton_GripTrigger) !=
+			(pOffTrackedRemoteOld->Buttons & ovrButton_GripTrigger)) {
 
-			if (rightTrackedRemoteState_new.Buttons & ovrButton_GripTrigger)
+			if (pOffTrackedRemoteNew->Buttons & ovrButton_GripTrigger)
 			{
 				if (distance < 0.50f)
 				{
@@ -119,6 +125,7 @@ void HandleInput_LeftAlt2()
 			else
 			{
 				Cvar_Set2("vr_weapon_stabilised", "0", true);
+
 			}
 		}
 
@@ -135,9 +142,9 @@ void HandleInput_LeftAlt2()
 		//dominant hand stuff first
 		{
 			///Weapon location relative to view
-			weaponoffset[0] = leftRemoteTracking_new.HeadPose.Pose.Position.x - hmdPosition[0];
-			weaponoffset[1] = leftRemoteTracking_new.HeadPose.Pose.Position.y - hmdPosition[1];
-			weaponoffset[2] = leftRemoteTracking_new.HeadPose.Pose.Position.z - hmdPosition[2];
+			weaponoffset[0] = pDominantTracking->HeadPose.Pose.Position.x - hmdPosition[0];
+			weaponoffset[1] = pDominantTracking->HeadPose.Pose.Position.y - hmdPosition[1];
+			weaponoffset[2] = pDominantTracking->HeadPose.Pose.Position.z - hmdPosition[2];
 
 			{
 				vec2_t v;
@@ -152,9 +159,9 @@ void HandleInput_LeftAlt2()
 			}
 
 			//Weapon velocity
-			weaponvelocity[0] = leftRemoteTracking_new.HeadPose.LinearVelocity.x;
-			weaponvelocity[1] = leftRemoteTracking_new.HeadPose.LinearVelocity.y;
-			weaponvelocity[2] = leftRemoteTracking_new.HeadPose.LinearVelocity.z;
+			weaponvelocity[0] = pDominantTracking->HeadPose.LinearVelocity.x;
+			weaponvelocity[1] = pDominantTracking->HeadPose.LinearVelocity.y;
+			weaponvelocity[2] = pDominantTracking->HeadPose.LinearVelocity.z;
 
 			{
 				vec2_t v;
@@ -169,8 +176,8 @@ void HandleInput_LeftAlt2()
 			}
 
 
-			//Set gun angles - We need to calculate all those we might need (including adjustments) for the client to then take its pick
-			const ovrQuatf quatRemote = leftRemoteTracking_new.HeadPose.Pose.Orientation;
+			//Set gun angles
+			const ovrQuatf quatRemote = pDominantTracking->HeadPose.Pose.Orientation;
 			QuatToYawPitchRoll(quatRemote, vr_weapon_pitchadjust->value, weaponangles[ADJUSTED]);
 			QuatToYawPitchRoll(quatRemote, 0.0f, weaponangles[UNADJUSTED]);
 			QuatToYawPitchRoll(quatRemote, vr_crowbar_pitchadjust->value, weaponangles[MELEE]);
@@ -180,14 +187,14 @@ void HandleInput_LeftAlt2()
 				//Don't trigger stabilisation if controllers are close together (holding Glock for example)
 				(distance > 0.15f))
 			{
-				float z = rightRemoteTracking_new.HeadPose.Pose.Position.z - leftRemoteTracking_new.HeadPose.Pose.Position.z;
-				float x = rightRemoteTracking_new.HeadPose.Pose.Position.x - leftRemoteTracking_new.HeadPose.Pose.Position.x;
-				float y = rightRemoteTracking_new.HeadPose.Pose.Position.y - leftRemoteTracking_new.HeadPose.Pose.Position.y;
+				float z = pOffTracking->HeadPose.Pose.Position.z - pDominantTracking->HeadPose.Pose.Position.z;
+				float x = pOffTracking->HeadPose.Pose.Position.x - pDominantTracking->HeadPose.Pose.Position.x;
+				float y = pOffTracking->HeadPose.Pose.Position.y - pDominantTracking->HeadPose.Pose.Position.y;
 				float zxDist = length(x, z);
 
 				if (zxDist != 0.0f && z != 0.0f) {
-					VectorSet(weaponangles[ADJUSTED], degrees(atanf(y / zxDist)), (cl.refdef.cl_viewangles[YAW] - hmdorientation[YAW]) - degrees(atan2f(x, -z)), weaponangles[ADJUSTED][ROLL]);
-					VectorSet(weaponangles[UNADJUSTED], degrees(atanf(y / zxDist)), (cl.refdef.cl_viewangles[YAW] - hmdorientation[YAW]) - degrees(atan2f(x, -z)), weaponangles[UNADJUSTED][ROLL]);
+                    VectorSet(weaponangles[ADJUSTED], degrees(atanf(y / zxDist)), (forwardYaw+snapTurn) - degrees(atan2f(x, -z)), weaponangles[ADJUSTED][ROLL]);
+                    VectorSet(weaponangles[UNADJUSTED], degrees(atanf(y / zxDist)), (forwardYaw+snapTurn) - degrees(atan2f(x, -z)), weaponangles[UNADJUSTED][ROLL]);
 				}
 			}
 			else
@@ -203,10 +210,10 @@ void HandleInput_LeftAlt2()
 			weaponangles[MELEE][PITCH] *= -1.0f;
 
 			//Use (Action)
-			if ((leftTrackedRemoteState_new.Buttons & ovrButton_Joystick) !=
-				(leftTrackedRemoteState_old.Buttons & ovrButton_Joystick)) {
+			if ((pDominantTrackedRemoteNew->Buttons & ovrButton_Joystick) !=
+				(pDominantTrackedRemoteOld->Buttons & ovrButton_Joystick)) {
 
-				sendButtonAction("+use", (leftTrackedRemoteState_new.Buttons & ovrButton_Joystick));
+				sendButtonAction("+use", (pDominantTrackedRemoteNew->Buttons & ovrButton_Joystick));
 			}
 
 			static bool finishReloadNextFrame = false;
@@ -216,7 +223,7 @@ void HandleInput_LeftAlt2()
 				finishReloadNextFrame = false;
 			}
 
-			if (leftRemoteTracking_new.Status  & (VRAPI_TRACKING_STATUS_POSITION_TRACKED | VRAPI_TRACKING_STATUS_POSITION_VALID)) {
+			if (pDominantTracking->Status & (VRAPI_TRACKING_STATUS_POSITION_TRACKED | VRAPI_TRACKING_STATUS_POSITION_VALID)) {
 				canUseBackpack = false;
 			}
 			else if (!canUseBackpack && grabMeleeWeapon == 0) {
@@ -228,15 +235,15 @@ void HandleInput_LeftAlt2()
 				canUseBackpack = true;
 			}
 
-			if ((leftTrackedRemoteState_new.Buttons & ovrButton_GripTrigger) !=
-				(leftTrackedRemoteState_old.Buttons & ovrButton_GripTrigger)) {
+			if ((pDominantTrackedRemoteNew->Buttons & ovrButton_GripTrigger) !=
+				(pDominantTrackedRemoteOld->Buttons & ovrButton_GripTrigger)) {
 
-				dominantGripPushed = (leftTrackedRemoteState_new.Buttons &
+				dominantGripPushed = (pDominantTrackedRemoteNew->Buttons &
 									  ovrButton_GripTrigger) != 0;
 
 				if (grabMeleeWeapon == 0)
 				{
-					if (leftRemoteTracking_new.Status & (VRAPI_TRACKING_STATUS_POSITION_TRACKED | VRAPI_TRACKING_STATUS_POSITION_VALID)) {
+					if (pDominantTracking->Status & (VRAPI_TRACKING_STATUS_POSITION_TRACKED | VRAPI_TRACKING_STATUS_POSITION_VALID)) {
 
 						if (dominantGripPushed) {
 							dominantGripPushTime = GetTimeInMilliSeconds();
@@ -251,7 +258,8 @@ void HandleInput_LeftAlt2()
 						if (dominantGripPushed) {
 							//Initiate crowbar from backpack mode
 							sendButtonActionSimple(g_pszBackpackWeapon);
-							Android_Vibrate(80, 0, 0.8); // vibrate to let user know they switched
+							int channel = (vr_control_scheme->integer >= 10) ? 0 : 1;
+							Android_Vibrate(80, channel, 0.8); // vibrate to let user know they switched
 							grabMeleeWeapon = 1;
 						}
 					}
@@ -266,17 +274,17 @@ void HandleInput_LeftAlt2()
 		float controllerYawHeading = 0.0f;
 		//off-hand stuff
 		{
-			flashlightoffset[0] = rightRemoteTracking_new.HeadPose.Pose.Position.x - hmdPosition[0];
-			flashlightoffset[1] = rightRemoteTracking_new.HeadPose.Pose.Position.y - hmdPosition[1];
-			flashlightoffset[2] = rightRemoteTracking_new.HeadPose.Pose.Position.z - hmdPosition[2];
+			flashlightoffset[0] = pOffTracking->HeadPose.Pose.Position.x - hmdPosition[0];
+			flashlightoffset[1] = pOffTracking->HeadPose.Pose.Position.y - hmdPosition[1];
+			flashlightoffset[2] = pOffTracking->HeadPose.Pose.Position.z - hmdPosition[2];
 
 			vec2_t v;
 			rotateAboutOrigin(flashlightoffset[0], flashlightoffset[2], -(cl.refdef.cl_viewangles[YAW] - hmdorientation[YAW]), v);
 			flashlightoffset[0] = v[0];
 			flashlightoffset[2] = v[1];
 
-			QuatToYawPitchRoll(rightRemoteTracking_new.HeadPose.Pose.Orientation, 0.0f, offhandangles);
-			QuatToYawPitchRoll(rightRemoteTracking_new.HeadPose.Pose.Orientation, 15.0f, flashlightangles);
+			QuatToYawPitchRoll(pOffTracking->HeadPose.Pose.Orientation, 0.0f, offhandangles);
+			QuatToYawPitchRoll(pOffTracking->HeadPose.Pose.Orientation, 15.0f, flashlightangles);
 
 			flashlightangles[YAW] += (cl.refdef.cl_viewangles[YAW] - hmdorientation[YAW]);
 			offhandangles[YAW] = flashlightangles[YAW];
@@ -294,8 +302,9 @@ void HandleInput_LeftAlt2()
 			//This section corrects for the fact that the controller actually controls direction of movement, but we want to move relative to the direction the
 			//player is facing for positional tracking
 			float multiplier = vr_positional_factor->value / (cl_forwardspeed->value *
-															  ((rightTrackedRemoteState_new.Buttons & ovrButton_Trigger) ? cl_movespeedkey->value : 1.0f));
+					((pOffTrackedRemoteNew->Buttons & ovrButton_Trigger) ? cl_movespeedkey->value : 1.0f));
 
+			//If player is ducked then multiply by 3 otherwise positional tracking feels very wrong
 			if (ducked != DUCK_NOTDUCKED)
 			{
 				multiplier *= 3.0f;
@@ -311,9 +320,9 @@ void HandleInput_LeftAlt2()
 				  positional_movementSideways,
 				  positional_movementForward);
 
-			//Jump (B Button)
-			handleTrackedControllerButton(&rightTrackedRemoteState_new,
-										  &rightTrackedRemoteState_old, ovrButton_B, K_SPACE);
+			//Jump
+			handleTrackedControllerButton(pOffTrackedRemoteNew,
+										  pOffTrackedRemoteOld, offButton2, K_SPACE);
 
 			//We need to record if we have started firing primary so that releasing trigger will stop firing, if user has pushed grip
 			//in meantime, then it wouldn't stop the gun firing and it would get stuck
@@ -322,75 +331,116 @@ void HandleInput_LeftAlt2()
 			if (!firingPrimary && dominantGripPushed && (GetTimeInMilliSeconds() - dominantGripPushTime) > vr_reloadtimeoutms->integer)
 			{
 				//Fire Secondary
-				if ((leftTrackedRemoteState_new.Buttons & ovrButton_Trigger) !=
-					(leftTrackedRemoteState_old.Buttons & ovrButton_Trigger)) {
+				if ((pDominantTrackedRemoteNew->Buttons & ovrButton_Trigger) !=
+					(pDominantTrackedRemoteOld->Buttons & ovrButton_Trigger)) {
 
-					sendButtonAction("+attack2", (leftTrackedRemoteState_new.Buttons & ovrButton_Trigger));
+					sendButtonAction("+attack2", (pDominantTrackedRemoteNew->Buttons & ovrButton_Trigger));
 				}
 			}
 			else
 			{
 				//Fire Primary
-				if ((leftTrackedRemoteState_new.Buttons & ovrButton_Trigger) !=
-					(leftTrackedRemoteState_old.Buttons & ovrButton_Trigger)) {
+				if ((pDominantTrackedRemoteNew->Buttons & ovrButton_Trigger) !=
+					(pDominantTrackedRemoteOld->Buttons & ovrButton_Trigger)) {
 
-					firingPrimary = (leftTrackedRemoteState_new.Buttons & ovrButton_Trigger);
+					firingPrimary = (pDominantTrackedRemoteNew->Buttons & ovrButton_Trigger);
 					sendButtonAction("+attack", firingPrimary);
 				}
 				// we need to release secondary fire if dominantGripPushed has been released before releasing trigger -> should fix the gun jamming and non stop firing secondary attack bug
-				if ((leftTrackedRemoteState_new.Buttons & ovrButton_Trigger) !=
-					(leftTrackedRemoteState_old.Buttons & ovrButton_Trigger) &&
-					(leftTrackedRemoteState_new.Buttons & ovrButton_Trigger) == false)
+				if ((pDominantTrackedRemoteNew->Buttons & ovrButton_Trigger) !=
+					(pDominantTrackedRemoteOld->Buttons & ovrButton_Trigger) &&
+					(pDominantTrackedRemoteNew->Buttons & ovrButton_Trigger) == false)
 				{
 					sendButtonAction("+attack2", false);
 				}
 			}
 
 			//Duck with A
-			if ((rightTrackedRemoteState_new.Buttons & ovrButton_A) !=
-				(rightTrackedRemoteState_old.Buttons & ovrButton_A) &&
+			if ((pOffTrackedRemoteNew->Buttons & offButton1) !=
+				(pOffTrackedRemoteOld->Buttons & offButton1) &&
 				ducked != DUCK_CROUCHED) {
-				ducked = (rightTrackedRemoteState_new.Buttons & ovrButton_A) ? DUCK_BUTTON : DUCK_NOTDUCKED;
-				sendButtonAction("+duck", (rightTrackedRemoteState_new.Buttons & ovrButton_A));
+				ducked = (pOffTrackedRemoteNew->Buttons & offButton1) ? DUCK_BUTTON : DUCK_NOTDUCKED;
+				sendButtonAction("+duck", (pOffTrackedRemoteNew->Buttons & offButton1));
 			}
 
 			//Weapon Chooser
 			static bool weaponSwitched = false;
-			if (between(-0.25f, rightTrackedRemoteState_new.Joystick.x, 0.25f) &&
-				(between(0.75f, rightTrackedRemoteState_new.Joystick.y, 1.0f) ||
-				 between(-1.0f, rightTrackedRemoteState_new.Joystick.y, -0.75f)))
+			if (vr_snapturn_angle->value != 0) // if snap angle feature is enabled
 			{
-				if (!weaponSwitched) {
-					if (between(0.75f, rightTrackedRemoteState_new.Joystick.y, 1.0f))
-					{
-						sendButtonActionSimple("invnext");
+				if (between(-0.25f, pOffTrackedRemoteNew->Joystick.x, 0.25f) &&
+					(between(0.75f, pOffTrackedRemoteNew->Joystick.y, 1.0f) ||
+					 between(-1.0f, pOffTrackedRemoteNew->Joystick.y, -0.75f)))
+				{
+					if (!weaponSwitched) {
+						if (between(0.75f, pOffTrackedRemoteNew->Joystick.y, 1.0f))
+						{
+							sendButtonActionSimple("invnext");
+						}
+						else
+						{
+							sendButtonActionSimple("invprev");
+						}
+						weaponSwitched = true;
 					}
-					else
-					{
-						sendButtonActionSimple("invprev");
-					}
-					weaponSwitched = true;
 				}
-			} else {
-				weaponSwitched = false;
+				else {
+					weaponSwitched = false;
+				}
+			}
+			else // allow slot selection (columns of weapon hud)
+			{
+				if (between(0.75f, pOffTrackedRemoteNew->Joystick.y, 1.0f) ||
+					between(-1.0f, pOffTrackedRemoteNew->Joystick.y, -0.75f) ||
+					between(0.75f, pOffTrackedRemoteNew->Joystick.x, 1.0f) ||
+					between(-1.0f, pOffTrackedRemoteNew->Joystick.x, -0.75f))
+				{
+					if (!weaponSwitched) {
+						if (!weaponSwitched)
+						{
+							if (between(0.75f, pOffTrackedRemoteNew->Joystick.y, 1.0f))
+							{
+								sendButtonActionSimple("invprev"); // in this mode is makes more sense to select the next item with Joystick down; this is the mouse wheel behaviour in hl
+							}
+							else if (between(-1.0f, pOffTrackedRemoteNew->Joystick.y, -0.75f))
+							{
+								sendButtonActionSimple("invnext");
+							}
+							else if (between(0.75f, pOffTrackedRemoteNew->Joystick.x, 1.0f))
+							{
+								sendButtonActionSimple("invnextslot"); // not an original hl methode -> needs update from hlsdk-xash3d
+							}
+							else if (between(-1.0f, pOffTrackedRemoteNew->Joystick.x, -0.75f))
+							{
+								sendButtonActionSimple("invprevslot");
+							}
+							weaponSwitched = true;
+						}
+						weaponSwitched = true;
+					}
+				}
+				else {
+					weaponSwitched = false;
+				}
 			}
 		}
 
 		{
-			//Use (Action)
-			if ((rightTrackedRemoteState_new.Buttons & ovrButton_Joystick) !=
-				(rightTrackedRemoteState_old.Buttons & ovrButton_Joystick)
-				&& (rightTrackedRemoteState_new.Buttons & ovrButton_Joystick)) {
+			//Laser Sight
+			if ((pOffTrackedRemoteNew->Buttons & ovrButton_Joystick) !=
+				(pOffTrackedRemoteOld->Buttons & ovrButton_Joystick)
+				&& (pOffTrackedRemoteNew->Buttons & ovrButton_Joystick)) {
 
 				Cvar_SetFloat("vr_lasersight", 1.0f - vr_lasersight->value);
+
 			}
 
 			if (!isScopeEngaged()) {
 				//Apply a filter and quadratic scaler so small movements are easier to make
-				float dist = length(leftTrackedRemoteState_new.Joystick.x, leftTrackedRemoteState_new.Joystick.y);
+				float dist = length(pDominantTrackedRemoteNew->Joystick.x, 
+									pDominantTrackedRemoteNew->Joystick.y);
 				float nlf = nonLinearFilter(dist);
-				float x = nlf * leftTrackedRemoteState_new.Joystick.x;
-				float y = nlf * leftTrackedRemoteState_new.Joystick.y;
+				float x = nlf * pDominantTrackedRemoteNew->Joystick.x;
+				float y = nlf * pDominantTrackedRemoteNew->Joystick.y;
 
 				player_moving = (fabs(x) + fabs(y)) > 0.01f;
 
@@ -407,16 +457,16 @@ void HandleInput_LeftAlt2()
 					  remote_movementForward);
 			} else {
 				static bool scopeZoomed = false;
-				if (between(0.75f, rightTrackedRemoteState_new.Joystick.y, 1.0f) ||
-					between(-1.0f, rightTrackedRemoteState_new.Joystick.y, -0.75f))
+				if (between(0.75f, pOffTrackedRemoteNew->Joystick.y, 1.0f) ||
+					between(-1.0f, pOffTrackedRemoteNew->Joystick.y, -0.75f))
 				{
 					if (!scopeZoomed)
 					{
-						if (between(0.75f, rightTrackedRemoteState_new.Joystick.y, 1.0f))
+						if (between(0.75f, pOffTrackedRemoteNew->Joystick.y, 1.0f))
 						{
 							sendButtonActionSimple("impulse 104"); //zoom in
 						}
-						else if (between(-1.0f, rightTrackedRemoteState_new.Joystick.y, -0.75f))
+						else if (between(-1.0f, pOffTrackedRemoteNew->Joystick.y, -0.75f))
 						{
 							sendButtonActionSimple("impulse 105"); //zoom out
 						}
@@ -431,9 +481,10 @@ void HandleInput_LeftAlt2()
 
 
 			//flashlight on/off
-			if (((leftTrackedRemoteState_new.Buttons & ovrButton_X) !=
-				 (leftTrackedRemoteState_old.Buttons & ovrButton_X)) &&
-				(leftTrackedRemoteState_old.Buttons & ovrButton_X)) {
+			if (!canUseQuickSave &&
+                ((pDominantTrackedRemoteNew->Buttons & domButton1) !=
+				 (pDominantTrackedRemoteOld->Buttons & domButton1)) &&
+				(pDominantTrackedRemoteOld->Buttons & domButton1)) {
 				sendButtonActionSimple("impulse 100");
 			}
 
@@ -443,18 +494,18 @@ void HandleInput_LeftAlt2()
 			static bool firingPrimary = false;
 
 			//Run
-			handleTrackedControllerButton(&rightTrackedRemoteState_new,
-										  &rightTrackedRemoteState_old,
+			handleTrackedControllerButton(pOffTrackedRemoteNew,
+										  pOffTrackedRemoteOld,
 										  ovrButton_Trigger, K_SHIFT);
 
 
 
             //engage comfort mask if using smooth rotation
             player_moving |= (vr_snapturn_angle->value <= 10.0f &&
-                              fabs(rightTrackedRemoteState_new.Joystick.x) > 0.6f);
+                              fabs(pOffTrackedRemoteNew->Joystick.x) > 0.6f);
 
 			static bool increaseSnap = true;
-			if (rightTrackedRemoteState_new.Joystick.x > 0.6f)
+			if (pOffTrackedRemoteNew->Joystick.x > 0.6f)
 			{
 				if (increaseSnap)
 				{
@@ -468,12 +519,12 @@ void HandleInput_LeftAlt2()
 						snapTurn += 360.f;
 					}
 				}
-			} else if (rightTrackedRemoteState_new.Joystick.x < 0.4f) {
+			} else if (pOffTrackedRemoteNew->Joystick.x < 0.4f) {
 				increaseSnap = true;
 			}
 
 			static bool decreaseSnap = true;
-			if (rightTrackedRemoteState_new.Joystick.x < -0.6f)
+			if (pOffTrackedRemoteNew->Joystick.x < -0.6f)
 			{
 				if (decreaseSnap)
 				{
@@ -489,7 +540,7 @@ void HandleInput_LeftAlt2()
 						snapTurn -= 360.f;
 					}
 				}
-			} else if (rightTrackedRemoteState_new.Joystick.x > -0.4f)
+			} else if (pOffTrackedRemoteNew->Joystick.x > -0.4f)
 			{
 				decreaseSnap = true;
 			}

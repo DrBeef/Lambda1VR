@@ -425,7 +425,7 @@ void HandleInput_Default( ovrInputStateTrackedRemote *pDominantTrackedRemoteNew,
 		}
 
 		{
-			//Use (Action)
+			//Laser Sight
 			if ((pOffTrackedRemoteNew->Buttons & ovrButton_Joystick) !=
 				(pOffTrackedRemoteOld->Buttons & ovrButton_Joystick)
 				&& (pOffTrackedRemoteNew->Buttons & ovrButton_Joystick)) {

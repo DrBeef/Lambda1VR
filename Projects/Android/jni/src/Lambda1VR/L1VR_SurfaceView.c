@@ -109,9 +109,12 @@ extern convar_t	*r_lefthand;
 enum control_scheme {
 	RIGHT_HANDED_DEFAULT = 0,
 	RIGHT_HANDED_ALT = 1,
+	RIGHT_HANDED_ALT2 = 2,
+	ONE_CONTROLLER_RIGHT = 3,
 	LEFT_HANDED_DEFAULT = 10,
 	LEFT_HANDED_ALT = 11,
-	LEFT_HANDED_ALT_2 = 12   //Special case for left-handers who want the right handed button mappings / thumbsticks but left handed weapon / right handed flashlight
+	LEFT_HANDED_ALT_2 = 12,   //Special case for left-handers who want the right handed button mappings / thumbsticks but left handed weapon / right handed flashlight
+    ONE_CONTROLLER_LEFT = 13   //Special case for left-handers who want the right handed button mappings / thumbsticks but left handed weapon / right handed flashlight
 };
 
 /*
@@ -1701,6 +1704,16 @@ void * AppThreadFunction( void * parm )
 									&leftTrackedRemoteState_new, &leftTrackedRemoteState_old, &leftRemoteTracking_new,
 									ovrButton_A, ovrButton_B, ovrButton_X, ovrButton_Y);
 					break;
+				case RIGHT_HANDED_ALT2:
+					HandleInput_Alt2(&rightTrackedRemoteState_new, &rightTrackedRemoteState_old, &rightRemoteTracking_new,
+									&leftTrackedRemoteState_new, &leftTrackedRemoteState_old, &leftRemoteTracking_new,
+									ovrButton_A, ovrButton_B, ovrButton_X, ovrButton_Y);
+					break;
+				case ONE_CONTROLLER_RIGHT:
+					HandleInput_OneController(&rightTrackedRemoteState_new, &rightTrackedRemoteState_old, &rightRemoteTracking_new,
+									&leftTrackedRemoteState_new, &leftTrackedRemoteState_old, &leftRemoteTracking_new,
+									ovrButton_A, ovrButton_B, ovrButton_X, ovrButton_Y);
+					break;
 				case LEFT_HANDED_DEFAULT:
 					HandleInput_Default(&leftTrackedRemoteState_new, &leftTrackedRemoteState_old, &leftRemoteTracking_new,
 										&rightTrackedRemoteState_new, &rightTrackedRemoteState_old, &rightRemoteTracking_new,
@@ -1712,7 +1725,14 @@ void * AppThreadFunction( void * parm )
 									 ovrButton_X, ovrButton_Y, ovrButton_A, ovrButton_B);
 					break;
 				case LEFT_HANDED_ALT_2:
-					HandleInput_LeftAlt2( );
+					HandleInput_Alt2(&leftTrackedRemoteState_new, &leftTrackedRemoteState_old, &leftRemoteTracking_new,
+									&rightTrackedRemoteState_new, &rightTrackedRemoteState_old, &rightRemoteTracking_new,
+									ovrButton_X, ovrButton_Y, ovrButton_A, ovrButton_B);
+					break;
+				case ONE_CONTROLLER_LEFT:
+					HandleInput_OneController(&leftTrackedRemoteState_new, &leftTrackedRemoteState_old, &leftRemoteTracking_new,
+									&rightTrackedRemoteState_new, &rightTrackedRemoteState_old, &rightRemoteTracking_new,
+									ovrButton_X, ovrButton_Y, ovrButton_A, ovrButton_B);
 					break;
 			}
 
