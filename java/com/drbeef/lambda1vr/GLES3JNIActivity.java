@@ -345,6 +345,20 @@ import static android.system.Os.setenv;
 			//Desert Eagle
 			copy_asset("/sdcard/xash/", "gearbox/models/v_desert_eagle.mdl", true);
 			copy_asset("/sdcard/xash/", "gearbox/models/w_desert_eagle.mdl", true);
+
+			//Saw
+			copy_asset("/sdcard/xash/", "gearbox/models/v_saw.mdl", true);
+			copy_asset("/sdcard/xash/", "gearbox/models/p_saw.mdl", true);
+			copy_asset("/sdcard/xash/", "gearbox/models/w_saw.mdl", true);
+			copy_asset("/sdcard/xash/", "gearbox/models/w_saw_clip.mdl", true);
+			copy_asset("/sdcard/xash/", "gearbox/models/saw_link.mdl", true);
+			copy_asset("/sdcard/xash/", "gearbox/models/saw_shell.mdl", true);
+			copy_asset("/sdcard/xash/", "gearbox/sound/weapons/SAW_bolt.wav", true);
+			copy_asset("/sdcard/xash/", "gearbox/sound/weapons/saw_fire1.wav", true);
+			copy_asset("/sdcard/xash/", "gearbox/sound/weapons/saw_fire2.wav", true);
+			copy_asset("/sdcard/xash/", "gearbox/sound/weapons/saw_fire3.wav", true);
+			copy_asset("/sdcard/xash/", "gearbox/sound/weapons/saw_reload_new.wav", true);
+			copy_asset("/sdcard/xash/", "gearbox/sound/weapons/saw_reload2_new.wav", true);
 		}
 
 		//Set default environment
