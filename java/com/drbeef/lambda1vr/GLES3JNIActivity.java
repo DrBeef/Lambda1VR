@@ -359,6 +359,20 @@ import static android.system.Os.setenv;
 			copy_asset("/sdcard/xash/", "gearbox/sound/weapons/saw_fire3.wav", true);
 			copy_asset("/sdcard/xash/", "gearbox/sound/weapons/saw_reload_new.wav", true);
 			copy_asset("/sdcard/xash/", "gearbox/sound/weapons/saw_reload2_new.wav", true);
+
+			//Barnacle
+			copy_asset("/sdcard/xash/", "gearbox/models/v_bgrap.mdl", true);
+			copy_asset("/sdcard/xash/", "gearbox/models/p_bgrap.mdl", true);
+			copy_asset("/sdcard/xash/", "gearbox/models/w_bgrap.mdl", true);
+			copy_asset("/sdcard/xash/", "gearbox/models/v_bgrap_tonguetip.mdl", true);
+			copy_asset("/sdcard/xash/", "gearbox/models/saw_link.mdl", true);
+			copy_asset("/sdcard/xash/", "gearbox/models/saw_shell.mdl", true);
+			copy_asset("/sdcard/xash/", "gearbox/sound/weapons/bgrapple_cough.wav", true);
+			copy_asset("/sdcard/xash/", "gearbox/sound/weapons/bgrapple_fire.wav", true);
+			copy_asset("/sdcard/xash/", "gearbox/sound/weapons/bgrapple_impact.wav", true);
+			copy_asset("/sdcard/xash/", "gearbox/sound/weapons/bgrapple_pull.wav", true);
+			copy_asset("/sdcard/xash/", "gearbox/sound/weapons/bgrapple_release.wav", true);
+			copy_asset("/sdcard/xash/", "gearbox/sound/weapons/bgrapple_wait.wav", true);
 		}
 
 		//Set default environment
