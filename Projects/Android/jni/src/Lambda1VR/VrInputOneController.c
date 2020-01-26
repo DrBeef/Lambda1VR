@@ -23,6 +23,7 @@ Authors		:	Simon Brown
 
 #include "VrInput.h"
 #include "VrCvars.h"
+#include "../Xash3D/xash3d/engine/client/client.h"
 
 extern cvar_t	*cl_forwardspeed;
 extern cvar_t	*cl_movespeedkey;
@@ -40,6 +41,8 @@ void HandleInput_OneController( ovrInputStateTrackedRemote *pDominantTrackedRemo
 	const char* pszHand = (vr_control_scheme->integer >= 10) ? "1" : "0";
 	Cvar_Set("hand", pszHand);
 
+
+	static bool shifted = false;
 	static bool dominantGripPushed = false;
 	static float dominantGripPushTime = 0.0f;
 
@@ -192,64 +195,66 @@ void HandleInput_OneController( ovrInputStateTrackedRemote *pDominantTrackedRemo
 				  positional_movementSideways,
 				  positional_movementForward);
 
+            shifted = (dominantGripPushed &&
+                (GetTimeInMilliSeconds() - dominantGripPushTime) > vr_reloadtimeoutms->integer);
+
             static bool weaponSwitched = false;
-			if (dominantGripPushed) {
-				if (between(0.75f, pDominantTrackedRemoteNew->Joystick.y, 1.0f) ||
-					between(-1.0f, pDominantTrackedRemoteNew->Joystick.y, -0.75f) ||
-					between(0.75f, pDominantTrackedRemoteNew->Joystick.x, 1.0f) ||
-					between(-1.0f, pDominantTrackedRemoteNew->Joystick.x, -0.75f))
-				{
-					if (!weaponSwitched) {
-						if (!weaponSwitched)
-						{
-							if (between(0.75f, pDominantTrackedRemoteNew->Joystick.y, 1.0f))
-							{
-								sendButtonActionSimple("invprev"); // in this mode is makes more sense to select the next item with Joystick down; this is the mouse wheel behaviour in hl
-							}
-							else if (between(-1.0f, pDominantTrackedRemoteNew->Joystick.y, -0.75f))
-							{
-								sendButtonActionSimple("invnext");
-							}
-							else if (between(0.75f, pDominantTrackedRemoteNew->Joystick.x, 1.0f))
-							{
-								sendButtonActionSimple("invnextslot"); // not an original hl methode -> needs update from hlsdk-xash3d
-							}
-							else if (between(-1.0f, pDominantTrackedRemoteNew->Joystick.x, -0.75f))
-							{
-								sendButtonActionSimple("invprevslot");
-							}
-							weaponSwitched = true;
-						}
-						weaponSwitched = true;
-					}
-				}
-				else {
-					weaponSwitched = false;
-				}
-			}
-		}
+            if (shifted) {
+                if (between(0.75f, pDominantTrackedRemoteNew->Joystick.y, 1.0f) ||
+                    between(-1.0f, pDominantTrackedRemoteNew->Joystick.y, -0.75f) ||
+                    between(0.75f, pDominantTrackedRemoteNew->Joystick.x, 1.0f) ||
+                    between(-1.0f, pDominantTrackedRemoteNew->Joystick.x, -0.75f))
+                {
+                    if (!weaponSwitched) {
+                        if (!weaponSwitched)
+                        {
+                            if (between(0.75f, pDominantTrackedRemoteNew->Joystick.y, 1.0f))
+                            {
+                                sendButtonActionSimple("invprev"); // in this mode is makes more sense to select the next item with Joystick down; this is the mouse wheel behaviour in hl
+                            }
+                            else if (between(-1.0f, pDominantTrackedRemoteNew->Joystick.y, -0.75f))
+                            {
+                                sendButtonActionSimple("invnext");
+                            }
+                            else if (between(0.75f, pDominantTrackedRemoteNew->Joystick.x, 1.0f))
+                            {
+                                sendButtonActionSimple("invnextslot"); // not an original hl methode -> needs update from hlsdk-xash3d
+                            }
+                            else if (between(-1.0f, pDominantTrackedRemoteNew->Joystick.x, -0.75f))
+                            {
+                                sendButtonActionSimple("invprevslot");
+                            }
+                            weaponSwitched = true;
+                        }
+                        weaponSwitched = true;
+                    }
+                }
+                else {
+                    weaponSwitched = false;
+                }
+            }
+            else {
+                //Apply a filter and quadratic scaler so small movements are easier to make
+                float dist = length(pDominantTrackedRemoteNew->Joystick.x,
+                                    pDominantTrackedRemoteNew->Joystick.y);
+                float nlf = nonLinearFilter(dist);
+                float x = nlf * pDominantTrackedRemoteNew->Joystick.x;
+                float y = nlf * pDominantTrackedRemoteNew->Joystick.y;
 
-		{
-			//Apply a filter and quadratic scaler so small movements are easier to make
-			float dist = length(pDominantTrackedRemoteNew->Joystick.x,
-								pDominantTrackedRemoteNew->Joystick.y);
-			float nlf = nonLinearFilter(dist);
-			float x = nlf * pDominantTrackedRemoteNew->Joystick.x;
-			float y = nlf * pDominantTrackedRemoteNew->Joystick.y;
-
-			player_moving = (fabs(x) + fabs(y)) > 0.01f;
+                player_moving = (fabs(x) + fabs(y)) > 0.01f;
 
 
-			//Adjust to be off-hand controller oriented
-			vec2_t v;
-			rotateAboutOrigin(x, y, controllerYawHeading, v);
+                //Adjust to be off-hand controller oriented
+                vec2_t v;
+                rotateAboutOrigin(x, y, controllerYawHeading, v);
 
-			remote_movementSideways = v[0];
-			remote_movementForward = v[1];
+                remote_movementSideways = v[0];
+                remote_movementForward = v[1];
 
-			ALOGV("        remote_movementSideways: %f, remote_movementForward: %f",
-				  remote_movementSideways,
-				  remote_movementForward);
+                ALOGV("        remote_movementSideways: %f, remote_movementForward: %f",
+                      remote_movementSideways,
+                      remote_movementForward);
+            }
 
             //Fire Primary
             if ((pDominantTrackedRemoteNew->Buttons & ovrButton_Trigger) !=
@@ -268,13 +273,29 @@ void HandleInput_OneController( ovrInputStateTrackedRemote *pDominantTrackedRemo
 
             }
 
+            //flashlight on/off
+            if (((pOffTrackedRemoteNew->Buttons & offButton2) !=
+                 (pOffTrackedRemoteOld->Buttons & offButton2)) &&
+                (pOffTrackedRemoteNew->Buttons & offButton2)) {
+                sendButtonActionSimple("impulse 100");
+            }
+
+            static int  jumpMode = 0;
             static bool running = false;
-            if (dominantGripPushed) {
-                //flashlight on/off
+            static int jumpTimer = 0;
+            if (shifted) {
+                jumpTimer = 0;
+                //Switch Jump Mode
                 if (((pDominantTrackedRemoteNew->Buttons & domButton1) !=
                      (pDominantTrackedRemoteOld->Buttons & domButton1)) &&
                     (pDominantTrackedRemoteNew->Buttons & domButton1)) {
-                    sendButtonActionSimple("impulse 100");
+                    jumpMode = 1 - jumpMode;
+                    if (jumpMode == 0) {
+                        CL_CenterPrint("JumpMode:  Jump {-> Duck}", -1);
+                    } else {
+                        CL_CenterPrint("JumpMode:  Duck -> Jump", -1);
+                    }
+
                 }
 
                 //Run - toggle
@@ -282,6 +303,11 @@ void HandleInput_OneController( ovrInputStateTrackedRemote *pDominantTrackedRemo
                     (pDominantTrackedRemoteOld->Buttons & domButton2) &&
                     (pDominantTrackedRemoteNew->Buttons & domButton2)) {
                     running = !running;
+                    if (running) {
+                        CL_CenterPrint("Run Toggle: Enabled", -1);
+                    } else {
+                        CL_CenterPrint("Run Toggle: Disabled", -1);
+                    }
                 }
 
                 //Use (Action)
@@ -293,27 +319,73 @@ void HandleInput_OneController( ovrInputStateTrackedRemote *pDominantTrackedRemo
             }
             else
             {
+                //Fire Secondary
+                if ((pDominantTrackedRemoteNew->Buttons & domButton2) !=
+                    (pDominantTrackedRemoteOld->Buttons & domButton2)) {
 
-                //Jump
-                handleTrackedControllerButton(pDominantTrackedRemoteNew,
-                                              pDominantTrackedRemoteOld, ovrButton_Joystick, K_SPACE);
-
-                //Duck
-                if ((pDominantTrackedRemoteNew->Buttons & domButton1) != (pDominantTrackedRemoteOld->Buttons & domButton1) &&
-                    ducked != DUCK_CROUCHED) {
-                    ducked = (pDominantTrackedRemoteNew->Buttons & domButton1) ? DUCK_BUTTON : DUCK_NOTDUCKED;
-                    sendButtonAction("+duck", (pDominantTrackedRemoteNew->Buttons & domButton1));
+                    sendButtonAction("+attack2", (pDominantTrackedRemoteNew->Buttons & domButton2));
                 }
 
-                //Fire Secondary
-                if ((pDominantTrackedRemoteNew->Buttons & ovrButton_Trigger) !=
-                    (pDominantTrackedRemoteOld->Buttons & ovrButton_Trigger)) {
+                //Start of Jump logic - initialise timer
+                if (((pDominantTrackedRemoteNew->Buttons & ovrButton_Joystick) !=
+                     (pDominantTrackedRemoteOld->Buttons & ovrButton_Joystick)))
+                {
+                    if (pDominantTrackedRemoteNew->Buttons & ovrButton_Joystick)
+                    {
+                        jumpTimer = GetTimeInMilliSeconds();
+                    }
+                }
 
-                    sendButtonAction("+attack2", (pDominantTrackedRemoteNew->Buttons & ovrButton_Trigger));
+                if (jumpMode == 0) {
+
+                    //Jump Mode 0:  Jump -> {Duck}
+					sendButtonAction("+jump", pDominantTrackedRemoteNew->Buttons & ovrButton_Joystick);
+
+                    //We are in jump macro
+                    if (jumpTimer != 0) {
+                        if (GetTimeInMilliSeconds() - jumpTimer > 250) {
+                            ducked = (pDominantTrackedRemoteNew->Buttons & ovrButton_Joystick) ? DUCK_BUTTON : DUCK_NOTDUCKED;
+                            sendButtonAction("+duck", (pDominantTrackedRemoteNew->Buttons & ovrButton_Joystick));
+                        }
+
+                        if (!(pDominantTrackedRemoteNew->Buttons & ovrButton_Joystick)) {
+                            jumpTimer = 0;
+                        }
+                    }
+
+                } else {
+                    //We are in jump macro
+                    if (jumpTimer != 0) {
+                        //Jump Mode 1:  Duck -> Jump
+                        ducked = (pDominantTrackedRemoteNew->Buttons & ovrButton_Joystick)
+                                 ? DUCK_BUTTON : DUCK_NOTDUCKED;
+                        sendButtonAction("+duck", (pDominantTrackedRemoteNew->Buttons &
+                                                   ovrButton_Joystick));
+
+                        if (GetTimeInMilliSeconds() - jumpTimer > 250) {
+							sendButtonAction("+jump", pDominantTrackedRemoteNew->Buttons & ovrButton_Joystick);
+						}
+
+                        if (!(pDominantTrackedRemoteNew->Buttons & ovrButton_Joystick)) {
+                            jumpTimer = 0;
+                        }
+                    }
+                }
+
+                if (jumpTimer != 0) {
+                    //Duck
+                    if ((pDominantTrackedRemoteNew->Buttons & domButton1) !=
+                        (pDominantTrackedRemoteOld->Buttons & domButton1) &&
+                        ducked != DUCK_CROUCHED) {
+                        ducked = (pDominantTrackedRemoteNew->Buttons & domButton1) ? DUCK_BUTTON
+                                                                                   : DUCK_NOTDUCKED;
+                        sendButtonAction("+duck",
+                                         (pDominantTrackedRemoteNew->Buttons & domButton1));
+                    }
                 }
             }
 
-			Key_Event(K_SHIFT, running);
+            sendButtonAction("+speed", running ? 1 : 0);
 		}
 	}
 
