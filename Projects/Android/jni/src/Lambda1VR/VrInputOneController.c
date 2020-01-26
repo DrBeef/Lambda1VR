@@ -283,7 +283,16 @@ void HandleInput_OneController( ovrInputStateTrackedRemote *pDominantTrackedRemo
             static int  jumpMode = 0;
             static bool running = false;
             static int jumpTimer = 0;
+            static bool firingSecondary = false;
             if (shifted) {
+                //If we were in the process of firing secondary, then just stop, otherwise it
+                //can get confused
+                if (firingSecondary)
+                {
+                    firingSecondary = false;
+                    sendButtonActionSimple("-attack2");
+                }
+
                 jumpTimer = 0;
                 //Switch Jump Mode
                 if (((pDominantTrackedRemoteNew->Buttons & domButton1) !=
@@ -323,6 +332,7 @@ void HandleInput_OneController( ovrInputStateTrackedRemote *pDominantTrackedRemo
                 if ((pDominantTrackedRemoteNew->Buttons & domButton2) !=
                     (pDominantTrackedRemoteOld->Buttons & domButton2)) {
 
+                    firingSecondary = (pDominantTrackedRemoteNew->Buttons & domButton2) > 0;
                     sendButtonAction("+attack2", (pDominantTrackedRemoteNew->Buttons & domButton2));
                 }
 
