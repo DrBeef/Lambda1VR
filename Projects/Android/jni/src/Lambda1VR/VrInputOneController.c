@@ -198,8 +198,9 @@ void HandleInput_OneController( ovrInputStateTrackedRemote *pDominantTrackedRemo
             shifted = (dominantGripPushed &&
                 (GetTimeInMilliSeconds() - dominantGripPushTime) > vr_reloadtimeoutms->integer);
 
+            static bool using = false;
             static bool weaponSwitched = false;
-            if (shifted) {
+            if (shifted && !using) {
                 if (between(0.75f, pDominantTrackedRemoteNew->Joystick.y, 1.0f) ||
                     between(-1.0f, pDominantTrackedRemoteNew->Joystick.y, -0.75f) ||
                     between(0.75f, pDominantTrackedRemoteNew->Joystick.x, 1.0f) ||
@@ -284,6 +285,7 @@ void HandleInput_OneController( ovrInputStateTrackedRemote *pDominantTrackedRemo
             static bool running = false;
             static int jumpTimer = 0;
             static bool firingSecondary = false;
+            static bool duckToggle = false;
             if (shifted) {
                 //If we were in the process of firing secondary, then just stop, otherwise it
                 //can get confused
@@ -323,11 +325,14 @@ void HandleInput_OneController( ovrInputStateTrackedRemote *pDominantTrackedRemo
                 if ((pDominantTrackedRemoteNew->Buttons & ovrButton_Joystick) !=
                     (pDominantTrackedRemoteOld->Buttons & ovrButton_Joystick)) {
 
+                    using = (pDominantTrackedRemoteNew->Buttons & ovrButton_Joystick);
                     sendButtonAction("+use", (pDominantTrackedRemoteNew->Buttons & ovrButton_Joystick));
                 }
             }
             else
             {
+                using = false;
+
                 //Fire Secondary
                 if ((pDominantTrackedRemoteNew->Buttons & domButton2) !=
                     (pDominantTrackedRemoteOld->Buttons & domButton2)) {
@@ -354,6 +359,8 @@ void HandleInput_OneController( ovrInputStateTrackedRemote *pDominantTrackedRemo
                     //We are in jump macro
                     if (jumpTimer != 0) {
                         if (GetTimeInMilliSeconds() - jumpTimer > 250) {
+                            duckToggle = false; // Control of ducking now down to this
+
                             ducked = (pDominantTrackedRemoteNew->Buttons & ovrButton_Joystick) ? DUCK_BUTTON : DUCK_NOTDUCKED;
                             sendButtonAction("+duck", (pDominantTrackedRemoteNew->Buttons & ovrButton_Joystick));
                         }
@@ -366,6 +373,8 @@ void HandleInput_OneController( ovrInputStateTrackedRemote *pDominantTrackedRemo
                 } else {
                     //We are in jump macro
                     if (jumpTimer != 0) {
+                        duckToggle = false; // Control of ducking now down to this
+
                         //Jump Mode 1:  Duck -> Jump
                         ducked = (pDominantTrackedRemoteNew->Buttons & ovrButton_Joystick)
                                  ? DUCK_BUTTON : DUCK_NOTDUCKED;
@@ -382,15 +391,16 @@ void HandleInput_OneController( ovrInputStateTrackedRemote *pDominantTrackedRemo
                     }
                 }
 
-                if (jumpTimer != 0) {
+                if (jumpTimer == 0) {
                     //Duck
-                    if ((pDominantTrackedRemoteNew->Buttons & domButton1) !=
+                    if (((pDominantTrackedRemoteNew->Buttons & domButton1) != (pDominantTrackedRemoteOld->Buttons & domButton1)) &&
                         (pDominantTrackedRemoteOld->Buttons & domButton1) &&
                         ducked != DUCK_CROUCHED) {
                         ducked = (pDominantTrackedRemoteNew->Buttons & domButton1) ? DUCK_BUTTON
                                                                                    : DUCK_NOTDUCKED;
-                        sendButtonAction("+duck",
-                                         (pDominantTrackedRemoteNew->Buttons & domButton1));
+
+                        duckToggle = !duckToggle;
+                        sendButtonAction("+duck", duckToggle ? 1 : 0);
                     }
                 }
             }
