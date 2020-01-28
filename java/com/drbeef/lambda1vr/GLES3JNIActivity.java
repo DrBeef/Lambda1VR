@@ -376,6 +376,9 @@ import static android.system.Os.setenv;
 
 			//Shock
 			copy_asset("/sdcard/xash/", "gearbox/models/v_shock.mdl", true);
+
+			//Pingu
+			copy_asset("/sdcard/xash/", "gearbox/models/v_penguin.mdl", true);
 		}
 
 		//Set default environment
