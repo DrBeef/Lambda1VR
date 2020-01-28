@@ -373,6 +373,9 @@ import static android.system.Os.setenv;
 			copy_asset("/sdcard/xash/", "gearbox/sound/weapons/bgrapple_pull.wav", true);
 			copy_asset("/sdcard/xash/", "gearbox/sound/weapons/bgrapple_release.wav", true);
 			copy_asset("/sdcard/xash/", "gearbox/sound/weapons/bgrapple_wait.wav", true);
+
+			//Shock
+			copy_asset("/sdcard/xash/", "gearbox/models/v_shock.mdl", true);
 		}
 
 		//Set default environment
