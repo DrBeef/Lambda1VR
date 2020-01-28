@@ -93,7 +93,7 @@ void CMenuControls::_Init( void )
     AddButton( "OK", "Apply changes and return to configuration menu", PC_OK, VoidCb( &CMenuControls::SetConfig ) );
 	AddButton( "Cancel", "Return to configuration menu", PC_CANCEL,	VoidCb( &CMenuControls::Cancel ) );
 
-    hmdWalkDirection.SetNameAndStatus( "Movement Direction", "Check to enable Gaze based directional movement" );
+    hmdWalkDirection.SetNameAndStatus( "HMD Oriented Movement Direction", "Check to enable Gaze based directional movement" );
     hmdWalkDirection.SetCoord( 320, 450 );
     hmdWalkDirection.LinkCvar( "vr_walkdirection" );
 
