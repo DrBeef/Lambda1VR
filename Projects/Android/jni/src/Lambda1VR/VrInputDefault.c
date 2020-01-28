@@ -321,8 +321,7 @@ void HandleInput_Default( ovrInputStateTrackedRemote *pDominantTrackedRemoteNew,
 				  positional_movementForward);
 
 			//Jump
-			handleTrackedControllerButton(pDominantTrackedRemoteNew,
-										  pDominantTrackedRemoteOld, domButton2, K_SPACE);
+			sendButtonAction("+jump", pDominantTrackedRemoteNew->Buttons & domButton2);
 
 			//We need to record if we have started firing primary so that releasing trigger will stop firing, if user has pushed grip
 			//in meantime, then it wouldn't stop the gun firing and it would get stuck
@@ -494,10 +493,7 @@ void HandleInput_Default( ovrInputStateTrackedRemote *pDominantTrackedRemoteNew,
 			static bool firingPrimary = false;
 
 			//Run
-			handleTrackedControllerButton(pOffTrackedRemoteNew,
-										  pOffTrackedRemoteOld,
-										  ovrButton_Trigger, K_SHIFT);
-
+			sendButtonAction("+speed", pOffTrackedRemoteNew->Buttons & ovrButton_Trigger);
 
 			//engage comfort mask if using smooth rotation
             player_moving |= (vr_snapturn_angle->value <= 10.0f &&

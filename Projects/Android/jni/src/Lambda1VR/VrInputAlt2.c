@@ -321,8 +321,7 @@ void HandleInput_Alt2( ovrInputStateTrackedRemote *pDominantTrackedRemoteNew, ov
 				  positional_movementForward);
 
 			//Jump
-			handleTrackedControllerButton(pOffTrackedRemoteNew,
-										  pOffTrackedRemoteOld, offButton2, K_SPACE);
+			sendButtonAction("+jump", pOffTrackedRemoteNew->Buttons & domButton2);
 
 			//We need to record if we have started firing primary so that releasing trigger will stop firing, if user has pushed grip
 			//in meantime, then it wouldn't stop the gun firing and it would get stuck
@@ -494,9 +493,7 @@ void HandleInput_Alt2( ovrInputStateTrackedRemote *pDominantTrackedRemoteNew, ov
 			static bool firingPrimary = false;
 
 			//Run
-			handleTrackedControllerButton(pOffTrackedRemoteNew,
-										  pOffTrackedRemoteOld,
-										  ovrButton_Trigger, K_SHIFT);
+			sendButtonAction("+speed", pOffTrackedRemoteNew->Buttons & ovrButton_Trigger);
 
 
 
