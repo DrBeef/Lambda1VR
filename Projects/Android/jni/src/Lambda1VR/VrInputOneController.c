@@ -154,24 +154,33 @@ void HandleInput_OneController( ovrInputStateTrackedRemote *pDominantTrackedRemo
 		float controllerYawHeading = 0.0f;
 
 		//still use off hand controller for flash light
-		{
-			flashlightoffset[0] = pOffTracking->HeadPose.Pose.Position.x - hmdPosition[0];
-			flashlightoffset[1] = pOffTracking->HeadPose.Pose.Position.y - hmdPosition[1];
-			flashlightoffset[2] = pOffTracking->HeadPose.Pose.Position.z - hmdPosition[2];
+        if (vr_headtorch->value == 1.0f)
+        {
+            VectorSet(flashlightoffset, 0, 0, 0);
+            VectorCopy(hmdorientation, flashlightangles);
+            VectorCopy(hmdorientation, offhandangles);
+        }
+        else
+        {
+            flashlightoffset[0] = pOffTracking->HeadPose.Pose.Position.x - hmdPosition[0];
+            flashlightoffset[1] = pOffTracking->HeadPose.Pose.Position.y - hmdPosition[1];
+            flashlightoffset[2] = pOffTracking->HeadPose.Pose.Position.z - hmdPosition[2];
 
-			vec2_t v;
-			rotateAboutOrigin(flashlightoffset[0], flashlightoffset[2], -(cl.refdef.cl_viewangles[YAW] - hmdorientation[YAW]), v);
-			flashlightoffset[0] = v[0];
-			flashlightoffset[2] = v[1];
+            vec2_t v;
+            rotateAboutOrigin(flashlightoffset[0], flashlightoffset[2],
+                              -(cl.refdef.cl_viewangles[YAW] - hmdorientation[YAW]), v);
+            flashlightoffset[0] = v[0];
+            flashlightoffset[2] = v[1];
 
-			QuatToYawPitchRoll(pOffTracking->HeadPose.Pose.Orientation, 0.0f, offhandangles);
-			QuatToYawPitchRoll(pOffTracking->HeadPose.Pose.Orientation, 15.0f, flashlightangles);
+            QuatToYawPitchRoll(pOffTracking->HeadPose.Pose.Orientation, 0.0f, offhandangles);
+            QuatToYawPitchRoll(pOffTracking->HeadPose.Pose.Orientation, 15.0f, flashlightangles);
+        }
 
-			flashlightangles[YAW] += (cl.refdef.cl_viewangles[YAW] - hmdorientation[YAW]);
-			offhandangles[YAW] = flashlightangles[YAW];
+        flashlightangles[YAW] += (cl.refdef.cl_viewangles[YAW] - hmdorientation[YAW]);
+        offhandangles[YAW] = flashlightangles[YAW];
 
-			controllerYawHeading = 0.0f;
-		}
+        controllerYawHeading = 0.0f;
+
 
 		{
 			//This section corrects for the fact that the controller actually controls direction of movement, but we want to move relative to the direction the

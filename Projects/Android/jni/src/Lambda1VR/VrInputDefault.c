@@ -273,29 +273,37 @@ void HandleInput_Default( ovrInputStateTrackedRemote *pDominantTrackedRemoteNew,
 
 		float controllerYawHeading = 0.0f;
 		//off-hand stuff
+		if (vr_headtorch->value == 1.0f)
+		{
+			VectorSet(flashlightoffset, 0, 0, 0);
+			VectorCopy(hmdorientation, flashlightangles);
+			VectorCopy(hmdorientation, offhandangles);
+		}
+		else
 		{
 			flashlightoffset[0] = pOffTracking->HeadPose.Pose.Position.x - hmdPosition[0];
 			flashlightoffset[1] = pOffTracking->HeadPose.Pose.Position.y - hmdPosition[1];
 			flashlightoffset[2] = pOffTracking->HeadPose.Pose.Position.z - hmdPosition[2];
 
 			vec2_t v;
-			rotateAboutOrigin(flashlightoffset[0], flashlightoffset[2], -(cl.refdef.cl_viewangles[YAW] - hmdorientation[YAW]), v);
+			rotateAboutOrigin(flashlightoffset[0], flashlightoffset[2],
+							  -(cl.refdef.cl_viewangles[YAW] - hmdorientation[YAW]), v);
 			flashlightoffset[0] = v[0];
 			flashlightoffset[2] = v[1];
 
 			QuatToYawPitchRoll(pOffTracking->HeadPose.Pose.Orientation, 0.0f, offhandangles);
 			QuatToYawPitchRoll(pOffTracking->HeadPose.Pose.Orientation, 15.0f, flashlightangles);
+		}
 
-			flashlightangles[YAW] += (cl.refdef.cl_viewangles[YAW] - hmdorientation[YAW]);
-			offhandangles[YAW] = flashlightangles[YAW];
+		flashlightangles[YAW] += (cl.refdef.cl_viewangles[YAW] - hmdorientation[YAW]);
+		offhandangles[YAW] = flashlightangles[YAW];
 
-			if (vr_walkdirection->integer == 0) {
-				controllerYawHeading = -cl.refdef.cl_viewangles[YAW] + flashlightangles[YAW];
-			}
-			else
-			{
-				controllerYawHeading = 0.0f;
-			}
+		if (vr_walkdirection->integer == 0) {
+			controllerYawHeading = -cl.refdef.cl_viewangles[YAW] + flashlightangles[YAW];
+		}
+		else
+		{
+			controllerYawHeading = 0.0f;
 		}
 
 		{

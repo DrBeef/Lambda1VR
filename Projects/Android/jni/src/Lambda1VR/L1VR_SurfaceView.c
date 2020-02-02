@@ -1451,6 +1451,7 @@ void VR_Init()
     vr_legacy_ladders = Cvar_Get( "vr_legacy_ladders", "0", CVAR_ARCHIVE, "Set to 1 to use ladder climb direction based on HMD, otherwise off-hand controller angle is used" );
 	vr_controller_tracking_haptic = Cvar_Get( "vr_controller_tracking_haptic", "1", CVAR_ARCHIVE, "Set to 0 to disable haptic blip when dominant controller loses tracking" );
 	vr_highlight_actionables = Cvar_Get( "vr_highlight_actionables", "1", CVAR_ARCHIVE, "Set to 0 to disable highlighting of actionable objects/entities" );
+	vr_headtorch = Cvar_Get( "vr_headtorch", "0", CVAR_ARCHIVE, "Set to 1 to enable head-torch flashlight mode" );
 
     //Not to be changed by users, as it will be overwritten anyway
 	vr_stereo_side = Cvar_Get( "vr_stereo_side", "0", CVAR_READ_ONLY, "Eye being drawn" );

@@ -64,6 +64,8 @@ private:
 	CMenuBannerBitmap banner;
 
     CMenuCheckBox	hmdWalkDirection;
+    CMenuCheckBox	mirrorWeapons;
+    CMenuCheckBox	headTorch;
     CMenuSlider	snapTurnAngle;
 
     CMenuTable	controllerList;
@@ -97,16 +99,26 @@ void CMenuControls::_Init( void )
     hmdWalkDirection.SetCoord( 320, 450 );
     hmdWalkDirection.LinkCvar( "vr_walkdirection" );
 
+    mirrorWeapons.SetNameAndStatus( "Mirror Weapon Models", "Check to mirror weapon models (for left-handed play to avoid seeing missing sides)" );
+    mirrorWeapons.SetCoord( 320, 510 );
+    mirrorWeapons.LinkCvar( "vr_mirror_weapons" );
+
+    headTorch.SetNameAndStatus( "Head-based Torch", "Check to enable head-torch (Half-life & Blueshift only)" );
+    headTorch.SetCoord( 320, 570 );
+    headTorch.LinkCvar( "vr_headtorch" );
+
     snapTurnAngle.SetNameAndStatus( "Snap/Smooth Turn: %.1f degrees", "Controller turn angle, < 10 is smooth turning per frame" );
     snapTurnAngle.Setup( 0.0, 90.0, 1.0f );
     snapTurnAngle.onChanged = CMenuEditable::WriteCvarCb;
-    snapTurnAngle.SetCoord( 320, 560 );
+    snapTurnAngle.SetCoord( 320, 660 );
     snapTurnAngle.SetSize( 520, 40 );
     snapTurnAngle.SetDrawValue(true);
     snapTurnAngle.LinkCvar("vr_snapturn_angle");
 
     AddItem( controllerList );
     AddItem( hmdWalkDirection );
+    AddItem( mirrorWeapons );
+    AddItem( headTorch );
     AddItem( snapTurnAngle );
 
 }
@@ -133,6 +145,8 @@ void CMenuControls::SetConfig( )
     EngFuncs::CvarSetValue( "vr_control_scheme", mode );
 
     hmdWalkDirection.WriteCvar();
+    mirrorWeapons.WriteCvar();
+    headTorch.WriteCvar();
     snapTurnAngle.WriteCvar();
 
     // We're done now, just close
@@ -147,14 +161,14 @@ void CMenuControllerModesModel::Update( void )
 {
     unsigned int i;
 
-    m_szModes[0] = "Default - Right Handed";
-    m_szModes[1] = "Alt 1 - Right Handed (Y Button to open weapon selector)";
-    m_szModes[2] = "Alt 2 - Right Handed (Movement & Button controls are switched hands)";
-    m_szModes[3] = "One Controller - Right Handed (Flashlight is still other controller)";
-    m_szModes[4] = "Default - Left Handed";
-    m_szModes[5] = "Alt 1 - Left Handed (B Button to open weapon selector)";
-    m_szModes[6] = "Alt 2 - Left Handed (Movement controls are switched hands)";
-    m_szModes[7] = "One Controller - Left Handed (Flashlight is still other controller)";
+    m_szModes[0] = "Right Handed Default";
+    m_szModes[1] = "Right Handed Alt 1 - Hold Y Button to open weapon selector";
+    m_szModes[2] = "Right Handed Alt 2 - Movement & Button controls are switched hands";
+    m_szModes[3] = "Right Handed One Controller - Flashlight control is on left-hand controller";
+    m_szModes[4] = "Left Handed Default";
+    m_szModes[5] = "Left Handed Alt 1 - Hold B Button to open weapon selector";
+    m_szModes[6] = "Left Handed Alt 2 - Movement controls are switched hands";
+    m_szModes[7] = "Left Handed One Controller - Flashlight is on right-hand controller";
     m_iNumModes = 8;
 }
 /*
