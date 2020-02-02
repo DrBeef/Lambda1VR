@@ -379,6 +379,28 @@ import static android.system.Os.setenv;
 
 			//Pingu
 			copy_asset("/sdcard/xash/", "gearbox/models/v_penguin.mdl", true);
+
+			//Spore
+			copy_asset("/sdcard/xash/", "gearbox/models/v_spore_launcher.mdl", true);
+			copy_asset("/sdcard/xash/", "gearbox/models/w_spore_launcher.mdl", true);
+			copy_asset("/sdcard/xash/", "gearbox/models/spore.mdl", true);
+			copy_asset("/sdcard/xash/", "gearbox/models/spore_ammo.mdl", true);
+			copy_asset("/sdcard/xash/", "gearbox/sound/weapons/splauncher_bounce.wav", true);
+			copy_asset("/sdcard/xash/", "gearbox/sound/weapons/splauncher_impact.wav", true);
+			copy_asset("/sdcard/xash/", "gearbox/sound/weapons/spore_hit1.wav", true);
+
+			//Displacer
+			copy_asset("/sdcard/xash/", "gearbox/models/v_displacer.mdl", true);
+			copy_asset("/sdcard/xash/", "gearbox/models/w_displacer.mdl", true);
+			copy_asset("/sdcard/xash/", "gearbox/models/p_displacer.mdl", true);
+			copy_asset("/sdcard/xash/", "gearbox/sound/weapons/displacer_fire.wav", true);
+			copy_asset("/sdcard/xash/", "gearbox/sound/weapons/displacer_impact.wav", true);
+			copy_asset("/sdcard/xash/", "gearbox/sound/weapons/displacer_self.wav", true);
+			copy_asset("/sdcard/xash/", "gearbox/sound/weapons/displacer_spin.wav", true);
+			copy_asset("/sdcard/xash/", "gearbox/sound/weapons/displacer_spin2.wav", true);
+			copy_asset("/sdcard/xash/", "gearbox/sound/weapons/displacer_start.wav", true);
+			copy_asset("/sdcard/xash/", "gearbox/sound/weapons/displacer_teleport.wav", true);
+			copy_asset("/sdcard/xash/", "gearbox/sound/weapons/displacer_teleport_player.wav", true);
 		}
 
 		//Set default environment
