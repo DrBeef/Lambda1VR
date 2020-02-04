@@ -182,3 +182,34 @@ void interactWithTouchScreen(ovrTracking *tracking, ovrInputStateTrackedRemote *
         IN_TouchEvent(t, 0, touchX, touchY, initialTouchX - touchX, initialTouchY - touchY);
     }
 }
+
+
+//YAW:  Left increase, Right decrease
+void updateScopeAngles(float forwardYaw)
+{
+    //Bit of a hack, but use weapon orientation / position for view when scope is engaged
+    static vec3_t currentScopeAngles;
+    if (isScopeEngaged())
+    {
+        //Set Position
+        VectorSet(hmdPosition, hmdPosition[0] + weaponoffset[0], hmdPosition[1] + weaponoffset[1], hmdPosition[2] + weaponoffset[2]);
+        VectorSet(weaponoffset, 0, 0, 0);
+
+        //Lerp the weapon angles to smooth out shaky hands a bit
+        vec3_t angles;
+        VectorSet(angles, -weaponangles[ADJUSTED][PITCH], weaponangles[ADJUSTED][YAW] - (forwardYaw+snapTurn), hmdorientation[ROLL]);
+
+        if (stabiliseScope) {
+            VectorLerp(currentScopeAngles, 0.125, angles, currentScopeAngles);
+        } else {
+            VectorCopy(angles, currentScopeAngles);
+        }
+
+        //Set "view" Angles
+        VectorCopy(currentScopeAngles, hmdorientation);
+    } else {
+        //Scope always engages with stabilisation turned on
+        stabiliseScope = true;
+        VectorSet(currentScopeAngles, -weaponangles[ADJUSTED][PITCH], weaponangles[ADJUSTED][YAW] - (forwardYaw+snapTurn), hmdorientation[ROLL]);
+    }
+}

@@ -432,13 +432,17 @@ void HandleInput_Default( ovrInputStateTrackedRemote *pDominantTrackedRemoteNew,
 		}
 
 		{
-			//Laser Sight
+			//Laser Sight / Scope stabilisation
 			if ((pOffTrackedRemoteNew->Buttons & ovrButton_Joystick) !=
 				(pOffTrackedRemoteOld->Buttons & ovrButton_Joystick)
 				&& (pOffTrackedRemoteNew->Buttons & ovrButton_Joystick)) {
 
-				Cvar_SetFloat("vr_lasersight", 1.0f - vr_lasersight->value);
-
+			    if (!isScopeEngaged()) {
+                    Cvar_SetFloat("vr_lasersight", 1.0f - vr_lasersight->value);
+                }
+			    else {
+                    stabiliseScope = !stabiliseScope;
+                }
 			}
 
             if (!isScopeEngaged()) {
@@ -549,24 +553,7 @@ void HandleInput_Default( ovrInputStateTrackedRemote *pDominantTrackedRemoteNew,
 			}
 		}
 
-	    //YAW:  Left increase, Right decrease
-
-        //Bit of a hack, but use weapon orientation / position for view when scope is engaged
-        if (isScopeEngaged())
-        {
-            //Set Position
-            VectorSet(hmdPosition, hmdPosition[0] + weaponoffset[0], hmdPosition[1] + weaponoffset[1], hmdPosition[2] + weaponoffset[2]);
-            VectorSet(weaponoffset, 0, 0, 0);
-
-            //Set "view" Angles
-            VectorSet(hmdorientation, -weaponangles[ADJUSTED][PITCH], weaponangles[ADJUSTED][YAW] - (forwardYaw+snapTurn), hmdorientation[ROLL]);
-        }
-
-        //Debugging
-/*        char buffer[1024];
-        Q_snprintf(buffer, 1024, "Snap Turn:\t\t%.2f\nForward:\t\t%.2f\nDrift:\t\t%.2f\nWeapon:\t\t%.2f\nOriginal HMD:\t\t%.2f\nHMD:\t\t%.2f\ncl.refdef.viewangles Yaw:\t\t%.2f",
-                   snapTurn, forwardYaw, driftCorrection, weaponangles[ADJUSTED][YAW], orighmdorientationyaw, hmdorientation[YAW], cl.refdef.viewangles[YAW]);
-        CL_CenterPrint(buffer, -1);*/
+        updateScopeAngles(forwardYaw);
     }
 
 	//Save state

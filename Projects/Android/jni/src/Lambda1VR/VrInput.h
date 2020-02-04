@@ -47,6 +47,8 @@ void HandleInput_OneController( ovrInputStateTrackedRemote *pDominantTrackedRemo
                       ovrInputStateTrackedRemote *pOffTrackedRemoteNew, ovrInputStateTrackedRemote *pOffTrackedRemoteOld, ovrTracking* pOffTracking,
                       int domButton1, int domButton2, int offButton1, int offButton2 );
 
+bool stabiliseScope;
+void updateScopeAngles(float forwardYaw);
 
 char * g_pszBackpackWeapon;
 
