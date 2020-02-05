@@ -61,6 +61,8 @@ bool player_moving;
 
 bool isMultiplayer();
 bool isScopeEngaged();
+bool isPlayerDead();
+
 
 float radians(float deg);
 float degrees(float rad);

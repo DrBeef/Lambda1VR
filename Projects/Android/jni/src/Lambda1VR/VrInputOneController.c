@@ -49,6 +49,13 @@ void HandleInput_OneController( ovrInputStateTrackedRemote *pDominantTrackedRemo
 	//Menu button - always on the left controller - unavoidable
 	handleTrackedControllerButton(&leftTrackedRemoteState_new, &leftTrackedRemoteState_old, ovrButton_Enter, K_ESCAPE);
 
+    if (isPlayerDead())
+    {
+        //Let player restart using trigger or main button
+        handleTrackedControllerButton(pDominantTrackedRemoteNew, pDominantTrackedRemoteOld, domButton1, K_SPACE);
+        handleTrackedControllerButton(pDominantTrackedRemoteNew, pDominantTrackedRemoteOld, ovrButton_Trigger, K_SPACE);
+    }
+
 	//Menu control - Uses "touch"
 	if (useScreenLayer())
 	{

@@ -909,6 +909,11 @@ bool isScopeEngaged()
 	return (cl.scr_fov != 0 &&	cl.scr_fov  < VR_FOV);
 }
 
+bool isPlayerDead()
+{
+    return cl.refdef.health <= 0;
+}
+
 void Host_BeginFrame();
 void Host_Frame();
 void Host_EndFrame();
