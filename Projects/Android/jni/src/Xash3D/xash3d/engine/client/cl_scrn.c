@@ -611,6 +611,7 @@ void SCR_RegisterTextures( void )
 	cls.fillImage = GL_LoadTexture( "*white", NULL, 0, TF_IMAGE, NULL ); // used for FillRGBA
 	cls.vignetteImage = GL_LoadTexture( "sprites/vignette.tga", NULL, 0, TF_IMAGE, NULL ); // used for puke reducing vignette
 	cls.scopeImage = GL_LoadTexture( "sprites/scope.tga", NULL, 0, TF_IMAGE, NULL ); // used for weapons with scopes
+	cls.pointerImage = GL_LoadTexture( "sprites/pointer.tga", NULL, 0, TF_IMAGE, NULL ); // used for menus
 	cls.particleImage = GL_LoadTexture( "*particle", NULL, 0, TF_IMAGE, NULL );
 
 	// register gfx.wad images

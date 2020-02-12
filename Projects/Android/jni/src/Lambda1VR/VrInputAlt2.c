@@ -89,12 +89,8 @@ void HandleInput_Alt2( ovrInputStateTrackedRemote *pDominantTrackedRemoteNew, ov
 	//Menu button - always on the left controller
 	handleTrackedControllerButton(&leftTrackedRemoteState_new, &leftTrackedRemoteState_old, ovrButton_Enter, K_ESCAPE);
 
-	if (isPlayerDead())
-	{
-		//Let player restart using trigger or main button
-		handleTrackedControllerButton(pDominantTrackedRemoteNew, pDominantTrackedRemoteOld, domButton1, K_SPACE);
-		handleTrackedControllerButton(pDominantTrackedRemoteNew, pDominantTrackedRemoteOld, ovrButton_Trigger, K_SPACE);
-	}
+	handleDeadPlayerClick(pDominantTrackedRemoteNew, pDominantTrackedRemoteOld, domButton1);
+
 
 	//Menu control - Uses "touch"
 	if (useScreenLayer())

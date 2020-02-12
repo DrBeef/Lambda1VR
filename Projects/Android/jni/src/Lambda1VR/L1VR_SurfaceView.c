@@ -911,7 +911,7 @@ bool isScopeEngaged()
 
 bool isPlayerDead()
 {
-    return cl.refdef.health <= 0;
+    return ( cls.key_dest == key_game ) && cl.frame.client.health <= 0.0;
 }
 
 void Host_BeginFrame();

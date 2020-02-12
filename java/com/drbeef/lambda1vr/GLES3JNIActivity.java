@@ -188,6 +188,10 @@ import static android.system.Os.setenv;
 		copy_asset("/sdcard/xash/" + game + "/", "sprites/vignette.tga", true);
 		copy_asset("/sdcard/xash/valve/", "sprites/vignette.tga", true); //seems to need to be here for some people
 
+		//Menu Arrow
+		copy_asset("/sdcard/xash/" + game + "/", "sprites/pointer.tga", true);
+		copy_asset("/sdcard/xash/valve/", "sprites/pointer.tga", true);
+
 		//Copy modified weapon models - This is the base set
 		if (!(new File("/sdcard/xash/" + game + "/models/no_copy").exists()))
 		{

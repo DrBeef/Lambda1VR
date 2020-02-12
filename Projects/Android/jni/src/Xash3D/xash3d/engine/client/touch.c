@@ -1033,12 +1033,12 @@ void Touch_DrawTouchPoint()
     if( cls.key_dest == key_game )
         return;
 
-    pglColor4ub( 0, 255, 0, 255 );
-	R_DrawStretchPic( TO_SCRN_X(touch.x+0.002f),
-					  TO_SCRN_Y(touch.y+0.003f),
-					  TO_SCRN_X(0.004f),
-					  TO_SCRN_Y(0.006f),
-					  0, 0, 1, 1, cls.fillImage );
+    pglColor4ub( 0, 0, 64, 255 );
+	R_DrawStretchPic( TO_SCRN_X(touch.x),
+					  TO_SCRN_Y(touch.y),
+					  TO_SCRN_X(0.02f),
+					  TO_SCRN_Y(0.03f),
+					  0, 0, 1, 1, cls.pointerImage);
 }
 
 void Touch_DrawTexture ( float x1, float y1, float x2, float y2, int texture, byte r, byte g, byte b, byte a )

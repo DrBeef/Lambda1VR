@@ -491,6 +491,7 @@ typedef struct
 	int		tileImage;		// for draw any areas not covered by the refresh
 	int 	vignetteImage;
 	int 	scopeImage;
+	int 	pointerImage;
 	HSPRITE		hChromeSprite;		// this is a really HudSprite handle, not texnum!
 	cl_font_t		creditsFont;		// shared creditsfont
 
