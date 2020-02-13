@@ -89,8 +89,6 @@ void HandleInput_Default( ovrInputStateTrackedRemote *pDominantTrackedRemoteNew,
 	//Menu button - always on the left controller
 	handleTrackedControllerButton(&leftTrackedRemoteState_new, &leftTrackedRemoteState_old, ovrButton_Enter, K_ESCAPE);
 
-	handleDeadPlayerClick(pDominantTrackedRemoteNew, pDominantTrackedRemoteOld, domButton1);
-
 	//Menu control - Uses "touch"
 	if (useScreenLayer())
 	{
@@ -331,7 +329,8 @@ void HandleInput_Default( ovrInputStateTrackedRemote *pDominantTrackedRemoteNew,
 				  positional_movementForward);
 
 			//Jump
-			sendButtonAction("+jump", pDominantTrackedRemoteNew->Buttons & domButton2);
+			sendButtonAction("+jump", (pDominantTrackedRemoteNew->Buttons & domButton2));
+
 
 			//We need to record if we have started firing primary so that releasing trigger will stop firing, if user has pushed grip
 			//in meantime, then it wouldn't stop the gun firing and it would get stuck
@@ -440,7 +439,7 @@ void HandleInput_Default( ovrInputStateTrackedRemote *pDominantTrackedRemoteNew,
 				&& (pOffTrackedRemoteNew->Buttons & ovrButton_Joystick)) {
 
 			    if (!isScopeEngaged()) {
-                    Cvar_SetFloat("vr_lasersight", 1.0f - vr_lasersight->value);
+                    Cvar_SetFloat("vr_lasersight", (int)(vr_lasersight->value + 1) % 3);
                 }
 			    else {
                     stabiliseScope = !stabiliseScope;

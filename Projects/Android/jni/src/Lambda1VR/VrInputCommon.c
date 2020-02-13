@@ -32,16 +32,6 @@ void handleTrackedControllerButton(ovrInputStateTrackedRemote * trackedRemoteSta
     }
 }
 
-void handleDeadPlayerClick(ovrInputStateTrackedRemote *pDominantTrackedRemoteNew, ovrInputStateTrackedRemote *pDominantTrackedRemoteOld, int domButton1) {
-    if (isPlayerDead()) {
-        //Let player restart using trigger or main button
-        handleTrackedControllerButton(pDominantTrackedRemoteNew, pDominantTrackedRemoteOld,
-                                      domButton1, K_ENTER);
-        handleTrackedControllerButton(pDominantTrackedRemoteNew, pDominantTrackedRemoteOld,
-                                      ovrButton_Trigger, K_ENTER);
-    }
-}
-
 static void Matrix4x4_Transform (const matrix4x4 *in, const float v[3], float out[3])
 {
     out[0] = v[0] * (*in)[0][0] + v[1] * (*in)[0][1] + v[2] * (*in)[0][2] + (*in)[0][3];

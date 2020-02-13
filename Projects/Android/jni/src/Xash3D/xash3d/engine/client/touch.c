@@ -1033,7 +1033,7 @@ void Touch_DrawTouchPoint()
     if( cls.key_dest == key_game )
         return;
 
-    pglColor4ub( 0, 0, 64, 255 );
+    pglColor4ub( 240, 240, 240, 255 );
 	R_DrawStretchPic( TO_SCRN_X(touch.x),
 					  TO_SCRN_Y(touch.y),
 					  TO_SCRN_X(0.02f),

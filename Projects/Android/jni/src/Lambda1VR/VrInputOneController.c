@@ -49,8 +49,6 @@ void HandleInput_OneController( ovrInputStateTrackedRemote *pDominantTrackedRemo
 	//Menu button - always on the left controller - unavoidable
 	handleTrackedControllerButton(&leftTrackedRemoteState_new, &leftTrackedRemoteState_old, ovrButton_Enter, K_ESCAPE);
 
-    handleDeadPlayerClick(pDominantTrackedRemoteNew, pDominantTrackedRemoteOld, domButton1);
-
     //Menu control - Uses "touch"
 	if (useScreenLayer())
 	{
@@ -281,7 +279,7 @@ void HandleInput_OneController( ovrInputStateTrackedRemote *pDominantTrackedRemo
                 (pOffTrackedRemoteOld->Buttons & ovrButton_Joystick)
                 && (pOffTrackedRemoteNew->Buttons & ovrButton_Joystick)) {
 
-                Cvar_SetFloat("vr_lasersight", 1.0f - vr_lasersight->value);
+                Cvar_SetFloat("vr_lasersight", (int)(vr_lasersight->value + 1) % 3);
 
             }
 
