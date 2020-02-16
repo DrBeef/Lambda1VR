@@ -330,7 +330,46 @@ void HandleInput_Alt2( ovrInputStateTrackedRemote *pDominantTrackedRemoteNew, ov
 				  positional_movementForward);
 
 			//Jump
-			sendButtonAction("+jump", pOffTrackedRemoteNew->Buttons & domButton2);
+			if (vr_quick_crouchjump->value != 0.0) {
+				//Jump (and crouch if double clicked quick enough)
+				static bool quickCrouchJumped = false;
+				static double jumpTimer = 0;
+				if ((pOffTrackedRemoteNew->Buttons & offButton2) !=
+					(pOffTrackedRemoteOld->Buttons & offButton2)) {
+					if ((pOffTrackedRemoteNew->Buttons & offButton2) && jumpTimer == 0) {
+						//Jump and start timer
+						sendButtonActionSimple("+jump");
+						jumpTimer = GetTimeInMilliSeconds();
+					} else {
+						//Is jump button released?
+						if ((pOffTrackedRemoteNew->Buttons & offButton2) == 0) {
+							if (quickCrouchJumped) {
+								ducked = DUCK_NOTDUCKED;
+								sendButtonActionSimple("-duck");
+								jumpTimer = 0;
+								quickCrouchJumped = false;
+							} else {
+								sendButtonActionSimple("-jump");
+							}
+						}
+							//Jump button is therefore pushed, was it pushed quick enough to trigger duck?
+						else if (between(1, (float) (GetTimeInMilliSeconds() - jumpTimer), 300)) {
+							ducked = DUCK_BUTTON;
+							sendButtonActionSimple("+duck");
+							quickCrouchJumped = true;
+						}
+							//Nope
+						else {
+							//Just jump and reset timer
+							sendButtonActionSimple("+jump");
+							jumpTimer = GetTimeInMilliSeconds();
+						}
+					}
+				}
+			} else {
+				//Jump
+				sendButtonAction("+jump", (pDominantTrackedRemoteNew->Buttons & domButton2));
+			}
 
 			//We need to record if we have started firing primary so that releasing trigger will stop firing, if user has pushed grip
 			//in meantime, then it wouldn't stop the gun firing and it would get stuck

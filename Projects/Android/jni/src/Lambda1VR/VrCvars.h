@@ -23,6 +23,7 @@ convar_t	*vr_legacy_ladders;
 convar_t	*vr_controller_tracking_haptic;
 convar_t	*vr_highlight_actionables;
 convar_t	*vr_headtorch;
+convar_t	*vr_quick_crouchjump;
 
 //Used and updated continuously during rendering
 convar_t	*vr_stereo_side;

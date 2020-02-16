@@ -66,6 +66,7 @@ private:
     CMenuCheckBox	hmdWalkDirection;
     CMenuCheckBox	mirrorWeapons;
     CMenuCheckBox	headTorch;
+    CMenuCheckBox	quickCrouchJump;
     CMenuSlider	snapTurnAngle;
 
     CMenuTable	controllerList;
@@ -99,6 +100,10 @@ void CMenuControls::_Init( void )
     hmdWalkDirection.SetCoord( 320, 450 );
     hmdWalkDirection.LinkCvar( "vr_walkdirection" );
 
+    quickCrouchJump.SetNameAndStatus( "Quick Crouch-Jump", "Check to enable quick Crouch-Jump (by double clicking jump)" );
+    quickCrouchJump.SetCoord( 720, 450 );
+    quickCrouchJump.LinkCvar( "vr_quick_crouchjump" );
+
     mirrorWeapons.SetNameAndStatus( "Mirror Weapon Models", "Check to mirror weapon models (for left-handed play to avoid seeing missing sides)" );
     mirrorWeapons.SetCoord( 320, 510 );
     mirrorWeapons.LinkCvar( "vr_mirror_weapons" );
@@ -117,6 +122,7 @@ void CMenuControls::_Init( void )
 
     AddItem( controllerList );
     AddItem( hmdWalkDirection );
+    AddItem( quickCrouchJump );
     AddItem( mirrorWeapons );
     AddItem( headTorch );
     AddItem( snapTurnAngle );
@@ -145,6 +151,7 @@ void CMenuControls::SetConfig( )
     EngFuncs::CvarSetValue( "vr_control_scheme", mode );
 
     hmdWalkDirection.WriteCvar();
+    quickCrouchJump.WriteCvar();
     mirrorWeapons.WriteCvar();
     headTorch.WriteCvar();
     snapTurnAngle.WriteCvar();

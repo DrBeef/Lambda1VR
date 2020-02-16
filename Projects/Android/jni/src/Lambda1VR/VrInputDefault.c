@@ -328,8 +328,47 @@ void HandleInput_Default( ovrInputStateTrackedRemote *pDominantTrackedRemoteNew,
 				  positional_movementSideways,
 				  positional_movementForward);
 
-			//Jump
-			sendButtonAction("+jump", (pDominantTrackedRemoteNew->Buttons & domButton2));
+
+			if (vr_quick_crouchjump->value != 0.0) {
+				//Jump (and crouch if double clicked quick enough)
+				static bool quickCrouchJumped = false;
+				static double jumpTimer = 0;
+				if ((pDominantTrackedRemoteNew->Buttons & domButton2) !=
+					(pDominantTrackedRemoteOld->Buttons & domButton2)) {
+					if ((pDominantTrackedRemoteNew->Buttons & domButton2) && jumpTimer == 0) {
+						//Jump and start timer
+						sendButtonActionSimple("+jump");
+						jumpTimer = GetTimeInMilliSeconds();
+					} else {
+						//Is jump button released?
+						if ((pDominantTrackedRemoteNew->Buttons & domButton2) == 0) {
+							if (quickCrouchJumped) {
+								ducked = DUCK_NOTDUCKED;
+								sendButtonActionSimple("-duck");
+								jumpTimer = 0;
+								quickCrouchJumped = false;
+							} else {
+								sendButtonActionSimple("-jump");
+							}
+						}
+							//Jump button is therefore pushed, was it pushed quick enough to trigger duck?
+						else if (between(1, (float) (GetTimeInMilliSeconds() - jumpTimer), 300)) {
+							ducked = DUCK_BUTTON;
+							sendButtonActionSimple("+duck");
+							quickCrouchJumped = true;
+						}
+							//Nope
+						else {
+							//Just jump and reset timer
+							sendButtonActionSimple("+jump");
+							jumpTimer = GetTimeInMilliSeconds();
+						}
+					}
+				}
+			} else {
+				//Jump
+				sendButtonAction("+jump", (pDominantTrackedRemoteNew->Buttons & domButton2));
+			}
 
 
 			//We need to record if we have started firing primary so that releasing trigger will stop firing, if user has pushed grip
@@ -364,8 +403,7 @@ void HandleInput_Default( ovrInputStateTrackedRemote *pDominantTrackedRemoteNew,
 			}
 
 			//Duck
-			if ((pDominantTrackedRemoteNew->Buttons & domButton1) !=
-				(pDominantTrackedRemoteOld->Buttons & domButton1) &&
+			if ((pDominantTrackedRemoteNew->Buttons & domButton1) != (pDominantTrackedRemoteOld->Buttons & domButton1) &&
 				ducked != DUCK_CROUCHED) {
 				ducked = (pDominantTrackedRemoteNew->Buttons & domButton1) ? DUCK_BUTTON : DUCK_NOTDUCKED;
 				sendButtonAction("+duck", (pDominantTrackedRemoteNew->Buttons & domButton1));
