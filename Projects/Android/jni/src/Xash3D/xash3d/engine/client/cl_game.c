@@ -3838,7 +3838,6 @@ static efx_api_t gEfxApi =
 	(void*)CL_DecalIndexFromName,
 	CL_DecalShoot,
 	CL_AttachTentToPlayer,
-	CL_AttachFlashlightEntityToPlayer,
 	CL_KillAttachedTents,
 	(void*)CL_BeamCirclePoints,
 	(void*)CL_BeamEntPoint,

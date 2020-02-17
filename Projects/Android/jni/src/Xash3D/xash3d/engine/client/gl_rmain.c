@@ -1205,6 +1205,7 @@ void R_DrawEntitiesOnList( void )
 	pglDisable( GL_BLEND );	// Trinity Render issues
 
 	R_DrawViewModel();
+	R_DrawFlashlightModel();
 
 	CL_ExtraUpdate();
 }

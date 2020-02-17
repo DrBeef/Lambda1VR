@@ -162,7 +162,6 @@ void V_SetupRefDef( void )
 
 	//Flashlight
 	convertFromVRtoHL(flashlightoffset, cl.refdef.flashlight.org);
-	cl.refdef.flashlight.org[2] += cl.refdef.viewheight[2]; // Have to do this for some reason..
 	VectorCopy(flashlightangles, cl.refdef.flashlight.angles.adjusted);
 #endif
 }

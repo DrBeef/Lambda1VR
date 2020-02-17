@@ -3793,6 +3793,64 @@ void R_DrawViewModel( void )
 }
 
 /*
+=================
+R_DrawFlashlightModel
+=================
+*/
+extern convar_t	*vr_flashlight_model;
+extern convar_t	*vr_headtorch;
+void R_DrawFlashlightModel( void )
+{
+    if( RI.refdef.onlyClientDraw || r_drawviewmodel->integer == 0 || bScopeEngaged())
+        return;
+
+    // ignore in thirdperson, camera view or client is died
+    if( cl.thirdperson || cl.refdef.health <= 0 || cl.refdef.viewentity != ( cl.playernum + 1 ))
+        return;
+
+    if( RI.params & RP_NONVIEWERREF )
+        return;
+
+    // draw flashlight model if required
+    if( cl.frame.client.flags & FL_HAS_FLASHLIGHT  &&
+        cl.refdef.weapon.flags != 1 && // Make sure weapon isn't being stabilised
+        vr_flashlight_model->integer &&
+        vr_headtorch->value == 0.0f) {
+
+        clgame.flashlightEntity.model = Mod_ForName("models/v_torch.mdl", false);
+        if (!clgame.flashlightEntity.model) {
+            MsgDev(D_INFO, "No model for flashlight!\n");
+            return;
+        }
+
+        VectorAdd(cl.refdef.vieworg, cl.refdef.flashlight.org, clgame.flashlightEntity.origin);
+        VectorCopy(cl.refdef.flashlight.angles.adjusted, clgame.flashlightEntity.curstate.angles);
+        clgame.flashlightEntity.curstate.angles[0] *= -1.0f;
+
+        RI.currententity = &clgame.flashlightEntity;
+        RI.currentmodel = clgame.flashlightEntity.model;
+        RI.currententity->curstate.renderamt = 192;
+
+        // hack the depth range to prevent flashlight model from poking into walls
+        pglDepthRange(gldepthmin, gldepthmin + 0.3f * (gldepthmax - gldepthmin));
+
+        RI.currententity->curstate.scale = 1.0f;
+        RI.currententity->curstate.frame = 0;
+        RI.currententity->curstate.framerate = 1.0f;
+        RI.currententity->curstate.animtime = 0;
+        RI.currententity->curstate.sequence = 0;
+
+        pStudioDraw->StudioDrawModel(STUDIO_RENDER);
+
+        // restore depth range
+        pglDepthRange(gldepthmin, gldepthmax);
+
+        RI.currententity = NULL;
+        RI.currentmodel = NULL;
+    }
+}
+
+/*
 ====================
 R_StudioLoadTexture
 

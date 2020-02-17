@@ -659,68 +659,6 @@ void GAME_EXPORT CL_AttachTentToPlayer( int client, int modelIndex, float zoffse
 
 /*
 ==============
-CL_AttachFlashlightEntityToPlayer
-
-Attaches flashlight entity to player
-==============
-*/
-void GAME_EXPORT CL_AttachFlashlightEntityToPlayer( const char* name, vec3_t position, vec3_t angles)
-{
-	TEMPENTITY	*pFlashlight = NULL;
-
-	// ignore in thirdperson, camera view or client is died
-	if( cl.thirdperson || cl.refdef.health <= 0 || cl.refdef.viewentity != ( cl.playernum + 1 ))
-		return;
-
-	cl_entity_t *pClient;
-	pClient = CL_GetEntityByIndex(cl.playernum + 1);
-	if (!pClient) {
-		MsgDev(D_INFO, "Couldn't get ClientEntity for %i\n", 1);
-		return;
-	}
-
-    vec3_t flashlightLocation;
-    VectorAdd(pClient->origin, position, flashlightLocation);
-
-    model_t *pModel = Mod_ForName(name, false);
-    if (!pModel) {
-        MsgDev(D_INFO, "No model %s!\n", name);
-        return;
-    }
-
-    pFlashlight = CL_TempEntAllocHigh(flashlightLocation, pModel);
-    if (!pFlashlight) {
-        MsgDev(D_INFO, "No temp ent.\n");
-        return;
-    }
-
-	//If flashlight is on, then do something..  actually.. maybe not
-	/*if (pClient->curstate.effects & EF_DIMLIGHT)
-	{
-        pFlashlight->entity.curstate.renderfx = kRenderFxGlowShell;
-	} else*/
-	{
-        pFlashlight->entity.curstate.renderfx = kRenderFxNone;
-	}
-
-	pFlashlight->entity.curstate.rendermode = kRenderNormal;
-	pFlashlight->entity.curstate.renderamt = pFlashlight->entity.baseline.renderamt = 192;
-
-	pFlashlight->clientIndex = cl.playernum + 1;
-
-	VectorCopy(angles, pFlashlight->entity.angles);
-	pFlashlight->entity.angles[0] *= -1.0f;
-
-	//Die immediately on next frame
-	pFlashlight->die = cl.time;
-
-	// no animation support for attached clientside studio models.
-	pFlashlight->frameMax = 0;
-	pFlashlight->entity.curstate.frame = 0;
-}
-
-/*
-==============
 CL_KillAttachedTents
 
 Detach entity from player

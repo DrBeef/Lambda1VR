@@ -414,6 +414,7 @@ typedef struct
 
 	efrag_t              *free_efrags;               // linked efrags
 	cl_entity_t          viewent;                    // viewmodel
+	cl_entity_t 		 flashlightEntity;			 // flashlight
 } clgame_static_t;
 
 typedef struct
