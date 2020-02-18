@@ -311,6 +311,7 @@ import static android.system.Os.setenv;
 			copy_asset("/sdcard/xash/" + game + "/", "sound/weapons/cbar_miss1.wav", true);
 
 			copy_asset("/sdcard/xash/" + game + "/", "models/v_torch.mdl", true);
+			copy_asset("/sdcard/xash/" + game + "/", "models/v_hand.mdl", true);
 		}
 
 		//Copy Opposing Force specific models

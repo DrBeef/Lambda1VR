@@ -3792,6 +3792,90 @@ void R_DrawViewModel( void )
 	RI.currentmodel = NULL;
 }
 
+extern convar_t	*vr_hand_model;
+extern convar_t	*vr_control_scheme;
+
+void R_DrawHandModel( int hand )
+{
+	if( RI.refdef.onlyClientDraw || r_drawviewmodel->integer == 0 || vr_hand_model->integer == 0 || bScopeEngaged())
+		return;
+
+	// ignore in thirdperson, camera view or client is died
+	if( cl.thirdperson || cl.refdef.health <= 0 || cl.refdef.viewentity != ( cl.playernum + 1 ))
+		return;
+
+	if( RI.params & RP_NONVIEWERREF )
+		return;
+
+	//Check whether we have weapon or flashlight
+	if ((hand == 0 && (cl.frame.client.flags & FL_HAS_FLASHLIGHT  || cl.refdef.weapon.flags == 1)) ||
+            (hand == 1 && clgame.viewent.model))
+        return;
+
+    clgame.handent.model = Mod_ForName("models/v_hand.mdl", false);
+    if (!clgame.handent.model) {
+        return;
+    }
+
+	RI.currententity = &clgame.handent;
+	RI.currentmodel = RI.currententity->model;
+	RI.currententity->curstate.renderamt = 192;
+	RI.currententity->curstate.renderfx = kRenderFxNoDissipation;
+	RI.currententity->curstate.rendermode = kRenderGlow;
+
+	//If left hand, set mirror weapons cvar
+	float mirror = vr_mirror_weapons->value;
+	if (hand == 0)
+    {
+        Cvar_Set2("vr_mirror_weapons", "1", true);
+    }
+
+	g_iBackFaceCull = hand == 0;
+
+	RI.currententity->curstate.scale = 1.0f;
+	RI.currententity->curstate.frame = 0;
+	RI.currententity->curstate.framerate = 1.0f;
+	RI.currententity->curstate.animtime = cl.time;
+	RI.currententity->curstate.sequence = 0;
+
+	int off_hand = (vr_control_scheme->integer >= 10) ? 1 : 0;
+	if (hand == off_hand)
+    {
+	    //Off hand
+	    VectorAdd(cl.refdef.vieworg, cl.refdef.flashlight.org, clgame.handent.origin);
+        VectorCopy(cl.refdef.flashlight.angles.adjusted, clgame.handent.curstate.angles);
+        clgame.handent.curstate.angles[0] *= -1.0f;
+    } else
+    {
+	    //Dominant hand
+        VectorAdd(cl.refdef.vieworg, cl.refdef.weapon.org, clgame.handent.origin);
+        VectorCopy(cl.refdef.weapon.angles.adjusted, clgame.handent.curstate.angles);
+    }
+
+	//Optional culling for the viewmodel
+    clgame.ds.cullMode = GL_NONE;
+    pglDisable(GL_CULL_FACE);
+
+	pStudioDraw->StudioDrawModel( STUDIO_RENDER | STUDIO_VIEWMODEL );
+
+    clgame.ds.cullMode = GL_FRONT;
+    pglEnable(GL_CULL_FACE);
+
+    if (hand == 0)
+    {
+        //restore cvar
+        Cvar_Set2("vr_mirror_weapons", mirror != 0.0 ? "1" : "0", true);
+    }
+
+
+	// backface culling for left-handed weapons
+	g_iBackFaceCull = false; // GL_FrontFace is called in RestoreStudioRenderer
+
+	RI.currententity = NULL;
+	RI.currentmodel = NULL;
+}
+
+
 /*
 =================
 R_DrawFlashlightModel
@@ -3817,18 +3901,18 @@ void R_DrawFlashlightModel( void )
         vr_flashlight_model->integer &&
         vr_headtorch->value == 0.0f) {
 
-        clgame.flashlightEntity.model = Mod_ForName("models/v_torch.mdl", false);
-        if (!clgame.flashlightEntity.model) {
+        clgame.flashlightent.model = Mod_ForName("models/v_torch.mdl", false);
+        if (!clgame.flashlightent.model) {
             MsgDev(D_INFO, "No model for flashlight!\n");
             return;
         }
 
-        VectorAdd(cl.refdef.vieworg, cl.refdef.flashlight.org, clgame.flashlightEntity.origin);
-        VectorCopy(cl.refdef.flashlight.angles.adjusted, clgame.flashlightEntity.curstate.angles);
-        clgame.flashlightEntity.curstate.angles[0] *= -1.0f;
+        VectorAdd(cl.refdef.vieworg, cl.refdef.flashlight.org, clgame.flashlightent.origin);
+        VectorCopy(cl.refdef.flashlight.angles.adjusted, clgame.flashlightent.curstate.angles);
+        clgame.flashlightent.curstate.angles[0] *= -1.0f;
 
-        RI.currententity = &clgame.flashlightEntity;
-        RI.currentmodel = clgame.flashlightEntity.model;
+        RI.currententity = &clgame.flashlightent;
+        RI.currentmodel = clgame.flashlightent.model;
         RI.currententity->curstate.renderamt = 192;
 
         // hack the depth range to prevent flashlight model from poking into walls

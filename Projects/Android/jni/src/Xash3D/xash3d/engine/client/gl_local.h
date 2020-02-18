@@ -495,6 +495,7 @@ void GL_SetRenderMode( int mode );
 void R_RunViewmodelEvents( void );
 void R_DrawViewModel( void );
 void R_DrawFlashlightModel( void );
+void R_DrawHandModel( int hand ); // 0 = left
 int R_GetSpriteTexture( const struct model_s *m_pSpriteModel, int frame );
 void R_DecalShoot( int textureIndex, int entityIndex, int modelIndex, vec3_t pos, int flags, vec3_t saxis, float scale );
 void R_RemoveEfrags( struct cl_entity_s *ent );

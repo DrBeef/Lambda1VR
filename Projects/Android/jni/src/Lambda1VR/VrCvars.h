@@ -16,6 +16,7 @@ convar_t	*vr_control_scheme;
 convar_t	*vr_enable_crouching;
 convar_t	*vr_height_adjust;
 convar_t	*vr_flashlight_model;
+convar_t	*vr_hand_model;
 convar_t	*vr_mirror_weapons;
 convar_t	*vr_weapon_backface_culling;
 convar_t	*vr_comfort_mask;

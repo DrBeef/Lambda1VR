@@ -66,6 +66,7 @@ private:
     CMenuCheckBox	hmdWalkDirection;
     CMenuCheckBox	mirrorWeapons;
     CMenuCheckBox	headTorch;
+    CMenuCheckBox	handModels;
     CMenuCheckBox	quickCrouchJump;
     CMenuSlider	snapTurnAngle;
 
@@ -108,6 +109,10 @@ void CMenuControls::_Init( void )
     mirrorWeapons.SetCoord( 320, 510 );
     mirrorWeapons.LinkCvar( "vr_mirror_weapons" );
 
+    handModels.SetNameAndStatus( "Draw Hand Models", "Check to enable controllers rendered as hand models" );
+    handModels.SetCoord( 720, 510 );
+    handModels.LinkCvar( "vr_hand_model" );
+
     headTorch.SetNameAndStatus( "Head-based Torch", "Check to enable head-torch (Half-life & Blueshift only)" );
     headTorch.SetCoord( 320, 570 );
     headTorch.LinkCvar( "vr_headtorch" );
@@ -125,6 +130,7 @@ void CMenuControls::_Init( void )
     AddItem( quickCrouchJump );
     AddItem( mirrorWeapons );
     AddItem( headTorch );
+    AddItem( handModels );
     AddItem( snapTurnAngle );
 
 }
@@ -154,6 +160,7 @@ void CMenuControls::SetConfig( )
     quickCrouchJump.WriteCvar();
     mirrorWeapons.WriteCvar();
     headTorch.WriteCvar();
+    handModels.WriteCvar();
     snapTurnAngle.WriteCvar();
 
     // We're done now, just close

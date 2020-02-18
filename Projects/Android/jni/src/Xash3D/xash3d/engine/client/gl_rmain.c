@@ -1204,6 +1204,9 @@ void R_DrawEntitiesOnList( void )
 	pglDepthMask( GL_TRUE );
 	pglDisable( GL_BLEND );	// Trinity Render issues
 
+    R_DrawHandModel(0); // left
+    R_DrawHandModel(1); // right
+
 	R_DrawViewModel();
 	R_DrawFlashlightModel();
 
