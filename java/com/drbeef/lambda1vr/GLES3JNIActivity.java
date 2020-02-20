@@ -406,6 +406,16 @@ import static android.system.Os.setenv;
 			copy_asset("/sdcard/xash/", "gearbox/sound/weapons/displacer_start.wav", true);
 			copy_asset("/sdcard/xash/", "gearbox/sound/weapons/displacer_teleport.wav", true);
 			copy_asset("/sdcard/xash/", "gearbox/sound/weapons/displacer_teleport_player.wav", true);
+
+			//Hand
+			copy_asset("/sdcard/xash/", "gearbox/models/v_hand.mdl", true);
+		}
+
+		//Copy Blue Shift specific models
+		if (game.equalsIgnoreCase("bshift") &&
+				!(new File("/sdcard/xash/" + game + "/models/no_copy").exists()))
+		{
+			copy_asset("/sdcard/xash/", "bshift/models/v_hand.mdl", true);
 		}
 
 		//Set default environment
