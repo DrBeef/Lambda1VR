@@ -1071,30 +1071,6 @@ static void ovrApp_Clear( ovrApp * app )
 	ovrRenderer_Clear( &app->Renderer );
 }
 
-static void ovrApp_PushBlackFinal( ovrApp * app )
-{
-	int frameFlags = 0;
-	frameFlags |= VRAPI_FRAME_FLAG_FLUSH | VRAPI_FRAME_FLAG_FINAL;
-
-	ovrLayerProjection2 layer = vrapi_DefaultLayerBlackProjection2();
-	layer.Header.Flags |= VRAPI_FRAME_LAYER_FLAG_INHIBIT_SRGB_FRAMEBUFFER;
-
-	const ovrLayerHeader2 * layers[] =
-	{
-		&layer.Header
-	};
-
-	ovrSubmitFrameDescription2 frameDesc = {};
-	frameDesc.Flags = frameFlags;
-	frameDesc.SwapInterval = 1;
-	frameDesc.FrameIndex = app->FrameIndex;
-	frameDesc.DisplayTime = app->DisplayTime;
-	frameDesc.LayerCount = 1;
-	frameDesc.Layers = layers;
-
-	vrapi_SubmitFrame2( app->Ovr, &frameDesc );
-}
-
 static void ovrApp_HandleVrModeChanges( ovrApp * app )
 {
 	if ( app->Resumed != false && app->NativeWindow != NULL )
@@ -1758,6 +1734,8 @@ void * AppThreadFunction( void * parm )
 				}
 			}
 
+            ovrRenderer * renderer = NULL;
+
 			ovrSubmitFrameDescription2 frameDesc = { 0 };
 			if (!useScreenLayer()) {
 
@@ -1782,19 +1760,12 @@ void * AppThreadFunction( void * parm )
                 }
                 layer.Header.Flags |= VRAPI_FRAME_LAYER_FLAG_CHROMATIC_ABERRATION_CORRECTION;
 
-                //Call the game drawing code to populate the cylinder layer texture
-                RenderFrame(&appState.Renderer,
-                            &appState.Java,
-                            &tracking,
-                            appState.Ovr);
-
                 // Set up the description for this frame.
                 const ovrLayerHeader2 *layers[] =
                         {
                                 &layer.Header
                         };
 
-                ovrSubmitFrameDescription2 frameDesc = {};
                 frameDesc.Flags = 0;
                 frameDesc.SwapInterval = appState.SwapInterval;
                 frameDesc.FrameIndex = appState.FrameIndex;
@@ -1802,8 +1773,7 @@ void * AppThreadFunction( void * parm )
                 frameDesc.LayerCount = 1;
                 frameDesc.Layers = layers;
 
-                // Hand over the eye images to the time warp.
-                vrapi_SubmitFrame2(appState.Ovr, &frameDesc);
+                renderer = &appState.Renderer;
 
 			} else {
 				// Set-up the compositor layers for this frame.
@@ -1812,21 +1782,10 @@ void * AppThreadFunction( void * parm )
 				memset( appState.Layers, 0, sizeof( ovrLayer_Union2 ) * ovrMaxLayerCount );
 				appState.LayerCount = 0;
 
-				// Render the world-view layer (simple ground plane) - this doesn't work.. it borks the game rendering
-//				appState.Layers[appState.LayerCount++].Projection =
-//						ovrRenderer_RenderGroundPlaneToEyeBuffer( &appState.Renderer, &appState.Java,
-//																  &appState.Scene, &tracking );
-
 				// Add a simple cylindrical layer
 				appState.Layers[appState.LayerCount++].Cylinder =
 						BuildCylinderLayer( &appState.Scene.CylinderRenderer,
 											appState.Scene.CylinderWidth, appState.Scene.CylinderHeight, &tracking, radians(playerYaw) );
-
-				//Call the game drawing code to populate the cylinder layer texture
-				RenderFrame(&appState.Scene.CylinderRenderer,
-										&appState.Java,
-										&tracking,
-										appState.Ovr);
 
 
 				// Compose the layers for this frame.
@@ -1844,9 +1803,17 @@ void * AppThreadFunction( void * parm )
 				frameDesc.LayerCount = appState.LayerCount;
 				frameDesc.Layers = layerHeaders;
 
-                // Hand over the eye images to the time warp.
-                vrapi_SubmitFrame2(appState.Ovr, &frameDesc);
+                renderer = &appState.Scene.CylinderRenderer;
             }
+
+            //Call the game drawing code to populate the cylinder layer texture
+            RenderFrame(renderer,
+                    &appState.Java,
+                    &tracking,
+                    appState.Ovr);
+
+            // Hand over the eye images to the time warp.
+            vrapi_SubmitFrame2(appState.Ovr, &frameDesc);
         }
         else
 		{

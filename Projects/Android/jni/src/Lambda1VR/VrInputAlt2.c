@@ -368,7 +368,7 @@ void HandleInput_Alt2( ovrInputStateTrackedRemote *pDominantTrackedRemoteNew, ov
 				}
 			} else {
 				//Jump
-				sendButtonAction("+jump", (pDominantTrackedRemoteNew->Buttons & domButton2));
+				sendButtonAction("+jump", (pOffTrackedRemoteNew->Buttons & offButton2));
 			}
 
 			//We need to record if we have started firing primary so that releasing trigger will stop firing, if user has pushed grip
