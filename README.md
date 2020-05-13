@@ -1,3 +1,5 @@
+![Lambda1VR Banner](https://www.lambda1vr.com/img/banner2.jpg)
+
 # Lambda1VR
 
 Lambda1VR is a port / mod of the Xash3D-FWGS Half-Life Engine for the Oculus Quest adding 6DoF weapon support and OpenGLES2.0 rendering.
