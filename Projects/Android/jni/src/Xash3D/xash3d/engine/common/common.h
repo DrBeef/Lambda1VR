@@ -185,7 +185,6 @@ typedef enum
 #define VR_EYE_RIGHT 		1
 #define VR_EYE_LEFT_MONO 		2
 #define VR_EYE_RIGHT_MONO 		3
-#define VR_FOV				104.0f
 #endif
 
 #define MAX_FRAMETIME	0.1

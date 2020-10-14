@@ -11,7 +11,7 @@ convar_t	*vr_crowbar_pitchadjust;
 convar_t	*vr_weapon_recoil;
 convar_t	*vr_weapon_stabilised;
 convar_t	*vr_lasersight;
-convar_t	*vr_fov;
+convar_t	*vr_fixed_fov;
 convar_t	*vr_control_scheme;
 convar_t	*vr_enable_crouching;
 convar_t	*vr_height_adjust;

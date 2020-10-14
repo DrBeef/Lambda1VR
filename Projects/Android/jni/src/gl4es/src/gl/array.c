@@ -446,7 +446,7 @@ GLvoid *copy_gl_pointer_color_bgra(const void *ptr, GLint stride, GLsizei width,
         #ifdef __ARM_NEON__
         int lsrc = *(int*)src;
         lsrc = (lsrc&0xff00ff00) | ((lsrc&0x00ff0000)>>16) | ((lsrc&0x000000ff)<<16);
-        asm volatile (
+        __asm volatile (
         "vmov           s12, %1              \n\t"   // because you cannot vmovl.u8 d6, s11
         "vmovl.u8       q3, d6               \n\t"   // Expand to 16-bit (so unsetuped s13 is expanded in d7)
         "vmovl.u16      q3, d6               \n\t"   // Expand to 32-bit, ignoring expanded d7

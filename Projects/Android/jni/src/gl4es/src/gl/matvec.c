@@ -9,7 +9,7 @@ float FASTMATH dot(const float *a, const float *b) {
 float FASTMATH dot4(const float *a, const float *b) {
 #ifdef __ARM_NEON__
     register float ret;
-    asm volatile (
+    __asm volatile (
     "vld1.f32 {d0-d1}, [%1]        \n" //q0 = a(0..3)
     "vld1.f32 {d2-d3}, [%2]        \n" //q1 = b(0..3)
     "vmul.f32 q0, q0, q1           \n" //q0 = a(0)*b(0),a(1)*b(1),a(2)*b(2),a(3)*b(3)
@@ -35,7 +35,7 @@ float cross3(const float *a, const float *b, float* c) {
 void matrix_vector(const float *a, const float *b, float *c) {
 #ifdef __ARM_NEON__
     const float* a1 = a+8;
-    asm volatile (
+    __asm volatile (
     "vld4.f32 {d0,d2,d4,d6}, [%1]        \n" 
     "vld4.f32 {d1,d3,d5,d7}, [%2]        \n" // q0-q3 = a(0,4,8,12/1,5,9,13/2,6,10,14/3,7,11,15)
     "vld1.f32 {q4}, [%3]       \n" // q4 = b
@@ -60,7 +60,7 @@ void vector_matrix(const float *a, const float *b, float *c) {
     const float* b2=b+4;
     const float* b3=b+8;
     const float* b4=b+12;
-    asm volatile (
+    __asm volatile (
     "vld1.f32 {q0}, [%1]        \n" // %q0 = a(0..3)
     "vld1.f32 {q1}, [%2]        \n" // %q1 = b(0..3)
     "vmul.f32 q1, q1, d0[0]     \n" // %q1 = b(0..3)*a[0]
@@ -88,7 +88,7 @@ void vector3_matrix(const float *a, const float *b, float *c) {
     const float* b2=b+4;
     const float* b3=b+8;
     const float* b4=b+12;
-    asm volatile (
+    __asm volatile (
     //"vld1.f32 {q0}, [%1]        \n" // %q0 = a(0..2)
     "vld1.32  {d0}, [%1]        \n"
     "flds     s2, [%1, #8]      \n"
@@ -127,7 +127,7 @@ void vector3_matrix3(const float *a, const float *b, float *c) {
 
 void vector_normalize(float *a) {
 #ifdef __ARM_NEON__
-        asm volatile (
+        __asm volatile (
         "vld1.32                {d4}, [%0]                      \n\t"   //d4={x0,y0}
         "flds                   s10, [%0, #8]                   \n\t"   //d5[0]={z0}
         "vsub.f32               s11, s11, s11                   \n\t"
@@ -162,7 +162,7 @@ void vector_normalize(float *a) {
 
 void vector4_normalize(float *a) {
 #ifdef __ARM_NEON__
-        asm volatile (
+        __asm volatile (
         "vld1.32                {q2}, [%0]                      \n\t"   //q2={x0,y0,z0,00}
 
         "vmul.f32               d0, d4, d4                      \n\t"   //d0= d4*d4
@@ -199,7 +199,7 @@ void FASTMATH matrix_transpose(const float *a, float *b) {
 #ifdef __ARM_NEON__
    const float* a1 = a+8;
 	float* b1=b+8;
-    asm volatile (
+    __asm volatile (
     "vld4.f32 {d0,d2,d4,d6}, [%1]        \n" 
     "vld4.f32 {d1,d3,d5,d7}, [%2]        \n" // %q0-%q3 = a(0,4,8,12/1,5,9,13/2,6,10,14/3,7,11,15)
     "vst1.f32 {d0-d3}, [%0]        \n"
@@ -263,7 +263,7 @@ void matrix_mul(const float *a, const float *b, float *c) {
     const float* a1 = a+8;
 	const float* b1=b+8;
     float* c1=c+8;
-    asm volatile (
+    __asm volatile (
     "vld1.32  {d16-d19}, [%2]       \n" 
     "vld1.32  {d20-d23}, [%3]       \n"
     "vld1.32  {d0-d3}, [%4]         \n"

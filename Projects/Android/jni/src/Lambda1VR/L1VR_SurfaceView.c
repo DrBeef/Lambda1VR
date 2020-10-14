@@ -906,7 +906,7 @@ bool isMultiplayer()
 
 bool isScopeEngaged()
 {
-	return (cl.scr_fov != 0 &&	cl.scr_fov  < VR_FOV);
+	return (cl.scr_fov != 0 &&	cl.scr_fov  < vrFOV);
 }
 
 bool isPlayerDead()
@@ -1421,7 +1421,11 @@ void VR_Init()
     vr_weapon_recoil = Cvar_Get( "vr_weapon_recoil", "0", CVAR_ARCHIVE, "Enables weapon recoil in VR, default is disabled, warning could make you sick" );
 	vr_weapon_stabilised = Cvar_Get( "vr_weapon_stabilised", "0", CVAR_READ_ONLY, "Whether user has engaged weapon stabilisation or not" );
     vr_lasersight = Cvar_Get( "vr_lasersight", "0", CVAR_ARCHIVE, "Enables laser-sight" );
-    vr_fov = Cvar_Get( "vr_fov", "104", CVAR_ARCHIVE, "FOV for Lambda1VR - 104 is correct, everything else is wrong" );
+
+    char buffer[32];
+    sprintf(buffer, "%i", (int)vrFOV);
+    vr_fixed_fov = Cvar_Get( "vr_fixed_fov", buffer, CVAR_ARCHIVE, "FOV for Lambda1VR" );
+
 	vr_control_scheme = Cvar_Get( "vr_control_scheme", "0", CVAR_ARCHIVE, "Controller Layout scheme" );
 	vr_enable_crouching = Cvar_Get( "vr_enable_crouching", "0.85", CVAR_ARCHIVE, "To enable real-world crouching trigger, set this to a value that multiplied by the user's height will trigger crouch mechanic" );
     vr_height_adjust = Cvar_Get( "vr_height_adjust", "0.0", CVAR_ARCHIVE, "Additional height adjustment for in-game player (in metres)" );
