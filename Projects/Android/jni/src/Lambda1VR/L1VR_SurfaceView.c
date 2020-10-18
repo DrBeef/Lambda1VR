@@ -84,8 +84,6 @@ int GPU_LEVEL			= 3;
 int NUM_MULTI_SAMPLES	= 4;
 float SS_MULTIPLIER    = 1.25f;
 
-vec2_t cylinderSize = {1280, 720};
-
 float radians(float deg) {
 	return (deg * M_PI) / 180.0;
 }
@@ -718,7 +716,7 @@ void ovrRenderer_Create( int width, int height, ovrRenderer * renderer, const ov
 	renderer->NumBuffers = VRAPI_FRAME_LAYER_EYE_MAX;
 
 	//Now using a symmetrical render target, based on the horizontal FOV
-    vrFOV = vrapi_GetSystemPropertyInt( java, VRAPI_SYS_PROP_SUGGESTED_EYE_FOV_DEGREES_X);
+    vrFOV = vrapi_GetSystemPropertyInt( java, VRAPI_SYS_PROP_SUGGESTED_EYE_FOV_DEGREES_Y);
 
 	// Create the render Textures.
 	for ( int eye = 0; eye < VRAPI_FRAME_LAYER_EYE_MAX; eye++ )
@@ -1351,14 +1349,8 @@ void R_ChangeDisplaySettings( int width, int height, qboolean fullscreen );
 
 void Android_GetScreenRes(int *width, int *height)
 {
-    if (useScreenLayer())
-    {
-        *width = cylinderSize[0];
-        *height = cylinderSize[1];
-    } else {
-        *width = m_width;
-        *height = m_height;
-    }
+	*width = m_width;
+	*height = m_height;
 }
 
 void Android_MessageBox(const char *title, const char *text)
@@ -1423,8 +1415,8 @@ void VR_Init()
     vr_lasersight = Cvar_Get( "vr_lasersight", "0", CVAR_ARCHIVE, "Enables laser-sight" );
 
     char buffer[32];
-    sprintf(buffer, "%i", (int)vrFOV);
-    vr_fixed_fov = Cvar_Get( "vr_fixed_fov", buffer, CVAR_ARCHIVE, "FOV for Lambda1VR" );
+    sprintf(buffer, "%d", (int)vrFOV);
+    vr_quest_fov = Cvar_Get("vr_quest_fov", buffer, CVAR_LATCH, "FOV for Lambda1VR" );
 
 	vr_control_scheme = Cvar_Get( "vr_control_scheme", "0", CVAR_ARCHIVE, "Controller Layout scheme" );
 	vr_enable_crouching = Cvar_Get( "vr_enable_crouching", "0.85", CVAR_ARCHIVE, "To enable real-world crouching trigger, set this to a value that multiplied by the user's height will trigger crouch mechanic" );
@@ -1580,7 +1572,7 @@ void * AppThreadFunction( void * parm )
 		// The scene is created here to be able to show a loading icon.
 		if ( !ovrScene_IsCreated( &appState.Scene ) )
 		{
-			ovrScene_Create( cylinderSize[0], cylinderSize[1], &appState.Scene, &java );
+			ovrScene_Create( m_width, m_height, &appState.Scene, &java );
 		}
 
         // This is the only place the frame index is incremented, right before
@@ -1728,14 +1720,7 @@ void * AppThreadFunction( void * parm )
 			if (usingScreenLayer != useScreenLayer())
 			{
                 usingScreenLayer = useScreenLayer();
-				if (usingScreenLayer)
-				{
-					R_ChangeDisplaySettings(cylinderSize[0], cylinderSize[1], true);
-				}
-				else
-				{
-					R_ChangeDisplaySettings(m_width, m_height, false);
-				}
+				R_ChangeDisplaySettings(m_width, m_height, false);
 			}
 
 			ovrSubmitFrameDescription2 frameDesc = { 0 };
