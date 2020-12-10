@@ -3,7 +3,7 @@
 #define VRCOMMON_H
 
 #include <xash3d_types.h>
-#include <VrApi_Ext.h>
+
 #include <VrApi_Input.h>
 
 #include <android/log.h>
