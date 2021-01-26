@@ -309,7 +309,8 @@ void HandleInput_Default( ovrInputStateTrackedRemote *pDominantTrackedRemoteNew,
 		{
 			//This section corrects for the fact that the controller actually controls direction of movement, but we want to move relative to the direction the
 			//player is facing for positional tracking
-			float multiplier = vr_positional_factor->value / (cl_forwardspeed->value *
+			float factor = (hmdType == VRAPI_DEVICE_TYPE_OCULUSQUEST2) ? ( vr_positional_factor->value * 1.25F ) : vr_positional_factor->value;
+			float multiplier = factor / (cl_forwardspeed->value *
 					((pOffTrackedRemoteNew->Buttons & ovrButton_Trigger) ? cl_movespeedkey->value : 1.0f));
 
 			//If player is ducked then multiply by 3 otherwise positional tracking feels very wrong

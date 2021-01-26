@@ -26,6 +26,8 @@ float positional_movementSideways;
 float positional_movementForward;
 float snapTurn;
 
+int hmdType;
+
 void sendButtonAction(const char* action, long buttonDown);
 void sendButtonActionSimple(const char* action);
 

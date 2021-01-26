@@ -1476,8 +1476,10 @@ void * AppThreadFunction( void * parm )
     m_width=vrapi_GetSystemPropertyInt( &java, VRAPI_SYS_PROP_SUGGESTED_EYE_TEXTURE_WIDTH ) * SS_MULTIPLIER;
     m_height=m_width;
 
+    hmdType = vrapi_GetSystemPropertyInt(&java, VRAPI_SYS_PROP_DEVICE_TYPE);
 
-	ovrEgl_CreateContext( &appState.Egl, NULL );
+
+    ovrEgl_CreateContext( &appState.Egl, NULL );
 
 	EglInitExtensions();
 
@@ -1645,7 +1647,7 @@ void * AppThreadFunction( void * parm )
 #endif
 
             //Set 90hz mode for Quest 2
-            if (vrapi_GetSystemPropertyInt(&java, VRAPI_SYS_PROP_DEVICE_TYPE) == VRAPI_DEVICE_TYPE_OCULUSQUEST2) {
+            if (hmdType == VRAPI_DEVICE_TYPE_OCULUSQUEST2) {
                 vrapi_SetDisplayRefreshRate(appState.Ovr, 90);
             }
 
