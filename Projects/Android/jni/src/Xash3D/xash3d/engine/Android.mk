@@ -7,7 +7,7 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE := xash
 
-APP_PLATFORM := android-19
+APP_PLATFORM := android-24
 
 include $(XASH3D_CONFIG)
 
@@ -39,14 +39,14 @@ LOCAL_C_INCLUDES := \
 LOCAL_EXPORT_C_INCLUDES := $(LOCAL_C_INCLUDES)
 
 LAMBDA1VR_SRC_FILES := \
-		   $(LOCAL_PATH)/../../../Lambda1VR/L1VR_SurfaceView.c \
-		   $(LOCAL_PATH)/../../../Lambda1VR/VrCompositor.c \
-		   $(LOCAL_PATH)/../../../Lambda1VR/VrInputCommon.c \
-		   $(LOCAL_PATH)/../../../Lambda1VR/VrInputDefault.c \
-		   $(LOCAL_PATH)/../../../Lambda1VR/VrInputAlt.c \
-		   $(LOCAL_PATH)/../../../Lambda1VR/VrInputAlt2.c \
-		   $(LOCAL_PATH)/../../../Lambda1VR/VrInputOneController.c \
-		   $(LOCAL_PATH)/../../../Lambda1VR/argtable3.c
+	../../../Lambda1VR/L1VR_SurfaceView.c \
+	../../../Lambda1VR/VrCompositor.c \
+	../../../Lambda1VR/VrInputCommon.c \
+	../../../Lambda1VR/VrInputDefault.c \
+	../../../Lambda1VR/VrInputAlt.c \
+	../../../Lambda1VR/VrInputAlt2.c \
+	../../../Lambda1VR/VrInputOneController.c \
+	../../../Lambda1VR/argtable3.c
 
 LOCAL_SRC_FILES := \
 		   $(LAMBDA1VR_SRC_FILES) \
