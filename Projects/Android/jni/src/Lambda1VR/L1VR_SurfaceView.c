@@ -1646,10 +1646,18 @@ void * AppThreadFunction( void * parm )
             }
 #endif
 
-            //Set 90hz mode for Quest 2
-            if (hmdType == VRAPI_DEVICE_TYPE_OCULUSQUEST2) {
-                vrapi_SetDisplayRefreshRate(appState.Ovr, 90);
-            }
+			// support for 120 hz on quest 2
+			int size = vrapi_GetSystemPropertyInt(appState.Ovr,VRAPI_SYS_PROP_NUM_SUPPORTED_DISPLAY_REFRESH_RATES);
+			vec5_t supported_rates;
+			int fps = 72; // default for quest and quest 2
+			int elements = vrapi_GetSystemPropertyFloatArray(appState.Ovr,VRAPI_SYS_PROP_SUPPORTED_DISPLAY_REFRESH_RATES, &supported_rates, size);
+			// get higher supported fps
+			for (int i = 0; i < size; ++i) {
+				if(supported_rates[i]) {
+					fps = supported_rates[i];
+				}
+			}
+			vrapi_SetDisplayRefreshRate(appState.Ovr, fps);
 
 			// Get the HMD pose, predicted for the middle of the time period during which
 			// the new eye images will be displayed. The number of frames predicted ahead

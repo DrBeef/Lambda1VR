@@ -34,6 +34,8 @@ float playerYaw;
 bool showingScreenLayer;
 float vrFOV;
 
+typedef vec_t vec5_t[5];
+
 vec3_t worldPosition;
 
 vec3_t hmdPosition;
