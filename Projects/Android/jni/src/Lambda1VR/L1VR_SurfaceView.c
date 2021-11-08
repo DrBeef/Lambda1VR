@@ -1653,7 +1653,7 @@ void * AppThreadFunction( void * parm )
 			int elements = vrapi_GetSystemPropertyFloatArray(appState.Ovr,VRAPI_SYS_PROP_SUPPORTED_DISPLAY_REFRESH_RATES, &supported_rates, size);
 			// get higher supported fps
 			for (int i = 0; i < size; ++i) {
-				if(supported_rates[i]) {
+				if(supported_rates[i] && supported_rates[i] > fps) {
 					fps = supported_rates[i];
 				}
 			}

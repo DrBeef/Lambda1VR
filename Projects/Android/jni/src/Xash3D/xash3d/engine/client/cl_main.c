@@ -411,6 +411,7 @@ void CL_CreateCmd( void )
 	color24		color;
 	vec3_t		angles;
 	qboolean		active;
+	vec3_t		vrangles;
 	int		i, ms;
 
 	ms = host.frametime * 1000;
@@ -497,6 +498,12 @@ void CL_CreateCmd( void )
 		VectorCopy( angles, pcmd->cmd.viewangles );
 		pcmd->cmd.msec = 0;
 	}
+
+	// override the server tracking command and replace head angles with the weapon angles
+	VectorCopy(cl.refdef.weapon.angles.adjusted , vrangles );
+	// correct pitch
+	vrangles[PITCH] = -vrangles[PITCH];
+	VectorCopy( vrangles , pcmd->cmd.viewangles );
 
 	// demo always have commands
 	// so don't overwrite them
