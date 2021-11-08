@@ -1649,7 +1649,7 @@ void * AppThreadFunction( void * parm )
 			// support for 120 hz on quest 2
 			int size = vrapi_GetSystemPropertyInt(appState.Ovr,VRAPI_SYS_PROP_NUM_SUPPORTED_DISPLAY_REFRESH_RATES);
 			vec5_t supported_rates;
-			int fps = 72; // default for quest and quest 2
+			int fps = 60; // default
 			int elements = vrapi_GetSystemPropertyFloatArray(appState.Ovr,VRAPI_SYS_PROP_SUPPORTED_DISPLAY_REFRESH_RATES, &supported_rates, size);
 			// get higher supported fps
 			for (int i = 0; i < size; ++i) {

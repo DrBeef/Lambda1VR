@@ -113,7 +113,7 @@ void CMenuControls::_Init( void )
     handModels.SetCoord( 720, 510 );
     handModels.LinkCvar( "vr_hand_model" );
 
-    headTorch.SetNameAndStatus( "Head-based Torch", "Check to enable head-torch (Half-life & Blueshift only)" );
+    headTorch.SetNameAndStatus( "Head-based Torch", "Check to enable head-torch (Half-life & Blueshift only), Default to enabled in multiplayer" );
     headTorch.SetCoord( 320, 570 );
     headTorch.LinkCvar( "vr_headtorch" );
 
