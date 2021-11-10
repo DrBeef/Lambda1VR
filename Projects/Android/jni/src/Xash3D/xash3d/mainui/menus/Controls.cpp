@@ -97,7 +97,7 @@ void CMenuControls::_Init( void )
     AddButton( "OK", "Apply changes and return to configuration menu", PC_OK, VoidCb( &CMenuControls::SetConfig ) );
 	AddButton( "Cancel", "Return to configuration menu", PC_CANCEL,	VoidCb( &CMenuControls::Cancel ) );
 
-    hmdWalkDirection.SetNameAndStatus( "HMD Oriented Movement Direction", "Check to enable Gaze based directional movement" );
+    hmdWalkDirection.SetNameAndStatus( "HMD Oriented Movement Direction (Single Player)", "Check to enable Gaze based directional movement, Not available in multiplayer" );
     hmdWalkDirection.SetCoord( 320, 450 );
     hmdWalkDirection.LinkCvar( "vr_walkdirection" );
 
@@ -113,7 +113,7 @@ void CMenuControls::_Init( void )
     handModels.SetCoord( 720, 510 );
     handModels.LinkCvar( "vr_hand_model" );
 
-    headTorch.SetNameAndStatus( "Head-based Torch", "Check to enable head-torch (Half-life & Blueshift only)" );
+    headTorch.SetNameAndStatus( "Head-based Torch", "Check to enable head-torch (Half-life & Blueshift only), Default to enabled in multiplayer" );
     headTorch.SetCoord( 320, 570 );
     headTorch.LinkCvar( "vr_headtorch" );
 

@@ -421,8 +421,8 @@ import static android.system.Os.setenv;
 		//Set default environment
 		try {
 			setenv("XASH3D_BASEDIR", "/sdcard/xash/", true);
-			setenv("XASH3D_ENGLIBDIR", getFilesDir().getParentFile().getPath() + "/lib", true);
-			setenv("XASH3D_GAMELIBDIR", getFilesDir().getParentFile().getPath() + "/lib", true);
+			setenv("XASH3D_ENGLIBDIR", getApplicationInfo().nativeLibraryDir, true);
+			setenv("XASH3D_GAMELIBDIR", getApplicationInfo().nativeLibraryDir, true);
 			setenv("XASH3D_GAMEDIR", "valve", true);
 			setenv( "XASH3D_EXTRAS_PAK1", getFilesDir().getPath() + "/extras.pak", true );
 
