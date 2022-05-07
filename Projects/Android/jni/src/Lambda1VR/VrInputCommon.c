@@ -212,3 +212,31 @@ void updateScopeAngles(float forwardYaw)
         VectorSet(currentScopeAngles, -weaponangles[ADJUSTED][PITCH], weaponangles[ADJUSTED][YAW] - (forwardYaw+snapTurn), hmdorientation[ROLL]);
     }
 }
+
+
+// Check if pTracking is within 0.4 of the HMD and in a 120 degree arc "behind" it
+bool isBackpack(ovrTracking* pTracking)
+{
+    const ovrVector3f position = pTracking->HeadPose.Pose.Position;
+    double distanceFromHmd = sqrtf(
+            ((hmdPosition[0] - position.x) * (hmdPosition[0] - position.x)) +
+            ((hmdPosition[1] - position.y) * (hmdPosition[1] - position.y)) +
+            ((hmdPosition[2] - position.z) * (hmdPosition[2] - position.z))
+    );
+
+    if(distanceFromHmd > 0.4){
+        return false;
+    }
+
+    double trackingAngle = atan2(hmdPosition[0] - position.x, hmdPosition[2] - position.z) * (180 / M_PI);
+    double angleFromHmd = trackingAngle - playerYaw;
+
+    if(angleFromHmd > 180){
+        angleFromHmd -= 360.0f;
+    }
+    else if(angleFromHmd < -180){
+        angleFromHmd += 360.0f;
+    }
+
+    return abs(angleFromHmd) > 120;
+}

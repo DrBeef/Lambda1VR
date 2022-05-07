@@ -52,6 +52,8 @@ void HandleInput_OneController( ovrInputStateTrackedRemote *pDominantTrackedRemo
 bool stabiliseScope;
 void updateScopeAngles(float forwardYaw);
 
+bool isBackpack(ovrTracking* pTracking);
+
 char * g_pszBackpackWeapon;
 
 #endif //VRINPUT_H
