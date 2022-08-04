@@ -193,7 +193,7 @@ import static android.system.Os.setenv;
 		copy_asset("/sdcard/xash/valve/", "sprites/pointer.tga", true);
 
 		//Copy modified weapon models - This is the base set
-		if (!(new File("/sdcard/xash/" + game + "/models/no_copy").exists()))
+		if (!(new File("/sdcard/xash/" + game + "/models/no_copy").exists()) && !(game.equalsIgnoreCase("Hunger")))
 		{
 			//Colt (A-16)
 			copy_asset("/sdcard/xash/" + game + "/", "models/v_9mmar.mdl", true);
@@ -417,6 +417,59 @@ import static android.system.Os.setenv;
 		{
 			copy_asset("/sdcard/xash/", "bshift/models/v_hand.mdl", true);
 		}
+		
+		//Copy They Hunger specific models
+		if (game.equalsIgnoreCase("Hunger") &&
+				!(new File("/sdcard/xash/" + game + "/models/no_copy").exists()))
+		{
+			//HL1 models
+			copy_asset("/sdcard/xash/" + game + "/", "/models/v_rpg.mdl", true);
+			copy_asset("/sdcard/xash/" + game + "/", "/models/v_357.mdl", true);
+			copy_asset("/sdcard/xash/" + game + "/", "/models/v_grenade.mdl", true);
+			copy_asset("/sdcard/xash/" + game + "/", "/models/v_satchel.mdl", true);
+			copy_asset("/sdcard/xash/" + game + "/", "/models/v_satchel_radio.mdl", true);
+			copy_asset("/sdcard/xash/" + game + "/", "/models/v_tripmine.mdl", true);
+			copy_asset("/sdcard/xash/" + game + "/", "/models/v_crossbow.mdl", true);
+			copy_asset("/sdcard/xash/" + game + "/", "/models/v_gauss.mdl", true);
+			copy_asset("/sdcard/xash/" + game + "/", "/models/v_squeak.mdl", true);
+			
+			//They Hunger models
+			copy_asset("/sdcard/xash/", "Hunger/models/v_9mmar.mdl", true);
+			copy_asset("/sdcard/xash/", "Hunger/models/v_9mmhandgun.mdl", true);
+			copy_asset("/sdcard/xash/", "Hunger/models/v_ap9.mdl", true);
+			copy_asset("/sdcard/xash/", "Hunger/models/v_egon.mdl", true);
+			copy_asset("/sdcard/xash/", "Hunger/models/v_hkg36.mdl", true);
+			copy_asset("/sdcard/xash/", "Hunger/models/v_shotgun.mdl", true);
+			copy_asset("/sdcard/xash/", "Hunger/models/v_shovel.mdl", true);
+			copy_asset("/sdcard/xash/", "Hunger/models/v_taurus.mdl", true);
+			copy_asset("/sdcard/xash/", "Hunger/models/v_tfac.mdl", true);
+			copy_asset("/sdcard/xash/", "Hunger/models/v_tfc_medkit.mdl", true);
+			copy_asset("/sdcard/xash/", "Hunger/models/v_tfc_sniper.mdl", true);
+			copy_asset("/sdcard/xash/", "Hunger/models/v_tfc_spanner.mdl", true);
+			copy_asset("/sdcard/xash/", "Hunger/models/v_tnt.mdl", true);
+			copy_asset("/sdcard/xash/", "Hunger/models/v_hand.mdl", true);
+		}
+		
+		//Copy Afraid of Monsters Director's Cut specific models
+		if (game.equalsIgnoreCase("AoMDC") &&
+				!(new File("/sdcard/xash/" + game + "/models/no_copy").exists()))
+		{
+			//Afraid of Monsters Director's Cut models
+			copy_asset("/sdcard/xash/", "AoMDC/models/v_axe.mdl", true);
+			copy_asset("/sdcard/xash/", "AoMDC/models/v_beretta.mdl", true);
+			copy_asset("/sdcard/xash/", "AoMDC/models/v_deagle.mdl", true);
+			copy_asset("/sdcard/xash/", "AoMDC/models/v_glock.mdl", true);
+			copy_asset("/sdcard/xash/", "AoMDC/models/v_hammer.mdl", true);
+			copy_asset("/sdcard/xash/", "AoMDC/models/v_hand.mdl", true);
+			copy_asset("/sdcard/xash/", "AoMDC/models/v_kitchenknife.mdl", true);
+			copy_asset("/sdcard/xash/", "AoMDC/models/v_mp5k.mdl", true);
+			copy_asset("/sdcard/xash/", "AoMDC/models/v_p228.mdl", true);
+			copy_asset("/sdcard/xash/", "AoMDC/models/v_revolver.mdl", true);
+			copy_asset("/sdcard/xash/", "AoMDC/models/v_shotgun.mdl", true);
+			copy_asset("/sdcard/xash/", "AoMDC/models/v_spear.mdl", true);
+			copy_asset("/sdcard/xash/", "AoMDC/models/v_torch.mdl", true);
+			copy_asset("/sdcard/xash/", "AoMDC/models/v_uzi.mdl", true);
+		}
 
 		//Set default environment
 		try {
@@ -433,6 +486,14 @@ import static android.system.Os.setenv;
 
 				//Use pipewrench as backpack weapon in opposing force
 				setenv("VR_BACKPACK_WEAPON", "weapon_pipewrench", true);
+			}
+			else if (game.equalsIgnoreCase("aomdc"))
+			{
+				setenv("XASH3D_LIBSUFFIX", "_aomdc", true);
+			}
+			else if (game.equalsIgnoreCase("hunger"))
+			{
+				setenv("XASH3D_LIBSUFFIX", "_theyhunger", true);
 			}
 			else
 			{
