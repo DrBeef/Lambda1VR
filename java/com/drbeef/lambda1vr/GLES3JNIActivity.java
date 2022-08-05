@@ -425,7 +425,6 @@ import static android.system.Os.setenv;
 			//HL1 models
 			copy_asset("/sdcard/xash/" + game + "/", "/models/v_rpg.mdl", true);
 			copy_asset("/sdcard/xash/" + game + "/", "/models/v_357.mdl", true);
-			copy_asset("/sdcard/xash/" + game + "/", "/models/v_grenade.mdl", true);
 			copy_asset("/sdcard/xash/" + game + "/", "/models/v_satchel.mdl", true);
 			copy_asset("/sdcard/xash/" + game + "/", "/models/v_satchel_radio.mdl", true);
 			copy_asset("/sdcard/xash/" + game + "/", "/models/v_tripmine.mdl", true);
@@ -469,6 +468,7 @@ import static android.system.Os.setenv;
 			copy_asset("/sdcard/xash/", "AoMDC/models/v_spear.mdl", true);
 			copy_asset("/sdcard/xash/", "AoMDC/models/v_torch.mdl", true);
 			copy_asset("/sdcard/xash/", "AoMDC/models/v_uzi.mdl", true);
+			copy_asset("/sdcard/xash/", "AoMDC/models/gmgeneral_display.aomdc", true);
 		}
 
 		//Set default environment
