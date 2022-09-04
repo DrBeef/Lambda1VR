@@ -17,10 +17,10 @@ android {
     // override app plugin abiFilters for both 32 and 64-bit support
     externalNativeBuild {
         ndk {
-                abiFilters 'armeabi-v7a'
+                abiFilters 'arm64-v8a'
         }
         ndkBuild {
-                abiFilters 'armeabi-v7a'
+                abiFilters 'arm64-v8a'
         }
     }
       minSdkVersion 24

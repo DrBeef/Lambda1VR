@@ -39,20 +39,20 @@
 
 // a1ba: we don't really need custom linker on Android 64, because
 // it's only intended to workaround bug which persist on Android < 4.4
-#define Elf_Ehdr	Elf32_Ehdr
-#define Elf_Phdr	Elf32_Phdr
-#define Elf_Shdr	Elf32_Shdr
-#define Elf_Sym		Elf32_Sym
-#define Elf_Rel		Elf32_Rel
-#define Elf_RelA	Elf32_Rela
-#define Elf_Dyn		Elf32_Dyn
-#define Elf_Half	Elf32_Half
-#define Elf_Word	Elf32_Word
-#define Elf_Sword	Elf32_Sword
-#define Elf_Addr	Elf32_Addr
-#define Elf_Off		Elf32_Off
-#define Elf_Nhdr	Elf32_Nhdr
-#define Elf_Note	Elf32_Note
+#define Elf_Ehdr	Elf64_Ehdr
+#define Elf_Phdr	Elf64_Phdr
+#define Elf_Shdr	Elf64_Shdr
+#define Elf_Sym		Elf64_Sym
+#define Elf_Rel		Elf64_Rel
+#define Elf_RelA	Elf64_Rela
+#define Elf_Dyn		Elf64_Dyn
+#define Elf_Half	Elf64_Half
+#define Elf_Word	Elf64_Word
+#define Elf_Sword	Elf64_Sword
+#define Elf_Addr	Elf64_Addr
+#define Elf_Off		Elf64_Off
+#define Elf_Nhdr	Elf64_Nhdr
+#define Elf_Note	Elf64_Note
 
 // Returns the address of the page containing address 'x'.
 #define PAGE_START(x)  ((x) & PAGE_MASK)
@@ -99,7 +99,7 @@ typedef void (*linker_function_t)();
 
 // Android uses REL for 32-bit but only uses RELA for 64-bit.
 #if defined(__LP64__)
-#define USE_RELA 1
+//#define USE_RELA 1
 #endif
 
 struct soinfo {
