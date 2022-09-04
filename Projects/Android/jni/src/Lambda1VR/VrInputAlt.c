@@ -528,14 +528,21 @@ void HandleInput_Alt( ovrInputStateTrackedRemote *pDominantTrackedRemoteNew, ovr
 			//Run
 			sendButtonAction("+speed", pOffTrackedRemoteNew->Buttons & ovrButton_Trigger);
 
+			static float joyx[4] = {0};
+			for (int j = 3; j > 0; --j)
+				joyx[j] = joyx[j-1];
+			joyx[0] = pDominantTrackedRemoteNew->Joystick.x;
+			float joystickX = (joyx[0] + joyx[1] + joyx[2] + joyx[3]) / 4.0f;
+
+
 			static bool increaseSnap = true;
             if (!selectingWeapon) {
 
                 //engage comfort mask if using smooth rotation
                 player_moving |= (vr_snapturn_angle->value <= 10.0f &&
-                                  fabs(pDominantTrackedRemoteNew->Joystick.x) > 0.6f);
+                                  fabs(joystickX) > 0.7f);
 
-				if (pDominantTrackedRemoteNew->Joystick.x > 0.7f)
+				if (joystickX > 0.7f)
 				{
 					if (increaseSnap)
 					{
@@ -550,13 +557,13 @@ void HandleInput_Alt( ovrInputStateTrackedRemote *pDominantTrackedRemoteNew, ovr
 						}
 					}
 				}
-				else if (pDominantTrackedRemoteNew->Joystick.x < 0.1f)
+				else if (joystickX < 0.1f)
 				{
 					increaseSnap = true;
 				}
 
 				static bool decreaseSnap = true;
-				if (pDominantTrackedRemoteNew->Joystick.x < -0.7f)
+				if (joystickX < -0.7f)
 				{
 					if (decreaseSnap)
 					{
@@ -573,7 +580,7 @@ void HandleInput_Alt( ovrInputStateTrackedRemote *pDominantTrackedRemoteNew, ovr
 						}
 					}
 				} 
-				else if (pDominantTrackedRemoteNew->Joystick.x > -0.2f)
+				else if (joystickX > -0.1f)
 				{
 					decreaseSnap = true;
 				}

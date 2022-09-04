@@ -79,7 +79,7 @@ PFNEGLGETSYNCATTRIBKHRPROC		eglGetSyncAttribKHR;
 #endif
 
 //Let's go to the maximum!
-int CPU_LEVEL			= 2;
+int CPU_LEVEL			= 3;
 int GPU_LEVEL			= 3;
 int NUM_MULTI_SAMPLES	= 4;
 float SS_MULTIPLIER    = 1.25f;
