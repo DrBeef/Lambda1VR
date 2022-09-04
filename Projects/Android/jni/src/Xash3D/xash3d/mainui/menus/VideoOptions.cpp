@@ -23,9 +23,17 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "PicButton.h"
 #include "Slider.h"
 #include "CheckBox.h"
+#include "SpinControl.h"
+#include "StringArrayModel.h"
 
 #define ART_BANNER	  	"gfx/shell/head_vidoptions"
 #define ART_GAMMA		"gfx/shell/gamma"
+
+static const char *refreshStr[] =
+{
+		"60hz", "72hz", "80hz", "90hz", "120hz"
+};
+
 
 class CMenuVidOptions : public CMenuFramework
 {
@@ -38,6 +46,8 @@ public:
 	void SaveAndPopMenu() override;
 	void GammaUpdate();
 	void GammaGet();
+	void GetConfig();
+	void RefreshChanged( void );
 
 	int		outlineWidth;
 
@@ -50,6 +60,7 @@ public:
 
 	CMenuSlider	gammaIntensity;
 	CMenuSlider	glareReduction;
+	CMenuSpinControl	refresh;
 	//CMenuCheckBox	fastSky;
 	CMenuCheckBox	hiTextures;
 	CMenuCheckBox   vbo;
@@ -87,6 +98,7 @@ void CMenuVidOptions::GammaGet( void )
 void CMenuVidOptions::SaveAndPopMenu( void )
 {
 	glareReduction.WriteCvar();
+	//refresh.WriteCvar();
 	//fastSky.WriteCvar();
 	hiTextures.WriteCvar();
 	vbo.WriteCvar();
@@ -95,6 +107,9 @@ void CMenuVidOptions::SaveAndPopMenu( void )
 	height.WriteCvar();
 	vignette.WriteCvar();
 	// gamma is already written
+
+	//write refresh
+	RefreshChanged();
 
 	CMenuFramework::SaveAndPopMenu();
 }
@@ -178,20 +193,31 @@ void CMenuVidOptions::_Init( void )
 		glareReduction.LinkCvar( "brightness" );
 	}
 
-	height.SetCoord( 72, 400 );
+
+	static CStringArrayModel model( refreshStr, ARRAYSIZE( refreshStr ));
+	refresh.Setup( &model );
+	refresh.font = QM_SMALLFONT;
+	refresh.SetRect( 72, 400, 300, 32 );
+	refresh.SetNameAndStatus( "Refresh", "Set Refresh Rate" );
+	refresh.Setup( 0, 4, 1 );
+	//refresh.LinkCvar( "vr_refresh", CMenuEditable::CVAR_VALUE );
+	refresh.onChanged = VoidCb( &CMenuVidOptions::RefreshChanged );
+
+
+	height.SetCoord( 72, 470 );
 	height.SetNameAndStatus( "Height Offset: %.1fm", "Set Player Height Adjustment" );
 	height.Setup( -0.5, 1.0, 0.1 );
 	height.SetDrawValue(true);
 	height.LinkCvar( "vr_height_adjust" );
 
-	vignette.SetCoord( 72, 450 );
+	vignette.SetCoord( 72, 520 );
 	vignette.SetNameAndStatus( "Comfort Vignette", "Set Comfort Vignette" );
 	vignette.Setup( 0.0, 0.7, 0.05 );
 	vignette.SetDrawValue(true);
 	vignette.LinkCvar( "vr_comfort_mask" );
 
 	vbo.SetNameAndStatus( "Use VBO", "Use new world renderer. Faster, but causes issues with flashlight" );
-	vbo.SetCoord( 72, 495 );
+	vbo.SetCoord( 72, 555 );
 	vbo.LinkCvar( "r_vbo" );
 //	vbo.onChanged = CMenuCheckBox::BitMaskCb;
 //	vbo.onChanged.pExtra = &bump.iFlags;
@@ -199,7 +225,7 @@ void CMenuVidOptions::_Init( void )
 	vbo.iMask = QMF_GRAYED;
 
 	actionables.SetNameAndStatus( "Highlight Usable Objects", "Enables highlighting of objects when they can be \"used\"" );
-	actionables.SetCoord( 72, 545 );
+	actionables.SetCoord( 72, 605 );
 	actionables.LinkCvar( "vr_highlight_actionables" );
 
 	//fastSky.SetNameAndStatus( "Draw simple sky", "enable/disable fast sky rendering (for old computers)" );
@@ -207,15 +233,15 @@ void CMenuVidOptions::_Init( void )
 	//fastSky.LinkCvar( "r_fastsky" );
 
 	hiTextures.SetNameAndStatus( "Allow materials", "let engine replace 8-bit textures with full color hi-res prototypes (if present)" );
-	hiTextures.SetCoord( 72, 595 );
+	hiTextures.SetCoord( 72, 655 );
 	hiTextures.LinkCvar( "host_allow_materials" );
 
 	fps.SetNameAndStatus( "Show FPS", "Show FPS Counter" );
-	fps.SetCoord( 72, 645 );
+	fps.SetCoord( 72, 705 );
 	fps.LinkCvar( "cl_showfps" );
 
 	done.SetNameAndStatus( "Done", "Go back to the Video Menu" );
-	done.SetCoord( 72, 695 );
+	done.SetCoord( 72, 755 );
 	done.SetPicture( PC_DONE );
 	done.onActivated = VoidCb( &CMenuVidOptions::SaveAndPopMenu );
 
@@ -224,6 +250,7 @@ void CMenuVidOptions::_Init( void )
 	AddItem( done );
 	AddItem( gammaIntensity );
 	AddItem( glareReduction );
+	AddItem( refresh );
 	AddItem( actionables );
 	AddItem( fps );
 	AddItem( vbo );
@@ -234,10 +261,74 @@ void CMenuVidOptions::_Init( void )
 	AddItem( testImage );
 }
 
+void CMenuVidOptions::RefreshChanged( void )
+{
+	if( refresh.GetCurrentValue() == 0)
+	{
+	EngFuncs::CvarSetValue("vr_refresh", 60.0);
+	}
+	else if( refresh.GetCurrentValue() == 1)
+	{
+	EngFuncs::CvarSetValue("vr_refresh", 72);
+	}
+	else if( refresh.GetCurrentValue() == 2)
+	{
+	EngFuncs::CvarSetValue("vr_refresh", 80);
+	}
+	else if( refresh.GetCurrentValue() == 3)
+	{
+	EngFuncs::CvarSetValue("vr_refresh", 90);
+	}
+	else if( refresh.GetCurrentValue() == 4)
+	{
+	EngFuncs::CvarSetValue("vr_refresh", 120);
+	}
+}
+/*
+=================
+CMenuVidOptions::GetConfig
+=================
+*/
+void CMenuVidOptions::GetConfig( void )
+{
+	int vr_refresh = (int)EngFuncs::GetCvarFloat("vr_refresh");
+	int val = 0;
+	switch (vr_refresh)
+	{
+		case 72:
+		{
+			val = 1;
+		}
+		break;
+		case 80:
+		{
+			val = 2;
+		}
+		break;
+		case 90:
+		{
+			val = 3;
+		}
+		break;
+		case 120:
+		{
+			val = 4;
+		}
+		break;
+		default:
+			break;
+	}
+
+	refresh.ForceDisplayString( refreshStr[val] );
+	refresh.SetCurrentValue( (float)val );
+}
+
 void CMenuVidOptions::_VidInit()
 {
 	outlineWidth = 2;
 	UI_ScaleCoords( NULL, NULL, &outlineWidth, NULL );
+
+	GetConfig();
 }
 
 /*

@@ -28,7 +28,7 @@ GNU General Public License for more details.
 
 mobile_engfuncs_t *gMobileEngfuncs;
 
-convar_t *vibration_enable;
+extern convar_t *vibration_enable;
 
 static void pfnVibrate( float duration, int channel, float intensity )
 {

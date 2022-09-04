@@ -496,17 +496,6 @@ static void ovrFramebuffer_Clear( ovrFramebuffer * frameBuffer )
 
 static bool ovrFramebuffer_Create( ovrFramebuffer * frameBuffer, const GLenum colorFormat, const int width, const int height, const int multisamples )
 {
-    LOAD_GLES2(glBindTexture);
-    LOAD_GLES2(glTexParameteri);
-    LOAD_GLES2(glGenRenderbuffers);
-    LOAD_GLES2(glBindRenderbuffer);
-    LOAD_GLES2(glRenderbufferStorage);
-    LOAD_GLES2(glGenFramebuffers);
-    LOAD_GLES2(glBindFramebuffer);
-    LOAD_GLES2(glFramebufferRenderbuffer);
-    LOAD_GLES2(glFramebufferTexture2D);
-    LOAD_GLES2(glCheckFramebufferStatus);
-
     frameBuffer->Width = width;
 	frameBuffer->Height = height;
 	frameBuffer->Multisamples = multisamples;
@@ -526,15 +515,15 @@ static bool ovrFramebuffer_Create( ovrFramebuffer * frameBuffer, const GLenum co
 		// Create the color buffer texture.
 		const GLuint colorTexture = vrapi_GetTextureSwapChainHandle( frameBuffer->ColorTextureSwapChain, i );
 		GLenum colorTextureTarget = GL_TEXTURE_2D;
-		GL( gles_glBindTexture( colorTextureTarget, colorTexture ) );
+		GL( glBindTexture( colorTextureTarget, colorTexture ) );
         // Just clamp to edge. However, this requires manually clearing the border
         // around the layer to clear the edge texels.
-        GL( gles_glTexParameteri( colorTextureTarget, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE ) );
-        GL( gles_glTexParameteri( colorTextureTarget, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE ) );
+        GL( glTexParameteri( colorTextureTarget, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE ) );
+        GL( glTexParameteri( colorTextureTarget, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE ) );
 
-		GL( gles_glTexParameteri( colorTextureTarget, GL_TEXTURE_MIN_FILTER, GL_LINEAR ) );
-		GL( gles_glTexParameteri( colorTextureTarget, GL_TEXTURE_MAG_FILTER, GL_LINEAR ) );
-		GL( gles_glBindTexture( colorTextureTarget, 0 ) );
+		GL( glTexParameteri( colorTextureTarget, GL_TEXTURE_MIN_FILTER, GL_LINEAR ) );
+		GL( glTexParameteri( colorTextureTarget, GL_TEXTURE_MAG_FILTER, GL_LINEAR ) );
+		GL( glBindTexture( colorTextureTarget, 0 ) );
 
 		if (multisamples > 1 && glRenderbufferStorageMultisampleEXT != NULL && glFramebufferTexture2DMultisampleEXT != NULL)
 		{
@@ -562,18 +551,18 @@ static bool ovrFramebuffer_Create( ovrFramebuffer * frameBuffer, const GLenum co
 		{
 			{
 				// Create depth buffer.
-				GL( gles_glGenRenderbuffers( 1, &frameBuffer->DepthBuffers[i] ) );
-				GL( gles_glBindRenderbuffer( GL_RENDERBUFFER, frameBuffer->DepthBuffers[i] ) );
-				GL( gles_glRenderbufferStorage( GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, frameBuffer->Width, frameBuffer->Height ) );
-				GL( gles_glBindRenderbuffer( GL_RENDERBUFFER, 0 ) );
+				GL( glGenRenderbuffers( 1, &frameBuffer->DepthBuffers[i] ) );
+				GL( glBindRenderbuffer( GL_RENDERBUFFER, frameBuffer->DepthBuffers[i] ) );
+				GL( glRenderbufferStorage( GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, frameBuffer->Width, frameBuffer->Height ) );
+				GL( glBindRenderbuffer( GL_RENDERBUFFER, 0 ) );
 
 				// Create the frame buffer.
-				GL( gles_glGenFramebuffers( 1, &frameBuffer->FrameBuffers[i] ) );
-				GL( gles_glBindFramebuffer( GL_DRAW_FRAMEBUFFER, frameBuffer->FrameBuffers[i] ) );
-				GL( gles_glFramebufferRenderbuffer( GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, frameBuffer->DepthBuffers[i] ) );
-				GL( gles_glFramebufferTexture2D( GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorTexture, 0 ) );
-				GL( GLenum renderFramebufferStatus = gles_glCheckFramebufferStatus( GL_DRAW_FRAMEBUFFER ) );
-				GL( gles_glBindFramebuffer( GL_DRAW_FRAMEBUFFER, 0 ) );
+				GL( glGenFramebuffers( 1, &frameBuffer->FrameBuffers[i] ) );
+				GL( glBindFramebuffer( GL_DRAW_FRAMEBUFFER, frameBuffer->FrameBuffers[i] ) );
+				GL( glFramebufferRenderbuffer( GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, frameBuffer->DepthBuffers[i] ) );
+				GL( glFramebufferTexture2D( GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorTexture, 0 ) );
+				GL( GLenum renderFramebufferStatus = glCheckFramebufferStatus( GL_DRAW_FRAMEBUFFER ) );
+				GL( glBindFramebuffer( GL_DRAW_FRAMEBUFFER, 0 ) );
 				if ( renderFramebufferStatus != GL_FRAMEBUFFER_COMPLETE )
 				{
 					ALOGE( "Incomplete frame buffer object: %s", GlFrameBufferStatusString( renderFramebufferStatus ) );
@@ -588,11 +577,8 @@ static bool ovrFramebuffer_Create( ovrFramebuffer * frameBuffer, const GLenum co
 
 void ovrFramebuffer_Destroy( ovrFramebuffer * frameBuffer )
 {
-    LOAD_GLES2(glDeleteFramebuffers);
-    LOAD_GLES2(glDeleteRenderbuffers);
-
-	GL( gles_glDeleteFramebuffers( frameBuffer->TextureSwapChainLength, frameBuffer->FrameBuffers ) );
-	GL( gles_glDeleteRenderbuffers( frameBuffer->TextureSwapChainLength, frameBuffer->DepthBuffers ) );
+	GL( glDeleteFramebuffers( frameBuffer->TextureSwapChainLength, frameBuffer->FrameBuffers ) );
+	GL( glDeleteRenderbuffers( frameBuffer->TextureSwapChainLength, frameBuffer->DepthBuffers ) );
 
 	vrapi_DestroyTextureSwapChain( frameBuffer->ColorTextureSwapChain );
 
@@ -604,14 +590,12 @@ void ovrFramebuffer_Destroy( ovrFramebuffer * frameBuffer )
 
 void ovrFramebuffer_SetCurrent( ovrFramebuffer * frameBuffer )
 {
-    LOAD_GLES2(glBindFramebuffer);
-	GL( gles_glBindFramebuffer( GL_DRAW_FRAMEBUFFER, frameBuffer->FrameBuffers[frameBuffer->TextureSwapChainIndex] ) );
+	GL( glBindFramebuffer( GL_DRAW_FRAMEBUFFER, frameBuffer->FrameBuffers[frameBuffer->TextureSwapChainIndex] ) );
 }
 
 void ovrFramebuffer_SetNone()
 {
-    LOAD_GLES2(glBindFramebuffer);
-	GL( gles_glBindFramebuffer( GL_DRAW_FRAMEBUFFER, 0 ) );
+	GL( glBindFramebuffer( GL_DRAW_FRAMEBUFFER, 0 ) );
 }
 
 void ovrFramebuffer_Resolve( ovrFramebuffer * frameBuffer )
@@ -633,19 +617,12 @@ void ovrFramebuffer_Advance( ovrFramebuffer * frameBuffer )
 
 void ovrFramebuffer_ClearEdgeTexels( ovrFramebuffer * frameBuffer )
 {
-    LOAD_GLES2(glEnable);
-    LOAD_GLES2(glDisable);
-    LOAD_GLES2(glViewport);
-    LOAD_GLES2(glScissor);
-    LOAD_GLES2(glClearColor);
-    LOAD_GLES2(glClear);
-
-    GL( gles_glEnable( GL_SCISSOR_TEST ) );
-    GL( gles_glViewport( 0, 0, frameBuffer->Width, frameBuffer->Height ) );
+    GL( glEnable( GL_SCISSOR_TEST ) );
+    GL( glViewport( 0, 0, frameBuffer->Width, frameBuffer->Height ) );
 
     // Explicitly clear the border texels to black because OpenGL-ES does not support GL_CLAMP_TO_BORDER.
     // Clear to fully opaque black.
-    GL( gles_glClearColor( 0.0f, 0.0f, 0.0f, 1.0f ) );
+    GL( glClearColor( 0.0f, 0.0f, 0.0f, 1.0f ) );
 
     //Glide comfort mask in and out
     static float currentVLevel = 0.0f;
@@ -673,21 +650,21 @@ void ovrFramebuffer_ClearEdgeTexels( ovrFramebuffer * frameBuffer )
     float height = useMask ? (frameBuffer->Height / 2.0f) * currentVLevel : 1;
 
     // bottom
-    GL( gles_glScissor( 0, 0, frameBuffer->Width, width ) );
-    GL( gles_glClear( GL_COLOR_BUFFER_BIT ) );
+    GL( glScissor( 0, 0, frameBuffer->Width, width ) );
+    GL( glClear( GL_COLOR_BUFFER_BIT ) );
     // top
-    GL( gles_glScissor( 0, frameBuffer->Height - height, frameBuffer->Width, height ) );
-    GL( gles_glClear( GL_COLOR_BUFFER_BIT ) );
+    GL( glScissor( 0, frameBuffer->Height - height, frameBuffer->Width, height ) );
+    GL( glClear( GL_COLOR_BUFFER_BIT ) );
     // left
-    GL( gles_glScissor( 0, 0, width, frameBuffer->Height ) );
-    GL( gles_glClear( GL_COLOR_BUFFER_BIT ) );
+    GL( glScissor( 0, 0, width, frameBuffer->Height ) );
+    GL( glClear( GL_COLOR_BUFFER_BIT ) );
     // right
-    GL( gles_glScissor( frameBuffer->Width - width, 0, width, frameBuffer->Height ) );
-    GL( gles_glClear( GL_COLOR_BUFFER_BIT ) );
+    GL( glScissor( frameBuffer->Width - width, 0, width, frameBuffer->Height ) );
+    GL( glClear( GL_COLOR_BUFFER_BIT ) );
 
 
-    GL( gles_glScissor( 0, 0, 0, 0 ) );
-    GL( gles_glDisable( GL_SCISSOR_TEST ) );
+    GL( glScissor( 0, 0, 0, 0 ) );
+    GL( glDisable( GL_SCISSOR_TEST ) );
 }
 
 
@@ -1113,6 +1090,10 @@ static void ovrApp_HandleVrModeChanges( ovrApp * app )
 				vrapi_SetPerfThread( app->Ovr, VRAPI_PERF_THREAD_TYPE_RENDERER, app->RenderThreadTid );
 
 				ALOGV( "		vrapi_SetPerfThread( RENDERER, %d )", app->RenderThreadTid );
+
+				vrapi_SetExtraLatencyMode(app->Ovr, VRAPI_EXTRA_LATENCY_MODE_ON);
+
+				ALOGV( "		vrapi_SetExtraLatencyMode( %d )", VRAPI_EXTRA_LATENCY_MODE_ON );
 			}
 		}
 	}
@@ -1368,7 +1349,33 @@ Android_Vibrate
 //0 = left, 1 = right
 float vibration_channel_duration[2] = {0.0f, 0.0f};
 float vibration_channel_intensity[2] = {0.0f, 0.0f};
-extern convar_t *vibration_enable;
+
+convar_t 	*vibration_enable;
+convar_t	*vr_snapturn_angle;
+convar_t	*vr_reloadtimeoutms;
+convar_t	*vr_positional_factor;
+convar_t	*vr_walkdirection;
+convar_t	*vr_weapon_pitchadjust;
+convar_t	*vr_crowbar_pitchadjust;
+convar_t	*vr_weapon_recoil;
+convar_t	*vr_weapon_stabilised;
+convar_t	*vr_lasersight;
+convar_t	*vr_quest_fov;
+convar_t	*vr_refresh;
+convar_t	*vr_control_scheme;
+convar_t	*vr_enable_crouching;
+convar_t	*vr_height_adjust;
+convar_t	*vr_flashlight_model;
+convar_t	*vr_hand_model;
+convar_t	*vr_mirror_weapons;
+convar_t	*vr_weapon_backface_culling;
+convar_t	*vr_comfort_mask;
+convar_t	*vr_legacy_ladders;
+convar_t	*vr_controller_tracking_haptic;
+convar_t	*vr_highlight_actionables;
+convar_t	*vr_headtorch;
+convar_t	*vr_quick_crouchjump;
+convar_t	*vr_stereo_side;
 
 void Android_Vibrate( float duration, int channel, float intensity )
 {
@@ -1418,6 +1425,7 @@ void VR_Init()
     sprintf(buffer, "%d", (int)vrFOV);
     vr_quest_fov = Cvar_Get("vr_quest_fov", buffer, CVAR_LATCH, "FOV for Lambda1VR" );
 
+    vr_refresh = Cvar_Get("vr_refresh", "72", CVAR_ARCHIVE, "Refresh Rate" );
 	vr_control_scheme = Cvar_Get( "vr_control_scheme", "0", CVAR_ARCHIVE, "Controller Layout scheme" );
 	vr_enable_crouching = Cvar_Get( "vr_enable_crouching", "0.85", CVAR_ARCHIVE, "To enable real-world crouching trigger, set this to a value that multiplied by the user's height will trigger crouch mechanic" );
     vr_height_adjust = Cvar_Get( "vr_height_adjust", "0.0", CVAR_ARCHIVE, "Additional height adjustment for in-game player (in metres)" );
@@ -1646,10 +1654,11 @@ void * AppThreadFunction( void * parm )
             }
 #endif
 
-            //Set 90hz mode for Quest 2
-            if (hmdType == VRAPI_DEVICE_TYPE_OCULUSQUEST2) {
-                vrapi_SetDisplayRefreshRate(appState.Ovr, 90);
-            }
+			//Set refresh rate
+            vrapi_SetDisplayRefreshRate(appState.Ovr, vr_refresh->value);
+
+			//Enable Extra Latency Mode
+			vrapi_SetExtraLatencyMode(appState.Ovr, VRAPI_EXTRA_LATENCY_MODE_ON);
 
 			// Get the HMD pose, predicted for the middle of the time period during which
 			// the new eye images will be displayed. The number of frames predicted ahead

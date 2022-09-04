@@ -29,7 +29,7 @@ extern cvar_t	*cl_movespeedkey;
 
 void Touch_Motion( touchEventType type, int fingerID, float x, float y, float dx, float dy );
 
-float initialTouchX, initialTouchY;
+extern float initialTouchX, initialTouchY;
 
 
 void HandleInput_Alt( ovrInputStateTrackedRemote *pDominantTrackedRemoteNew, ovrInputStateTrackedRemote *pDominantTrackedRemoteOld, ovrTracking* pDominantTracking,
@@ -535,7 +535,7 @@ void HandleInput_Alt( ovrInputStateTrackedRemote *pDominantTrackedRemoteNew, ovr
                 player_moving |= (vr_snapturn_angle->value <= 10.0f &&
                                   fabs(pDominantTrackedRemoteNew->Joystick.x) > 0.6f);
 
-				if (pDominantTrackedRemoteNew->Joystick.x > 0.6f)
+				if (pDominantTrackedRemoteNew->Joystick.x > 0.7f)
 				{
 					if (increaseSnap)
 					{
@@ -550,13 +550,13 @@ void HandleInput_Alt( ovrInputStateTrackedRemote *pDominantTrackedRemoteNew, ovr
 						}
 					}
 				}
-				else if (pDominantTrackedRemoteNew->Joystick.x < 0.4f) 
+				else if (pDominantTrackedRemoteNew->Joystick.x < 0.1f)
 				{
 					increaseSnap = true;
 				}
 
 				static bool decreaseSnap = true;
-				if (pDominantTrackedRemoteNew->Joystick.x < -0.6f)
+				if (pDominantTrackedRemoteNew->Joystick.x < -0.7f)
 				{
 					if (decreaseSnap)
 					{
@@ -573,7 +573,7 @@ void HandleInput_Alt( ovrInputStateTrackedRemote *pDominantTrackedRemoteNew, ovr
 						}
 					}
 				} 
-				else if (pDominantTrackedRemoteNew->Joystick.x > -0.4f)
+				else if (pDominantTrackedRemoteNew->Joystick.x > -0.2f)
 				{
 					decreaseSnap = true;
 				}

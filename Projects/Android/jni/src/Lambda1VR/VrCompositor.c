@@ -40,28 +40,23 @@ renderState
 
 void getCurrentRenderState( renderState * state)
 {
-	LOAD_GLES2(glGetIntegerv);
-
 	state->VertexBuffer = 0;
 	state->IndexBuffer = 0;
 	state->VertexArrayObject = 0;
 	state->Program = 0;
 
-    gles_glGetIntegerv(GL_ARRAY_BUFFER, &state->VertexBuffer );
-	gles_glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER, &state->IndexBuffer );
-    gles_glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &state->VertexArrayObject );
-	gles_glGetIntegerv(GL_CURRENT_PROGRAM, &state->Program );
+    glGetIntegerv(GL_ARRAY_BUFFER, &state->VertexBuffer );
+	glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER, &state->IndexBuffer );
+    glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &state->VertexArrayObject );
+	glGetIntegerv(GL_CURRENT_PROGRAM, &state->Program );
 }
 
 void restoreRenderState( renderState * state )
 {
-	LOAD_GLES2(glBindBuffer);
-	LOAD_GLES2(glUseProgram);
-
-    GL( gles_glUseProgram( state->Program ) );
+    GL( glUseProgram( state->Program ) );
     GL( glBindVertexArray( state->VertexArrayObject ) );
-	GL( gles_glBindBuffer( GL_ARRAY_BUFFER, state->VertexBuffer ) );
-	GL( gles_glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, state->IndexBuffer ) );
+	GL( glBindBuffer( GL_ARRAY_BUFFER, state->VertexBuffer ) );
+	GL( glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, state->IndexBuffer ) );
 }
 
 
@@ -109,10 +104,6 @@ static void ovrGeometry_Clear( ovrGeometry * geometry )
 
 static void ovrGeometry_CreateGroundPlane( ovrGeometry * geometry )
 {
-	LOAD_GLES2(glGenBuffers);
-	LOAD_GLES2(glBindBuffer);
-	LOAD_GLES2(glBufferData);
-
 	typedef struct
 	{
 		float positions[4][4];
@@ -163,38 +154,34 @@ static void ovrGeometry_CreateGroundPlane( ovrGeometry * geometry )
 	renderState state;
 	getCurrentRenderState(&state);
 
-	GL( gles_glGenBuffers( 1, &geometry->VertexBuffer ) );
-	GL( gles_glBindBuffer( GL_ARRAY_BUFFER, geometry->VertexBuffer ) );
-	GL( gles_glBufferData( GL_ARRAY_BUFFER, sizeof( cubeVertices ), &cubeVertices, GL_STATIC_DRAW ) );
+	GL( glGenBuffers( 1, &geometry->VertexBuffer ) );
+	GL( glBindBuffer( GL_ARRAY_BUFFER, geometry->VertexBuffer ) );
+	GL( glBufferData( GL_ARRAY_BUFFER, sizeof( cubeVertices ), &cubeVertices, GL_STATIC_DRAW ) );
 
-	GL( gles_glGenBuffers( 1, &geometry->IndexBuffer ) );
-	GL( gles_glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, geometry->IndexBuffer ) );
-	GL( gles_glBufferData( GL_ELEMENT_ARRAY_BUFFER, sizeof( cubeIndices ), cubeIndices, GL_STATIC_DRAW ) );
+	GL( glGenBuffers( 1, &geometry->IndexBuffer ) );
+	GL( glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, geometry->IndexBuffer ) );
+	GL( glBufferData( GL_ELEMENT_ARRAY_BUFFER, sizeof( cubeIndices ), cubeIndices, GL_STATIC_DRAW ) );
 
 	restoreRenderState(&state);
 }
 
 static void ovrGeometry_Destroy( ovrGeometry * geometry )
 {
-	LOAD_GLES2(glDeleteBuffers);
-
-	GL( gles_glDeleteBuffers( 1, &geometry->IndexBuffer ) );
-	GL( gles_glDeleteBuffers( 1, &geometry->VertexBuffer ) );
+	GL( glDeleteBuffers( 1, &geometry->IndexBuffer ) );
+	GL( glDeleteBuffers( 1, &geometry->VertexBuffer ) );
 
 	ovrGeometry_Clear( geometry );
 }
 
 static void ovrGeometry_CreateVAO( ovrGeometry * geometry )
 {
-	LOAD_GLES2(glBindBuffer);
-
 	renderState state;
 	getCurrentRenderState(&state);
 
 	GL( glGenVertexArrays( 1, &geometry->VertexArrayObject ) );
 	GL( glBindVertexArray( geometry->VertexArrayObject ) );
 
-	GL( gles_glBindBuffer( GL_ARRAY_BUFFER, geometry->VertexBuffer ) );
+	GL( glBindBuffer( GL_ARRAY_BUFFER, geometry->VertexBuffer ) );
 
 	for ( int i = 0; i < MAX_VERTEX_ATTRIB_POINTERS; i++ )
 	{
@@ -207,7 +194,7 @@ static void ovrGeometry_CreateVAO( ovrGeometry * geometry )
 		}
 	}
 
-    GL( gles_glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, geometry->IndexBuffer ) );
+    GL( glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, geometry->IndexBuffer ) );
 
 	restoreRenderState(&state);
 }
@@ -259,65 +246,49 @@ static void ovrProgram_Clear( ovrProgram * program )
 
 static bool ovrProgram_Create( ovrProgram * program, const char * vertexSource, const char * fragmentSource )
 {
-    LOAD_GLES2(glGetIntegerv);
-    LOAD_GLES2(glCreateShader);
-    LOAD_GLES2(glShaderSource);
-    LOAD_GLES2(glCompileShader);
-    LOAD_GLES2(glGetShaderiv);
-    LOAD_GLES2(glGetShaderInfoLog);
-    LOAD_GLES2(glAttachShader);
-    LOAD_GLES2(glBindAttribLocation);
-    LOAD_GLES2(glLinkProgram);
-    LOAD_GLES2(glGetProgramiv);
-    LOAD_GLES2(glGetUniformLocation);
-    LOAD_GLES2(glCreateProgram);
-    LOAD_GLES2(glUseProgram);
-    LOAD_GLES2(glUniform1i);
-    LOAD_GLES2(glGetProgramInfoLog);
-
 	GLint r;
 
-	GL( program->VertexShader = gles_glCreateShader( GL_VERTEX_SHADER ) );
+	GL( program->VertexShader = glCreateShader( GL_VERTEX_SHADER ) );
 
-	GL( gles_glShaderSource( program->VertexShader, 1, &vertexSource, 0 ) );
-	GL( gles_glCompileShader( program->VertexShader ) );
-	GL( gles_glGetShaderiv( program->VertexShader, GL_COMPILE_STATUS, &r ) );
+	GL( glShaderSource( program->VertexShader, 1, &vertexSource, 0 ) );
+	GL( glCompileShader( program->VertexShader ) );
+	GL( glGetShaderiv( program->VertexShader, GL_COMPILE_STATUS, &r ) );
 	if ( r == GL_FALSE )
 	{
 		GLchar msg[4096];
-		GL( gles_glGetShaderInfoLog( program->VertexShader, sizeof( msg ), 0, msg ) );
+		GL( glGetShaderInfoLog( program->VertexShader, sizeof( msg ), 0, msg ) );
 		ALOGE( "%s\n%s\n", vertexSource, msg );
 		return false;
 	}
 
-	GL( program->FragmentShader = gles_glCreateShader( GL_FRAGMENT_SHADER ) );
-	GL( gles_glShaderSource( program->FragmentShader, 1, &fragmentSource, 0 ) );
-	GL( gles_glCompileShader( program->FragmentShader ) );
-	GL( gles_glGetShaderiv( program->FragmentShader, GL_COMPILE_STATUS, &r ) );
+	GL( program->FragmentShader = glCreateShader( GL_FRAGMENT_SHADER ) );
+	GL( glShaderSource( program->FragmentShader, 1, &fragmentSource, 0 ) );
+	GL( glCompileShader( program->FragmentShader ) );
+	GL( glGetShaderiv( program->FragmentShader, GL_COMPILE_STATUS, &r ) );
 	if ( r == GL_FALSE )
 	{
 		GLchar msg[4096];
-		GL( gles_glGetShaderInfoLog( program->FragmentShader, sizeof( msg ), 0, msg ) );
+		GL( glGetShaderInfoLog( program->FragmentShader, sizeof( msg ), 0, msg ) );
 		ALOGE( "%s\n%s\n", fragmentSource, msg );
 		return false;
 	}
 
-	GL( program->Program = gles_glCreateProgram() );
-	GL( gles_glAttachShader( program->Program, program->VertexShader ) );
-	GL( gles_glAttachShader( program->Program, program->FragmentShader ) );
+	GL( program->Program = glCreateProgram() );
+	GL( glAttachShader( program->Program, program->VertexShader ) );
+	GL( glAttachShader( program->Program, program->FragmentShader ) );
 
 	// Bind the vertex attribute locations.
 	for ( int i = 0; i < sizeof( ProgramVertexAttributes ) / sizeof( ProgramVertexAttributes[0] ); i++ )
 	{
-		GL( gles_glBindAttribLocation( program->Program, ProgramVertexAttributes[i].location, ProgramVertexAttributes[i].name ) );
+		GL( glBindAttribLocation( program->Program, ProgramVertexAttributes[i].location, ProgramVertexAttributes[i].name ) );
 	}
 
-	GL( gles_glLinkProgram( program->Program ) );
-	GL( gles_glGetProgramiv( program->Program, GL_LINK_STATUS, &r ) );
+	GL( glLinkProgram( program->Program ) );
+	GL( glGetProgramiv( program->Program, GL_LINK_STATUS, &r ) );
 	if ( r == GL_FALSE )
 	{
 		GLchar msg[4096];
-		GL( gles_glGetProgramInfoLog( program->Program, sizeof( msg ), 0, msg ) );
+		GL( glGetProgramInfoLog( program->Program, sizeof( msg ), 0, msg ) );
 		ALOGE( "Linking program failed: %s\n", msg );
 		return false;
 	}
@@ -337,7 +308,7 @@ static bool ovrProgram_Create( ovrProgram * program, const char * vertexSource, 
 		}
 		else
 		{
-			GL( program->UniformLocation[uniformIndex] = gles_glGetUniformLocation( program->Program, ProgramUniforms[i].name ) );
+			GL( program->UniformLocation[uniformIndex] = glGetUniformLocation( program->Program, ProgramUniforms[i].name ) );
 			program->UniformBinding[uniformIndex] = program->UniformLocation[uniformIndex];
 		}
 	}
@@ -345,17 +316,17 @@ static bool ovrProgram_Create( ovrProgram * program, const char * vertexSource, 
 	renderState state;
 	getCurrentRenderState(&state);
 
-	GL( gles_glUseProgram( program->Program ) );
+	GL( glUseProgram( program->Program ) );
 
 	// Get the texture locations.
 	for ( int i = 0; i < MAX_PROGRAM_TEXTURES; i++ )
 	{
 		char name[32];
 		sprintf( name, "Texture%i", i );
-		program->Textures[i] = gles_glGetUniformLocation( program->Program, name );
+		program->Textures[i] = glGetUniformLocation( program->Program, name );
 		if ( program->Textures[i] != -1 )
 		{
-			GL( gles_glUniform1i( program->Textures[i], i ) );
+			GL( glUniform1i( program->Textures[i], i ) );
 		}
 	}
 
@@ -366,22 +337,19 @@ static bool ovrProgram_Create( ovrProgram * program, const char * vertexSource, 
 
 static void ovrProgram_Destroy( ovrProgram * program )
 {
-    LOAD_GLES2(glDeleteProgram);
-    LOAD_GLES2(glDeleteShader);
-
 	if ( program->Program != 0 )
 	{
-		GL( gles_glDeleteProgram( program->Program ) );
+		GL( glDeleteProgram( program->Program ) );
 		program->Program = 0;
 	}
 	if ( program->VertexShader != 0 )
 	{
-		GL( gles_glDeleteShader( program->VertexShader ) );
+		GL( glDeleteShader( program->VertexShader ) );
 		program->VertexShader = 0;
 	}
 	if ( program->FragmentShader != 0 )
 	{
-		GL( gles_glDeleteShader( program->FragmentShader ) );
+		GL( glDeleteShader( program->FragmentShader ) );
 		program->FragmentShader = 0;
 	}
 }
@@ -492,21 +460,6 @@ ovrRenderer
 ovrLayerProjection2 ovrRenderer_RenderGroundPlaneToEyeBuffer( ovrRenderer * renderer, const ovrJava * java,
 	const ovrScene * scene, const ovrTracking2 * tracking )
 {
-	LOAD_GLES2(glEnable);
-	LOAD_GLES2(glDepthMask);
-	LOAD_GLES2(glDepthFunc);
-	LOAD_GLES2(glViewport);
-	LOAD_GLES2(glScissor);
-	LOAD_GLES2(glClearColor);
-	LOAD_GLES2(glClear);
-	LOAD_GLES2(glDisable);
-	LOAD_GLES2(glGetIntegerv);
-	LOAD_GLES2(glBindBuffer);
-	LOAD_GLES2(glCullFace);
-	LOAD_GLES2(glDrawElements);
-	LOAD_GLES2(glUseProgram);
-    LOAD_GLES(glUniformMatrix4fv);
-
 	ovrLayerProjection2 layer = vrapi_DefaultLayerProjection2();
 	layer.HeadPose = tracking->HeadPose;
 	for ( int eye = 0; eye < VRAPI_FRAME_LAYER_EYE_MAX; eye++ )
@@ -526,28 +479,28 @@ ovrLayerProjection2 ovrRenderer_RenderGroundPlaneToEyeBuffer( ovrRenderer * rend
 		renderState state;
 		getCurrentRenderState(&state);
 
-        GL( gles_glUseProgram( scene->Program.Program ) );
+        GL( glUseProgram( scene->Program.Program ) );
 
 		ovrMatrix4f viewProjMatrix = ovrMatrix4f_Multiply( &tracking->Eye[eye].ProjectionMatrix, &tracking->Eye[eye].ViewMatrix );
 		glUniformMatrix4fv(	scene->Program.UniformLocation[UNIFORM_VIEW_PROJ_MATRIX], 1, GL_TRUE, &viewProjMatrix.M[0][0] );
 
-		GL( gles_glEnable( GL_SCISSOR_TEST ) );
-		GL( gles_glDepthMask( GL_TRUE ) );
-		GL( gles_glEnable( GL_DEPTH_TEST ) );
-		GL( gles_glDepthFunc( GL_LEQUAL ) );
-		GL( gles_glEnable( GL_CULL_FACE ) );
-		GL( gles_glCullFace( GL_BACK ) );
-		GL( gles_glViewport( 0, 0, frameBuffer->Width, frameBuffer->Height ) );
-		GL( gles_glScissor( 0, 0, frameBuffer->Width, frameBuffer->Height ) );
-		GL( gles_glClearColor( 0.0f, 0.0f, 0.0f, 1.0f ) );
-		GL( gles_glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT ) );
+		GL( glEnable( GL_SCISSOR_TEST ) );
+		GL( glDepthMask( GL_TRUE ) );
+		GL( glEnable( GL_DEPTH_TEST ) );
+		GL( glDepthFunc( GL_LEQUAL ) );
+		GL( glEnable( GL_CULL_FACE ) );
+		GL( glCullFace( GL_BACK ) );
+		GL( glViewport( 0, 0, frameBuffer->Width, frameBuffer->Height ) );
+		GL( glScissor( 0, 0, frameBuffer->Width, frameBuffer->Height ) );
+		GL( glClearColor( 0.0f, 0.0f, 0.0f, 1.0f ) );
+		GL( glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT ) );
 
 		//bind buffers
-		GL( gles_glBindBuffer( GL_ARRAY_BUFFER, scene->GroundPlane.VertexBuffer ) );
-		GL( gles_glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, scene->GroundPlane.IndexBuffer ) );
+		GL( glBindBuffer( GL_ARRAY_BUFFER, scene->GroundPlane.VertexBuffer ) );
+		GL( glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, scene->GroundPlane.IndexBuffer ) );
 		GL( glBindVertexArray( scene->GroundPlane.VertexArrayObject ) );
 
-		GL( gles_glDrawElements( GL_TRIANGLES, scene->GroundPlane.IndexCount, GL_UNSIGNED_SHORT, NULL ) );
+		GL( glDrawElements( GL_TRIANGLES, scene->GroundPlane.IndexCount, GL_UNSIGNED_SHORT, NULL ) );
 
 		restoreRenderState(&state);
 

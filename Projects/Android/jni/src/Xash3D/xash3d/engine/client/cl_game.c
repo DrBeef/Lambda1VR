@@ -986,8 +986,8 @@ Render crosshair
 ====================
 */
 
-vec3_t weaponangles[3];
-vec3_t hmdorientation;
+extern vec3_t weaponangles[3];
+extern vec3_t hmdorientation;
 
 void CL_DrawCrosshair( void )
 {

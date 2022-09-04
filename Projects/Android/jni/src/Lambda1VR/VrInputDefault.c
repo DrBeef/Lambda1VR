@@ -552,7 +552,7 @@ void HandleInput_Default( ovrInputStateTrackedRemote *pDominantTrackedRemoteNew,
 				fabs(pDominantTrackedRemoteNew->Joystick.x) > 0.6f);
 
 			static bool increaseSnap = true;
-			if (pDominantTrackedRemoteNew->Joystick.x > 0.6f)
+			if (pDominantTrackedRemoteNew->Joystick.x > 0.7f)
 			{
 				if (increaseSnap)
 				{
@@ -566,12 +566,12 @@ void HandleInput_Default( ovrInputStateTrackedRemote *pDominantTrackedRemoteNew,
 						snapTurn += 360.f;
 					}
 				}
-			} else if (pDominantTrackedRemoteNew->Joystick.x < 0.4f) {
+			} else if (pDominantTrackedRemoteNew->Joystick.x < 0.1f) {
 				increaseSnap = true;
 			}
 
 			static bool decreaseSnap = true;
-			if (pDominantTrackedRemoteNew->Joystick.x < -0.6f)
+			if (pDominantTrackedRemoteNew->Joystick.x < -0.7f)
 			{
 				if (decreaseSnap)
 				{
@@ -587,7 +587,7 @@ void HandleInput_Default( ovrInputStateTrackedRemote *pDominantTrackedRemoteNew,
 						snapTurn -= 360.f;
 					}
 				}
-			} else if (pDominantTrackedRemoteNew->Joystick.x > -0.4f)
+			} else if (pDominantTrackedRemoteNew->Joystick.x > -0.2f)
 			{
 				decreaseSnap = true;
 			}

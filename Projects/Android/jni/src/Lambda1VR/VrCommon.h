@@ -26,38 +26,38 @@
 #define YAW 1
 #define ROLL 2
 
-bool xash_initialised;
+extern bool xash_initialised;
 
-float playerHeight;
-float playerYaw;
+extern float playerHeight;
+extern float playerYaw;
 
-bool showingScreenLayer;
-float vrFOV;
+extern bool showingScreenLayer;
+extern float vrFOV;
 
-vec3_t worldPosition;
+extern vec3_t worldPosition;
 
-vec3_t hmdPosition;
-vec3_t hmdorientation;
-vec3_t positionDeltaThisFrame;
+extern vec3_t hmdPosition;
+extern vec3_t hmdorientation;
+extern vec3_t positionDeltaThisFrame;
 
 #define ADJUSTED 0
 #define UNADJUSTED 1
 #define MELEE 2
-vec3_t weaponangles[3];
-vec3_t weaponoffset;
-vec3_t weaponvelocity;
+extern vec3_t weaponangles[3];
+extern vec3_t weaponoffset;
+extern vec3_t weaponvelocity;
 
-vec3_t offhandangles;
+extern vec3_t offhandangles;
 
-vec3_t flashlightangles;
-vec3_t flashlightoffset;
+extern vec3_t flashlightangles;
+extern vec3_t flashlightoffset;
 
 #define DUCK_NOTDUCKED 0
 #define DUCK_BUTTON 1
 #define DUCK_CROUCHED 2
-int ducked;
+extern int ducked;
 
-bool player_moving;
+extern bool player_moving;
 
 bool isMultiplayer();
 bool isScopeEngaged();

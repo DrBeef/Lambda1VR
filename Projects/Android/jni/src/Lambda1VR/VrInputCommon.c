@@ -23,6 +23,52 @@ Authors		:	Simon Brown
 
 #include "VrInput.h"
 
+ovrDeviceID controllerIDs[2];
+
+bool xash_initialised;
+
+float playerHeight;
+float playerYaw;
+
+bool showingScreenLayer;
+float vrFOV;
+
+vec3_t worldPosition;
+
+vec3_t hmdPosition;
+vec3_t hmdorientation;
+vec3_t positionDeltaThisFrame;
+
+vec3_t weaponangles[3];
+vec3_t weaponoffset;
+vec3_t weaponvelocity;
+
+vec3_t offhandangles;
+
+vec3_t flashlightangles;
+vec3_t flashlightoffset;
+int ducked;
+
+bool player_moving;
+
+bool stabiliseScope;
+char * g_pszBackpackWeapon;
+
+ovrInputStateTrackedRemote leftTrackedRemoteState_old;
+ovrInputStateTrackedRemote leftTrackedRemoteState_new;
+ovrTracking leftRemoteTracking_new;
+
+ovrInputStateTrackedRemote rightTrackedRemoteState_old;
+ovrInputStateTrackedRemote rightTrackedRemoteState_new;
+ovrTracking rightRemoteTracking_new;
+
+float remote_movementSideways;
+float remote_movementForward;
+float positional_movementSideways;
+float positional_movementForward;
+float snapTurn;
+
+int hmdType;
 
 void handleTrackedControllerButton(ovrInputStateTrackedRemote * trackedRemoteState, ovrInputStateTrackedRemote * prevTrackedRemoteState, uint32_t button, int key)
 {
@@ -61,7 +107,7 @@ float length(float x, float y)
     return sqrtf(powf(x, 2.0f) + powf(y, 2.0f));
 }
 
-#define NLF_DEADZONE 0.1
+#define NLF_DEADZONE 0.2
 #define NLF_POWER 2.2
 
 float nonLinearFilter(float in)
@@ -147,7 +193,7 @@ void acquireTrackedRemotesData(const ovrMobile *Ovr, double displayTime) {//The 
 
 int IN_TouchEvent( touchEventType type, int fingerID, float x, float y, float dx, float dy );
 
-float initialTouchX, initialTouchY;
+extern float initialTouchX, initialTouchY;
 
 void interactWithTouchScreen(ovrTracking *tracking, ovrInputStateTrackedRemote *newState, ovrInputStateTrackedRemote *oldState) {
     float remoteAngles[3];
