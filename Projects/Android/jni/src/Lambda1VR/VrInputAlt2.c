@@ -486,12 +486,23 @@ void HandleInput_Alt2( ovrInputStateTrackedRemote *pDominantTrackedRemoteNew, ov
 			}
 
 			if (!isScopeEngaged()) {
+				static float joyx[4] = {0};
+				static float joyy[4] = {0};
+				for (int j = 3; j > 0; --j) {
+					joyx[j] = joyx[j - 1];
+					joyy[j] = joyy[j - 1];
+				}
+				joyx[0] = pDominantTrackedRemoteNew->Joystick.x;
+				joyy[0] = pDominantTrackedRemoteNew->Joystick.y;
+				float joystickX = (joyx[0] + joyx[1] + joyx[2] + joyx[3]) / 4.0f;
+				float joystickY = (joyy[0] + joyy[1] + joyy[2] + joyy[3]) / 4.0f;
+
 				//Apply a filter and quadratic scaler so small movements are easier to make
-				float dist = length(pDominantTrackedRemoteNew->Joystick.x, 
-									pDominantTrackedRemoteNew->Joystick.y);
+				float dist = length(joystickX,
+									joystickY);
 				float nlf = nonLinearFilter(dist);
-				float x = nlf * pDominantTrackedRemoteNew->Joystick.x;
-				float y = nlf * pDominantTrackedRemoteNew->Joystick.y;
+				float x = nlf * joystickX;
+				float y = nlf * joystickY;
 
 				player_moving = (fabs(x) + fabs(y)) > 0.01f;
 

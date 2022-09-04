@@ -486,12 +486,24 @@ void HandleInput_Default( ovrInputStateTrackedRemote *pDominantTrackedRemoteNew,
 			}
 
             if (!isScopeEngaged()) {
+
+				static float joyx[4] = {0};
+				static float joyy[4] = {0};
+				for (int j = 3; j > 0; --j) {
+					joyx[j] = joyx[j - 1];
+					joyy[j] = joyy[j - 1];
+				}
+				joyx[0] = pOffTrackedRemoteNew->Joystick.x;
+				joyy[0] = pOffTrackedRemoteNew->Joystick.y;
+				float joystickX = (joyx[0] + joyx[1] + joyx[2] + joyx[3]) / 4.0f;
+				float joystickY = (joyy[0] + joyy[1] + joyy[2] + joyy[3]) / 4.0f;
+
                 //Apply a filter and quadratic scaler so small movements are easier to make
-                float dist = length(pOffTrackedRemoteNew->Joystick.x,
-                                    pOffTrackedRemoteNew->Joystick.y);
+                float dist = length(joystickX,
+									joystickY);
                 float nlf = nonLinearFilter(dist);
-                float x = nlf * pOffTrackedRemoteNew->Joystick.x;
-                float y = nlf * pOffTrackedRemoteNew->Joystick.y;
+                float x = nlf * joystickX;
+                float y = nlf * joystickY;
 
                 player_moving = (fabs(x) + fabs(y)) > 0.01f;
 
