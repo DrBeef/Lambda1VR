@@ -14,6 +14,7 @@ import java.io.OutputStream;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 
@@ -420,9 +421,9 @@ import static android.system.Os.setenv;
 
 		//Set default environment
 		try {
+			ApplicationInfo info = getApplicationInfo();
 			setenv("XASH3D_BASEDIR", "/sdcard/xash/", true);
-			setenv("XASH3D_ENGLIBDIR", getFilesDir().getParentFile().getPath() + "/lib", true);
-			setenv("XASH3D_GAMELIBDIR", getFilesDir().getParentFile().getPath() + "/lib", true);
+			setenv("XASH3D_GAMELIBDIR", info.nativeLibraryDir, true);
 			setenv("XASH3D_GAMEDIR", "valve", true);
 			setenv( "XASH3D_EXTRAS_PAK1", getFilesDir().getPath() + "/extras.pak", true );
 

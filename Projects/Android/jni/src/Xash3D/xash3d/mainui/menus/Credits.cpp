@@ -29,6 +29,7 @@ static const char *uiCreditsDefault[] =
 	"",
 	"Copyright XashXT Group 2017 (C)",
 	"Copyright Flying With Gauss 2017 (C)",
+	"Copyright Team Beef 2022 (C)",
 	0
 };
 

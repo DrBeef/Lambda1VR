@@ -10,23 +10,23 @@ enum control_scheme;
 
 #define SCOPE_ENGAGE_DISTANCE 0.28
 
-ovrInputStateTrackedRemote leftTrackedRemoteState_old;
-ovrInputStateTrackedRemote leftTrackedRemoteState_new;
-ovrTracking leftRemoteTracking_new;
+extern ovrInputStateTrackedRemote leftTrackedRemoteState_old;
+extern ovrInputStateTrackedRemote leftTrackedRemoteState_new;
+extern ovrTracking leftRemoteTracking_new;
 
-ovrInputStateTrackedRemote rightTrackedRemoteState_old;
-ovrInputStateTrackedRemote rightTrackedRemoteState_new;
-ovrTracking rightRemoteTracking_new;
+extern ovrInputStateTrackedRemote rightTrackedRemoteState_old;
+extern ovrInputStateTrackedRemote rightTrackedRemoteState_new;
+extern ovrTracking rightRemoteTracking_new;
 
-ovrDeviceID controllerIDs[2];
+extern ovrDeviceID controllerIDs[2];
 
-float remote_movementSideways;
-float remote_movementForward;
-float positional_movementSideways;
-float positional_movementForward;
-float snapTurn;
+extern float remote_movementSideways;
+extern float remote_movementForward;
+extern float positional_movementSideways;
+extern float positional_movementForward;
+extern float snapTurn;
 
-int hmdType;
+extern int hmdType;
 
 void sendButtonAction(const char* action, long buttonDown);
 void sendButtonActionSimple(const char* action);
@@ -49,12 +49,12 @@ void HandleInput_OneController( ovrInputStateTrackedRemote *pDominantTrackedRemo
                       ovrInputStateTrackedRemote *pOffTrackedRemoteNew, ovrInputStateTrackedRemote *pOffTrackedRemoteOld, ovrTracking* pOffTracking,
                       int domButton1, int domButton2, int offButton1, int offButton2 );
 
-bool stabiliseScope;
+extern bool stabiliseScope;
 void updateScopeAngles(float forwardYaw);
 
 bool isBackpack(ovrTracking* pTracking);
 
-char * g_pszBackpackWeapon;
+extern char * g_pszBackpackWeapon;
 
 #endif //VRINPUT_H
 
