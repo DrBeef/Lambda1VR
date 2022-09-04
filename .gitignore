@@ -44,3 +44,4 @@ Projects/Android/.idea/runConfigurations.xml
 Projects/Android/.gradle/*
 Projects/Android/Android.iml
 Projects/Android/Android.iml
+Projects/Android/local.properties
