@@ -5,3 +5,10 @@
 [submodule "Projects/Android/jni/src/hlsdk-xash3d-opfor"]
 	path = Projects/Android/jni/src/hlsdk-xash3d-opfor
 	url = https://github.com/DrBeef/hlsdk-xash3d-opfor
+
+[submodule "Projects/Android/jni/src/hlsdk-xash3d_aomdc"]
+	path = Projects/Android/jni/src/hlsdk-xash3d_aomdc
+	url = https://github.com/kote2345/hlsdk-xash3d_aomdc
+[submodule "Projects/Android/jni/src/hlsdk-xash3d_theyhunger"]
+	path = Projects/Android/jni/src/hlsdk-xash3d_theyhunger
+	url = https://github.com/kote2345/hlsdk-xash3d_theyhunger
