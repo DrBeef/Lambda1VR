@@ -79,10 +79,10 @@ PFNEGLGETSYNCATTRIBKHRPROC		eglGetSyncAttribKHR;
 #endif
 
 //Let's go to the maximum!
-int CPU_LEVEL			= 3;
-int GPU_LEVEL			= 3;
+int CPU_LEVEL			= 4;
+int GPU_LEVEL			= 4;
 int NUM_MULTI_SAMPLES	= 4;
-float SS_MULTIPLIER    = 1.25f;
+float SS_MULTIPLIER    = 1.2f;
 
 float radians(float deg) {
 	return (deg * M_PI) / 180.0;
