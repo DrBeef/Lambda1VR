@@ -136,7 +136,7 @@ void HandleInput_OneController( ovrInputStateTrackedRemote *pDominantTrackedRemo
 				dominantGripPushed = (pDominantTrackedRemoteNew->Buttons &
 									  ovrButton_GripTrigger) != 0;
 
-				if (pDominantTracking->Status & (VRAPI_TRACKING_STATUS_POSITION_TRACKED | VRAPI_TRACKING_STATUS_POSITION_VALID)) {
+				if (!isBackpack(pDominantTracking)) {
 
 					if (dominantGripPushed) {
 						dominantGripPushTime = GetTimeInMilliSeconds();

@@ -46,7 +46,7 @@ void HandleInput_Alt2( ovrInputStateTrackedRemote *pDominantTrackedRemoteNew, ov
 	static float dominantGripPushTime = 0.0f;
 
 	static bool canUseQuickSave = false;
-	if (pOffTracking->Status & (VRAPI_TRACKING_STATUS_POSITION_TRACKED | VRAPI_TRACKING_STATUS_POSITION_VALID)) {
+	if (!isBackpack(pOffTracking)) {
 		canUseQuickSave = false;
 	}
 	else if (!canUseQuickSave) {
@@ -223,7 +223,7 @@ void HandleInput_Alt2( ovrInputStateTrackedRemote *pDominantTrackedRemoteNew, ov
 				finishReloadNextFrame = false;
 			}
 
-			if (pDominantTracking->Status & (VRAPI_TRACKING_STATUS_POSITION_TRACKED | VRAPI_TRACKING_STATUS_POSITION_VALID)) {
+			if (!isBackpack(pDominantTracking)) {
 				canUseBackpack = false;
 			}
 			else if (!canUseBackpack && grabMeleeWeapon == 0) {
@@ -243,7 +243,7 @@ void HandleInput_Alt2( ovrInputStateTrackedRemote *pDominantTrackedRemoteNew, ov
 
 				if (grabMeleeWeapon == 0)
 				{
-					if (pDominantTracking->Status & (VRAPI_TRACKING_STATUS_POSITION_TRACKED | VRAPI_TRACKING_STATUS_POSITION_VALID)) {
+					if (!isBackpack(pDominantTracking)) {
 
 						if (dominantGripPushed) {
 							dominantGripPushTime = GetTimeInMilliSeconds();
