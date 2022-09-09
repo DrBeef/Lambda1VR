@@ -21,7 +21,7 @@ extern convar_t	*vr_hand_model;
 extern convar_t	*vr_mirror_weapons;
 extern convar_t	*vr_weapon_backface_culling;
 extern convar_t	*vr_comfort_mask;
-extern convar_t	*vr_legacy_ladders;
+extern convar_t	*vr_controller_ladders;
 extern convar_t	*vr_controller_tracking_haptic;
 extern convar_t	*vr_highlight_actionables;
 extern convar_t	*vr_headtorch;

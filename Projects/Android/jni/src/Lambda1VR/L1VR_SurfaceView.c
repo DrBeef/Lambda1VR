@@ -1370,7 +1370,7 @@ convar_t	*vr_hand_model;
 convar_t	*vr_mirror_weapons;
 convar_t	*vr_weapon_backface_culling;
 convar_t	*vr_comfort_mask;
-convar_t	*vr_legacy_ladders;
+convar_t	*vr_controller_ladders;
 convar_t	*vr_controller_tracking_haptic;
 convar_t	*vr_highlight_actionables;
 convar_t	*vr_headtorch;
@@ -1434,7 +1434,7 @@ void VR_Init()
 	vr_mirror_weapons = Cvar_Get( "vr_mirror_weapons", "0", CVAR_ARCHIVE, "Set to 1 to mirror the weapon models (for left handed use)" );
     vr_weapon_backface_culling = Cvar_Get( "vr_weapon_backface_culling", "0", CVAR_ARCHIVE, "Use to enable whether back face culling is used on weapon viewmodel" );
 	vr_comfort_mask = Cvar_Get( "vr_comfort_mask", "0.0", CVAR_ARCHIVE, "Use to reduce motion sickness, 0.0 is off, 1.0 is fully obscured, probably go with 0.7, anything less than 0.5 is barely visible" );
-    vr_legacy_ladders = Cvar_Get( "vr_legacy_ladders", "0", CVAR_ARCHIVE, "Set to 1 to use ladder climb direction based on HMD, otherwise off-hand controller angle is used" );
+    vr_controller_ladders = Cvar_Get( "vr_controller_ladders", "0", CVAR_ARCHIVE, "Set to 0 to use ladder climb direction based on HMD, otherwise off-hand controller angle is used" );
 	vr_controller_tracking_haptic = Cvar_Get( "vr_controller_tracking_haptic", "1", CVAR_ARCHIVE, "Set to 0 to disable haptic blip when dominant controller loses tracking" );
 	vr_highlight_actionables = Cvar_Get( "vr_highlight_actionables", "1", CVAR_ARCHIVE, "Set to 0 to disable highlighting of actionable objects/entities" );
 	vr_headtorch = Cvar_Get( "vr_headtorch", "0", CVAR_ARCHIVE, "Set to 1 to enable head-torch flashlight mode" );

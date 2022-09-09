@@ -414,7 +414,7 @@ void HandleInput_Alt( ovrInputStateTrackedRemote *pDominantTrackedRemoteNew, ovr
                 if (selectingWeapon)
                 {
                     scrollCount++;
-                    sendButtonActionSimple("invnext");
+                    sendButtonActionSimple("invprev");
                 } else{
                     if (scrollCount == 0)
                     {
@@ -438,12 +438,12 @@ void HandleInput_Alt( ovrInputStateTrackedRemote *pDominantTrackedRemoteNew, ovr
                         if (between(0.4f, pDominantTrackedRemoteNew->Joystick.x, 1.0f))
                         {
                             scrollCount++;
-                            sendButtonActionSimple("invnext");
+                            sendButtonActionSimple("invprev");
                         }
                         else
                         {
                             scrollCount--;
-                            sendButtonActionSimple("invprev");
+                            sendButtonActionSimple("invnext");
                         }
                         weaponSwitched = true;
                     }

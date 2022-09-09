@@ -220,19 +220,19 @@ void HandleInput_OneController( ovrInputStateTrackedRemote *pDominantTrackedRemo
                         {
                             if (between(0.75f, pDominantTrackedRemoteNew->Joystick.y, 1.0f))
                             {
-                                sendButtonActionSimple("invprev"); // in this mode is makes more sense to select the next item with Joystick down; this is the mouse wheel behaviour in hl
+                                sendButtonActionSimple("invnext"); // in this mode is makes more sense to select the next item with Joystick down; this is the mouse wheel behaviour in hl
                             }
                             else if (between(-1.0f, pDominantTrackedRemoteNew->Joystick.y, -0.75f))
                             {
-                                sendButtonActionSimple("invnext");
+                                sendButtonActionSimple("invprev");
                             }
                             else if (between(0.75f, pDominantTrackedRemoteNew->Joystick.x, 1.0f))
                             {
-                                sendButtonActionSimple("invnextslot"); // not an original hl methode -> needs update from hlsdk-xash3d
+                                sendButtonActionSimple("invprevslot"); // not an original hl methode -> needs update from hlsdk-xash3d
                             }
                             else if (between(-1.0f, pDominantTrackedRemoteNew->Joystick.x, -0.75f))
                             {
-                                sendButtonActionSimple("invprevslot");
+                                sendButtonActionSimple("invnextslot");
                             }
                             weaponSwitched = true;
                         }
