@@ -437,6 +437,7 @@ import static android.system.Os.setenv;
 			copy_asset("/sdcard/xash/", "Hunger/models/v_9mmar.mdl", true);
 			copy_asset("/sdcard/xash/", "Hunger/models/v_9mmhandgun.mdl", true);
 			copy_asset("/sdcard/xash/", "Hunger/models/v_ap9.mdl", true);
+			copy_asset("/sdcard/xash/", "Hunger/models/v_crowbar.mdl", true);
 			copy_asset("/sdcard/xash/", "Hunger/models/v_egon.mdl", true);
 			copy_asset("/sdcard/xash/", "Hunger/models/v_hkg36.mdl", true);
 			copy_asset("/sdcard/xash/", "Hunger/models/v_shotgun.mdl", true);
