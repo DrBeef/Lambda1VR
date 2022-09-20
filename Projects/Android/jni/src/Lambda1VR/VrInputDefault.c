@@ -86,8 +86,9 @@ void HandleInput_Default( ovrInputStateTrackedRemote *pDominantTrackedRemoteNew,
 		}
 	}
 
-	//Menu button - always on the left controller
+	//Menu button - always on the left controller (unless its on the right - GB)
 	handleTrackedControllerButton(&leftTrackedRemoteState_new, &leftTrackedRemoteState_old, ovrButton_Enter, K_ESCAPE);
+    handleTrackedControllerButton(&rightTrackedRemoteState_new, &rightTrackedRemoteState_old, ovrButton_Enter, K_ESCAPE);
 
 	//Menu control - Uses "touch"
 	if (useScreenLayer())
