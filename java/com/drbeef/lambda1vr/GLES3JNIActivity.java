@@ -489,6 +489,10 @@ import static android.system.Os.setenv;
 				//Use pipewrench as backpack weapon in opposing force
 				setenv("VR_BACKPACK_WEAPON", "weapon_pipewrench", true);
 			}
+			else if (game.equalsIgnoreCase("bshift"))
+			{
+				setenv("XASH3D_LIBSUFFIX", "_bshift", true);
+			}
 			else if (game.equalsIgnoreCase("aomdc"))
 			{
 				setenv("XASH3D_LIBSUFFIX", "_aomdc", true);

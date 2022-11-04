@@ -30,7 +30,7 @@ HLSDK_PATH  := $(APPLICATIONMK_PATH)/src/HLSDK/halflife/
 # step will error as we currently remove prebuilt artifacts on clean.
 APP_ALLOW_MISSING_DEPS=true
 
-APP_MODULES := gl4es xash menu client server client_opfor server_opfor client_aomdc server_aomdc client_theyhunger server_theyhunger
+APP_MODULES := gl4es xash menu client server client_bshift server_bshift client_opfor server_opfor client_aomdc server_aomdc client_theyhunger server_theyhunger
 APP_STL := c++_shared
 
 
