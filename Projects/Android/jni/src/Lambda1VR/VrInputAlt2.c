@@ -209,7 +209,50 @@ void HandleInput_Alt2( ovrInputStateTrackedRemote *pDominantTrackedRemoteNew, ov
 			weaponangles[MELEE][YAW] += (cl.refdef.cl_viewangles[YAW] - hmdorientation[YAW]);
 			weaponangles[MELEE][PITCH] *= -1.0f;
 
-			//Use (Action)
+			// Use (Action gesture)
+			if (vr_gesture_triggered_use->integer) {
+				bool gestureUseAllowed = !vr_weapon_stabilised->value;
+				// Off-hand gesture
+				float xOffset = hmdPosition[0] - pOffTracking->HeadPose.Pose.Position.x;
+				float zOffset = hmdPosition[2] - pOffTracking->HeadPose.Pose.Position.z;
+				float distanceToBody = sqrtf((xOffset * xOffset) + (zOffset * zOffset));
+				if (gestureUseAllowed && (distanceToBody > vr_use_gesture_boundary->value)) {
+					if (!(use_gesture_state & VR_USE_GESTURE_OFF_HAND)) {
+						sendButtonAction("+use2", true);
+					}
+					use_gesture_state |= VR_USE_GESTURE_OFF_HAND;
+				} else {
+					if (use_gesture_state & VR_USE_GESTURE_OFF_HAND) {
+						sendButtonAction("+use2", false);
+					}
+					use_gesture_state &= ~VR_USE_GESTURE_OFF_HAND;
+				}
+				// Weapon-hand gesture
+				xOffset = hmdPosition[0] - pDominantTracking->HeadPose.Pose.Position.x;
+				zOffset = hmdPosition[2] - pDominantTracking->HeadPose.Pose.Position.z;
+				distanceToBody = sqrtf((xOffset * xOffset) + (zOffset * zOffset));
+				if (gestureUseAllowed && (distanceToBody > vr_use_gesture_boundary->value)) {
+					if (!(use_gesture_state & VR_USE_GESTURE_WEAPON_HAND)) {
+						sendButtonAction("+use", true);
+					}
+					use_gesture_state |= VR_USE_GESTURE_WEAPON_HAND;
+				} else {
+					if (use_gesture_state & VR_USE_GESTURE_WEAPON_HAND) {
+						sendButtonAction("+use", false);
+					}
+					use_gesture_state &= ~VR_USE_GESTURE_WEAPON_HAND;
+				}
+			} else {
+				if (use_gesture_state & VR_USE_GESTURE_OFF_HAND) {
+					sendButtonAction("+use2", false);
+				}
+				if (use_gesture_state & VR_USE_GESTURE_WEAPON_HAND) {
+					sendButtonAction("+use", false);
+				}
+				use_gesture_state = 0;
+			}
+
+			// Use (Action button)
 			if ((pDominantTrackedRemoteNew->Buttons & ovrButton_Joystick) !=
 				(pDominantTrackedRemoteOld->Buttons & ovrButton_Joystick)) {
 

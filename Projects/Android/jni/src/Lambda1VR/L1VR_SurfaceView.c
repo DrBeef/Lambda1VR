@@ -1376,6 +1376,8 @@ convar_t	*vr_highlight_actionables;
 convar_t	*vr_headtorch;
 convar_t	*vr_quick_crouchjump;
 convar_t	*vr_stereo_side;
+convar_t	*vr_gesture_triggered_use;
+convar_t	*vr_use_gesture_boundary;
 
 void Android_Vibrate( float duration, int channel, float intensity )
 {
@@ -1439,6 +1441,8 @@ void VR_Init()
 	vr_highlight_actionables = Cvar_Get( "vr_highlight_actionables", "1", CVAR_ARCHIVE, "Set to 0 to disable highlighting of actionable objects/entities" );
 	vr_headtorch = Cvar_Get( "vr_headtorch", "0", CVAR_ARCHIVE, "Set to 1 to enable head-torch flashlight mode" );
     vr_quick_crouchjump = Cvar_Get( "vr_quick_crouchjump", "1", CVAR_ARCHIVE, "Set to 0 to disable quick crouch-jump mode (double clicking jump button triggers duck)" );
+    vr_gesture_triggered_use = Cvar_Get( "vr_gesture_triggered_use", "0", CVAR_ARCHIVE, "Set to 0 to disable use gesture, 1 to enable" );
+    vr_use_gesture_boundary = Cvar_Get( "vr_use_gesture_boundary", "0.35", CVAR_ARCHIVE, "Use gesture boundary" );
 
     //Not to be changed by users, as it will be overwritten anyway
 	vr_stereo_side = Cvar_Get( "vr_stereo_side", "0", CVAR_READ_ONLY, "Eye being drawn" );

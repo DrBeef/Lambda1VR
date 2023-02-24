@@ -677,6 +677,14 @@ qboolean Delta_ParseField( char **delta_script, const delta_field_t *pInfo, delt
 	*delta_script = COM_ParseFile( *delta_script, token );
 	if( token[0] != ',' ) *delta_script = oldpos; // not a ','
 
+	// Ugly hack, but we need bigger size of buttons fields to be able to pass additional "use2" command state.
+    // Based on tests should not cause problems with multiplayer, but allow this to be disabled just in case.
+    int forceCompatibility = Cvar_Get("vr_force_network_compatibility", "0", CVAR_LATCH, "")->integer;
+	if (!forceCompatibility && !Q_strcmp( pField->name, "buttons" )) {
+		pField->flags = 8; // DT_INTEGER
+		pField->bits = 17;
+	}
+
 	return true;
 }
 
