@@ -1,6 +1,7 @@
 
 package com.drbeef.lambda1vr;
 
+import static android.system.Os.setenv;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -10,6 +11,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Locale;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -18,6 +20,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -32,9 +35,24 @@ import static android.system.Os.setenv;
 
 @SuppressLint("SdCardPath") public class GLES3JNIActivity extends Activity implements SurfaceHolder.Callback
 {
-	// Load the gles3jni library right away to make sure JNI_OnLoad() gets called as the very first thing.
+	private static String manufacturer = "";
+
 	static
 	{
+		manufacturer = Build.MANUFACTURER.toLowerCase(Locale.ROOT);
+		if (manufacturer.contains("oculus")) // rename oculus to meta as this will probably happen in the future anyway
+		{
+			manufacturer = "meta";
+		}
+
+		try
+		{
+			//Load manufacturer specific loader
+			System.loadLibrary("openxr_loader_" + manufacturer);
+			setenv("OPENXR_HMD", manufacturer, true);
+		} catch (Exception e)
+		{}
+
 		System.loadLibrary( "xash" );
 	}
 

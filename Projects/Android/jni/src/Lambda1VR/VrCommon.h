@@ -4,11 +4,9 @@
 
 #include <xash3d_types.h>
 
-#include <VrApi_Input.h>
-
 #include <android/log.h>
 
-#define LOG_TAG "Lambda1VR"
+#include "TBXR_Common.h"
 
 #ifndef NDEBUG
 #define DEBUG 1
@@ -21,6 +19,13 @@
 #else
 #define ALOGV(...)
 #endif
+
+extern ovrInputStateTrackedRemote leftTrackedRemoteState_old;
+extern ovrInputStateTrackedRemote leftTrackedRemoteState_new;
+extern ovrTrackedController leftRemoteTracking_new;
+extern ovrInputStateTrackedRemote rightTrackedRemoteState_old;
+extern ovrInputStateTrackedRemote rightTrackedRemoteState_new;
+extern ovrTrackedController rightRemoteTracking_new;
 
 #define PITCH 0
 #define YAW 1
@@ -64,16 +69,8 @@ bool isScopeEngaged();
 bool isPlayerDead();
 
 
-float radians(float deg);
-float degrees(float rad);
-double GetTimeInMilliSeconds();
 float length(float x, float y);
 float nonLinearFilter(float in);
 bool between(float min, float val, float max);
-void rotateAboutOrigin(float v1, float v2, float rotation, vec2_t out);
-void QuatToYawPitchRoll(ovrQuatf q, float pitchAdjust, vec3_t out);
-bool useScreenLayer();
-void handleTrackedControllerButton(ovrInputStateTrackedRemote * trackedRemoteState, ovrInputStateTrackedRemote * prevTrackedRemoteState, uint32_t button, int key);
-void Android_Vibrate( float duration, int channel, float intensity );
 
 #endif //VRCOMMON_H

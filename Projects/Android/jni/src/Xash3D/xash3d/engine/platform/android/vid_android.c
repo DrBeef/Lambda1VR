@@ -311,7 +311,7 @@ void R_ChangeDisplaySettingsFast( int width, int height )
 
 rserr_t R_ChangeDisplaySettings( int width, int height, qboolean fullscreen )
 {
-	Android_GetScreenRes(&width, &height);
+	TBXR_GetScreenRes(&width, &height);
 	R_SaveVideoMode( width, height );
 
 	host.window_center_x = width / 2;
@@ -344,7 +344,7 @@ Set the described video mode
 qboolean VID_SetMode( void )
 {
 	int width, height;
-	Android_GetScreenRes( &width, &height );
+	TBXR_GetScreenRes( &width, &height );
 	MsgDev( D_NOTE, "VID_SetMode(%d, %d)\n", width, height);
 	R_ChangeDisplaySettings( width, height, false );
 	return true;

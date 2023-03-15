@@ -7,8 +7,6 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE := xash
 
-APP_PLATFORM := android-19
-
 include $(XASH3D_CONFIG)
 
 LOCAL_CFLAGS += -D__MULTITEXTURE_SUPPORT__ -DXASH_GLES -DXASH_GL4ES -DUSE_EVDEV -DXASH_DYNAMIC_DLADDR -DCRASHHANDLER -DXASH_OPENSL -DXASH_SKIPCRTLIB -DXASH_FORCEINLINE -DXASH_FASTSTR
@@ -34,18 +32,21 @@ LOCAL_C_INCLUDES := \
 	$(LOCAL_PATH)/../pm_shared		    \
 	$(LOCAL_PATH)/../			    \
 	$(LOCAL_PATH)/../utils/vgui/include	    \
-	$(HLSDK_PATH)/cl_dll/
+	$(HLSDK_PATH)/cl_dll/ \
+    ${TOP_DIR}/OpenXR-SDK/include \
+    ${TOP_DIR}/OpenXR-SDK/src/common
 
 LOCAL_EXPORT_C_INCLUDES := $(LOCAL_C_INCLUDES)
 
 LAMBDA1VR_SRC_FILES := \
 		   $(LOCAL_PATH)/../../../Lambda1VR/L1VR_SurfaceView.c \
-		   $(LOCAL_PATH)/../../../Lambda1VR/VrCompositor.c \
+		   $(LOCAL_PATH)/../../../Lambda1VR/TBXR_Common.c \
+		   $(LOCAL_PATH)/../../../Lambda1VR/OpenXrInput.c \
 		   $(LOCAL_PATH)/../../../Lambda1VR/VrInputCommon.c \
 		   $(LOCAL_PATH)/../../../Lambda1VR/VrInputDefault.c \
 		   $(LOCAL_PATH)/../../../Lambda1VR/VrInputAlt.c \
 		   $(LOCAL_PATH)/../../../Lambda1VR/VrInputAlt2.c \
-		   $(LOCAL_PATH)/../../../Lambda1VR/VrInputOneController.c \
+		   $(LOCAL_PATH)/../../../Lambda1VR/VrInputOne.c \
 		   $(LOCAL_PATH)/../../../Lambda1VR/argtable3.c
 
 LOCAL_SRC_FILES := \
@@ -179,10 +180,9 @@ LOCAL_SRC_FILES := \
            platform/android/android_nosdl.c \
            platform/android/dlsym-weak.cpp
 
-#LOCAL_STATIC_LIBRARIES := GL
 LOCAL_LDLIBS			:= -ldl -llog -landroid -lGLESv3 -lEGL		# include default libraries
-LOCAL_SHARED_LIBRARIES	:= vrapi gl4es
+LOCAL_SHARED_LIBRARIES	:= openxr_loader gl4es
 
 include $(BUILD_SHARED_LIBRARY)
 
-$(call import-module,VrApi/Projects/AndroidPrebuilt/jni)
+$(call import-module,AndroidPrebuilt/jni)

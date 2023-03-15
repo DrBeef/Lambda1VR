@@ -15,15 +15,7 @@ Authors		:	Simon Brown
 #include <client/touch.h>
 #include <client/client.h>
 
-#include <VrApi.h>
-#include <VrApi_Helpers.h>
-#include <VrApi_SystemUtils.h>
-#include <VrApi_Input.h>
-#include <VrApi_Types.h>
-
 #include "VrInput.h"
-
-ovrDeviceID controllerIDs[2];
 
 bool xash_initialised;
 
@@ -56,11 +48,11 @@ char * g_pszBackpackWeapon;
 
 ovrInputStateTrackedRemote leftTrackedRemoteState_old;
 ovrInputStateTrackedRemote leftTrackedRemoteState_new;
-ovrTracking leftRemoteTracking_new;
+ovrTrackedController leftRemoteTracking_new;
 
 ovrInputStateTrackedRemote rightTrackedRemoteState_old;
 ovrInputStateTrackedRemote rightTrackedRemoteState_new;
-ovrTracking rightRemoteTracking_new;
+ovrTrackedController rightRemoteTracking_new;
 
 float remote_movementSideways;
 float remote_movementForward;
@@ -68,7 +60,6 @@ float positional_movementSideways;
 float positional_movementForward;
 float snapTurn;
 
-int hmdType;
 
 void handleTrackedControllerButton(ovrInputStateTrackedRemote * trackedRemoteState, ovrInputStateTrackedRemote * prevTrackedRemoteState, uint32_t button, int key)
 {
@@ -83,23 +74,6 @@ static void Matrix4x4_Transform (const matrix4x4 *in, const float v[3], float ou
     out[0] = v[0] * (*in)[0][0] + v[1] * (*in)[0][1] + v[2] * (*in)[0][2] + (*in)[0][3];
     out[1] = v[0] * (*in)[1][0] + v[1] * (*in)[1][1] + v[2] * (*in)[1][2] + (*in)[1][3];
     out[2] = v[0] * (*in)[2][0] + v[1] * (*in)[2][1] + v[2] * (*in)[2][2] + (*in)[2][3];
-}
-
-void rotateAboutOrigin(float v1, float v2, float rotation, vec2_t out)
-{
-    vec3_t temp = {0.0f, 0.0f, 0.0f};
-    temp[0] = v1;
-    temp[1] = v2;
-
-    vec3_t v = {0.0f, 0.0f, 0.0f};
-    matrix4x4 matrix;
-    vec3_t angles = {0.0f, rotation, 0.0f};
-    vec3_t origin = {0.0f, 0.0f, 0.0f};
-    Matrix4x4_CreateFromEntity(matrix, angles, origin, 1.0f);
-    Matrix4x4_Transform(&matrix, temp, v);
-
-    out[0] = v[0];
-    out[1] = v[1];
 }
 
 float length(float x, float y)
@@ -155,49 +129,14 @@ void sendButtonAction(const char* action, long buttonDown)
 
 }
 
-void acquireTrackedRemotesData(const ovrMobile *Ovr, double displayTime) {//The amount of yaw changed by controller
-    for ( int i = 0; ; i++ ) {
-        ovrInputCapabilityHeader cap;
-        ovrResult result = vrapi_EnumerateInputDevices(Ovr, i, &cap);
-        if (result < 0) {
-            break;
-        }
-
-        if (cap.Type == ovrControllerType_TrackedRemote) {
-            ovrTracking remoteTracking;
-            ovrInputStateTrackedRemote trackedRemoteState;
-            trackedRemoteState.Header.ControllerType = ovrControllerType_TrackedRemote;
-            result = vrapi_GetCurrentInputState(Ovr, cap.DeviceID, &trackedRemoteState.Header);
-
-            if (result == ovrSuccess) {
-                ovrInputTrackedRemoteCapabilities remoteCapabilities;
-                remoteCapabilities.Header = cap;
-                result = vrapi_GetInputDeviceCapabilities(Ovr, &remoteCapabilities.Header);
-
-                result = vrapi_GetInputTrackingState(Ovr, cap.DeviceID, displayTime,
-                                                     &remoteTracking);
-
-                if (remoteCapabilities.ControllerCapabilities & ovrControllerCaps_RightHand) {
-                    rightTrackedRemoteState_new = trackedRemoteState;
-                    rightRemoteTracking_new = remoteTracking;
-                    controllerIDs[1] = cap.DeviceID;
-                } else{
-                    leftTrackedRemoteState_new = trackedRemoteState;
-                    leftRemoteTracking_new = remoteTracking;
-                    controllerIDs[0] = cap.DeviceID;
-                }
-            }
-        }
-    }
-}
-
 int IN_TouchEvent( touchEventType type, int fingerID, float x, float y, float dx, float dy );
 
 extern float initialTouchX, initialTouchY;
 
-void interactWithTouchScreen(ovrTracking *tracking, ovrInputStateTrackedRemote *newState, ovrInputStateTrackedRemote *oldState) {
+void interactWithTouchScreen(ovrTrackedController *tracking, ovrInputStateTrackedRemote *newState, ovrInputStateTrackedRemote *oldState) {
     float remoteAngles[3];
-    QuatToYawPitchRoll(tracking->HeadPose.Pose.Orientation, 0.0f, remoteAngles);
+    vec3_t rotation = {0, 0, 0};
+    QuatToYawPitchRoll(tracking->Pose.orientation, rotation, remoteAngles);
     float yaw = remoteAngles[YAW] - playerYaw;
 
     //Adjust for maximum yaw values
@@ -207,8 +146,8 @@ void interactWithTouchScreen(ovrTracking *tracking, ovrInputStateTrackedRemote *
     if (yaw > -40.0f && yaw < 40.0f &&
         remoteAngles[PITCH] > -22.5f && remoteAngles[PITCH] < 22.5f) {
 
-        int newRemoteTrigState = (newState->Buttons & ovrButton_Trigger) != 0;
-        int prevRemoteTrigState = (oldState->Buttons & ovrButton_Trigger) != 0;
+        int newRemoteTrigState = (newState->Buttons & xrButton_Trigger) != 0;
+        int prevRemoteTrigState = (oldState->Buttons & xrButton_Trigger) != 0;
 
         touchEventType t = event_motion;
 
@@ -261,9 +200,9 @@ void updateScopeAngles(float forwardYaw)
 
 
 // Check if pTracking is within 0.4 of the HMD and in a 120 degree arc "behind" it
-bool isBackpack(ovrTracking* pTracking)
+bool isBackpack(ovrTrackedController* pTracking)
 {
-    const ovrVector3f position = pTracking->HeadPose.Pose.Position;
+    const XrVector3f position = pTracking->Pose.position;
     double distanceFromHmd = sqrtf(
             ((hmdPosition[0] - position.x) * (hmdPosition[0] - position.x)) +
             ((hmdPosition[1] - position.y) * (hmdPosition[1] - position.y)) +

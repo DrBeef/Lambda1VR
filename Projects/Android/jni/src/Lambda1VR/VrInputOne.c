@@ -15,12 +15,6 @@ Authors		:	Simon Brown
 #include <client/touch.h>
 #include <client/client.h>
 
-#include <VrApi.h>
-#include <VrApi_Helpers.h>
-#include <VrApi_SystemUtils.h>
-#include <VrApi_Input.h>
-#include <VrApi_Types.h>
-
 #include "VrInput.h"
 #include "VrCvars.h"
 #include "../Xash3D/xash3d/engine/client/client.h"
@@ -33,8 +27,8 @@ void Touch_Motion( touchEventType type, int fingerID, float x, float y, float dx
 extern float initialTouchX, initialTouchY;
 
 
-void HandleInput_OneController( ovrInputStateTrackedRemote *pDominantTrackedRemoteNew, ovrInputStateTrackedRemote *pDominantTrackedRemoteOld, ovrTracking* pDominantTracking,
-                          ovrInputStateTrackedRemote *pOffTrackedRemoteNew, ovrInputStateTrackedRemote *pOffTrackedRemoteOld, ovrTracking* pOffTracking,
+void HandleInput_OneController( ovrInputStateTrackedRemote *pDominantTrackedRemoteNew, ovrInputStateTrackedRemote *pDominantTrackedRemoteOld, ovrTrackedController* pDominantTracking,
+                          ovrInputStateTrackedRemote *pOffTrackedRemoteNew, ovrInputStateTrackedRemote *pOffTrackedRemoteOld, ovrTrackedController* pOffTracking,
                           int domButton1, int domButton2, int offButton1, int offButton2 )
 {
 	//Ensure handedness is set correctly
@@ -47,23 +41,23 @@ void HandleInput_OneController( ovrInputStateTrackedRemote *pDominantTrackedRemo
 	static float dominantGripPushTime = 0.0f;
 
 	//Menu button - always on the left controller - unavoidable
-	handleTrackedControllerButton(&leftTrackedRemoteState_new, &leftTrackedRemoteState_old, ovrButton_Enter, K_ESCAPE);
+	handleTrackedControllerButton(&leftTrackedRemoteState_new, &leftTrackedRemoteState_old, xrButton_Enter, K_ESCAPE);
 
     //Menu control - Uses "touch"
-	if (useScreenLayer())
+	if (VR_UseScreenLayer())
 	{
         interactWithTouchScreen(pDominantTracking, pDominantTrackedRemoteNew, pDominantTrackedRemoteOld);
 	}
 	else
 	{
 		//If distance to off-hand remote is less than 35cm and user pushes grip, then we enable weapon stabilisation
-		float distance = sqrtf(powf(pOffTracking->HeadPose.Pose.Position.x - pDominantTracking->HeadPose.Pose.Position.x, 2) +
-							   powf(pOffTracking->HeadPose.Pose.Position.y - pDominantTracking->HeadPose.Pose.Position.y, 2) +
-							   powf(pOffTracking->HeadPose.Pose.Position.z - pDominantTracking->HeadPose.Pose.Position.z, 2));
+		float distance = sqrtf(powf(pOffTracking->Pose.position.x - pDominantTracking->Pose.position.x, 2) +
+							   powf(pOffTracking->Pose.position.y - pDominantTracking->Pose.position.y, 2) +
+							   powf(pOffTracking->Pose.position.z - pDominantTracking->Pose.position.z, 2));
 
-		float distanceToHMD = sqrtf(powf(hmdPosition[0] - pDominantTracking->HeadPose.Pose.Position.x, 2) +
-									powf(hmdPosition[1] - pDominantTracking->HeadPose.Pose.Position.y, 2) +
-									powf(hmdPosition[2] - pDominantTracking->HeadPose.Pose.Position.z, 2));
+		float distanceToHMD = sqrtf(powf(hmdPosition[0] - pDominantTracking->Pose.position.x, 2) +
+									powf(hmdPosition[1] - pDominantTracking->Pose.position.y, 2) +
+									powf(hmdPosition[2] - pDominantTracking->Pose.position.z, 2));
 
 		static float forwardYaw = 0;
 		if (!isScopeEngaged())
@@ -74,9 +68,9 @@ void HandleInput_OneController( ovrInputStateTrackedRemote *pDominantTrackedRemo
 		//dominant hand stuff first
 		{
 			///Weapon location relative to view
-			weaponoffset[0] = pDominantTracking->HeadPose.Pose.Position.x - hmdPosition[0];
-			weaponoffset[1] = pDominantTracking->HeadPose.Pose.Position.y - hmdPosition[1];
-			weaponoffset[2] = pDominantTracking->HeadPose.Pose.Position.z - hmdPosition[2];
+			weaponoffset[0] = pDominantTracking->Pose.position.x - hmdPosition[0];
+			weaponoffset[1] = pDominantTracking->Pose.position.y - hmdPosition[1];
+			weaponoffset[2] = pDominantTracking->Pose.position.z - hmdPosition[2];
 
 			{
 				vec2_t v;
@@ -91,9 +85,9 @@ void HandleInput_OneController( ovrInputStateTrackedRemote *pDominantTrackedRemo
 			}
 
 			//Weapon velocity
-			weaponvelocity[0] = pDominantTracking->HeadPose.LinearVelocity.x;
-			weaponvelocity[1] = pDominantTracking->HeadPose.LinearVelocity.y;
-			weaponvelocity[2] = pDominantTracking->HeadPose.LinearVelocity.z;
+			weaponvelocity[0] = pDominantTracking->Velocity.linearVelocity.x;
+			weaponvelocity[1] = pDominantTracking->Velocity.linearVelocity.y;
+			weaponvelocity[2] = pDominantTracking->Velocity.linearVelocity.z;
 
 			{
 				vec2_t v;
@@ -109,10 +103,13 @@ void HandleInput_OneController( ovrInputStateTrackedRemote *pDominantTrackedRemo
 
 
 			//Set gun angles
-			const ovrQuatf quatRemote = pDominantTracking->HeadPose.Pose.Orientation;
-			QuatToYawPitchRoll(quatRemote, vr_weapon_pitchadjust->value, weaponangles[ADJUSTED]);
-			QuatToYawPitchRoll(quatRemote, 0.0f, weaponangles[UNADJUSTED]);
-			QuatToYawPitchRoll(quatRemote, vr_crowbar_pitchadjust->value, weaponangles[MELEE]);
+            vec3_t rotation = {0};
+            rotation[PITCH] = vr_weapon_pitchadjust->value;
+            QuatToYawPitchRoll(pDominantTracking->Pose.orientation, rotation, weaponangles[ADJUSTED]);
+            rotation[PITCH] = 0.0f;
+            QuatToYawPitchRoll(pDominantTracking->Pose.orientation, rotation, weaponangles[UNADJUSTED]);
+            rotation[PITCH] = vr_crowbar_pitchadjust->value;
+            QuatToYawPitchRoll(pDominantTracking->Pose.orientation, rotation, weaponangles[MELEE]);
 
 			weaponangles[ADJUSTED][YAW] += (cl.refdef.cl_viewangles[YAW] - hmdorientation[YAW]);
 			weaponangles[ADJUSTED][PITCH] *= -1.0f;
@@ -130,18 +127,18 @@ void HandleInput_OneController( ovrInputStateTrackedRemote *pDominantTrackedRemo
 				finishReloadNextFrame = false;
 			}
 
-			if ((pDominantTrackedRemoteNew->Buttons & ovrButton_GripTrigger) !=
-				(pDominantTrackedRemoteOld->Buttons & ovrButton_GripTrigger)) {
+			if ((pDominantTrackedRemoteNew->Buttons & xrButton_GripTrigger) !=
+				(pDominantTrackedRemoteOld->Buttons & xrButton_GripTrigger)) {
 
 				dominantGripPushed = (pDominantTrackedRemoteNew->Buttons &
-									  ovrButton_GripTrigger) != 0;
+									  xrButton_GripTrigger) != 0;
 
 				if (!isBackpack(pDominantTracking)) {
 
 					if (dominantGripPushed) {
-						dominantGripPushTime = GetTimeInMilliSeconds();
+						dominantGripPushTime = TBXR_GetTimeInMilliSeconds();
 					} else {
-						if ((GetTimeInMilliSeconds() - dominantGripPushTime) <
+						if ((TBXR_GetTimeInMilliSeconds() - dominantGripPushTime) <
 							vr_reloadtimeoutms->integer) {
 							sendButtonActionSimple("+reload");
 							finishReloadNextFrame = true;
@@ -162,9 +159,9 @@ void HandleInput_OneController( ovrInputStateTrackedRemote *pDominantTrackedRemo
         }
         else
         {
-            flashlightoffset[0] = pOffTracking->HeadPose.Pose.Position.x - hmdPosition[0];
-            flashlightoffset[1] = pOffTracking->HeadPose.Pose.Position.y - hmdPosition[1];
-            flashlightoffset[2] = pOffTracking->HeadPose.Pose.Position.z - hmdPosition[2];
+            flashlightoffset[0] = pOffTracking->Pose.position.x - hmdPosition[0];
+            flashlightoffset[1] = pOffTracking->Pose.position.y - hmdPosition[1];
+            flashlightoffset[2] = pOffTracking->Pose.position.z - hmdPosition[2];
 
             vec2_t v;
             rotateAboutOrigin(flashlightoffset[0], flashlightoffset[2],
@@ -172,8 +169,10 @@ void HandleInput_OneController( ovrInputStateTrackedRemote *pDominantTrackedRemo
             flashlightoffset[0] = v[0];
             flashlightoffset[2] = v[1];
 
-            QuatToYawPitchRoll(pOffTracking->HeadPose.Pose.Orientation, 0.0f, offhandangles);
-            QuatToYawPitchRoll(pOffTracking->HeadPose.Pose.Orientation, 15.0f, flashlightangles);
+            vec3_t rotation = {0};
+            QuatToYawPitchRoll(pOffTracking->Pose.orientation, rotation, offhandangles);
+            rotation[PITCH] = 15.0f;
+            QuatToYawPitchRoll(pOffTracking->Pose.orientation, rotation, flashlightangles);
         }
 
         flashlightangles[YAW] += (cl.refdef.cl_viewangles[YAW] - hmdorientation[YAW]);
@@ -186,7 +185,7 @@ void HandleInput_OneController( ovrInputStateTrackedRemote *pDominantTrackedRemo
 			//This section corrects for the fact that the controller actually controls direction of movement, but we want to move relative to the direction the
 			//player is facing for positional tracking
 			float multiplier = vr_positional_factor->value / (cl_forwardspeed->value *
-					((pOffTrackedRemoteNew->Buttons & ovrButton_Trigger) ? cl_movespeedkey->value : 1.0f));
+					((pOffTrackedRemoteNew->Buttons & xrButton_Trigger) ? cl_movespeedkey->value : 1.0f));
 
 			//If player is ducked then multiply by 3 otherwise positional tracking feels very wrong
 			if (ducked != DUCK_NOTDUCKED)
@@ -205,7 +204,7 @@ void HandleInput_OneController( ovrInputStateTrackedRemote *pDominantTrackedRemo
 				  positional_movementForward);
 
             shifted = (dominantGripPushed &&
-                (GetTimeInMilliSeconds() - dominantGripPushTime) > vr_reloadtimeoutms->integer);
+                (TBXR_GetTimeInMilliSeconds() - dominantGripPushTime) > vr_reloadtimeoutms->integer);
 
             static bool using = false;
             static bool weaponSwitched = false;
@@ -279,17 +278,17 @@ void HandleInput_OneController( ovrInputStateTrackedRemote *pDominantTrackedRemo
             }
 
             //Fire Primary
-            if ((pDominantTrackedRemoteNew->Buttons & ovrButton_Trigger) !=
-                (pDominantTrackedRemoteOld->Buttons & ovrButton_Trigger)) {
+            if ((pDominantTrackedRemoteNew->Buttons & xrButton_Trigger) !=
+                (pDominantTrackedRemoteOld->Buttons & xrButton_Trigger)) {
 
-                bool firingPrimary = (pDominantTrackedRemoteNew->Buttons & ovrButton_Trigger);
+                bool firingPrimary = (pDominantTrackedRemoteNew->Buttons & xrButton_Trigger);
                 sendButtonAction("+attack", firingPrimary);
             }
 
             //Laser Sight
-            if ((pOffTrackedRemoteNew->Buttons & ovrButton_Joystick) !=
-                (pOffTrackedRemoteOld->Buttons & ovrButton_Joystick)
-                && (pOffTrackedRemoteNew->Buttons & ovrButton_Joystick)) {
+            if ((pOffTrackedRemoteNew->Buttons & xrButton_Joystick) !=
+                (pOffTrackedRemoteOld->Buttons & xrButton_Joystick)
+                && (pOffTrackedRemoteNew->Buttons & xrButton_Joystick)) {
 
                 Cvar_SetFloat("vr_lasersight", (int)(vr_lasersight->value + 1) % 3);
 
@@ -343,11 +342,11 @@ void HandleInput_OneController( ovrInputStateTrackedRemote *pDominantTrackedRemo
                 }
 
                 //Use (Action)
-                if ((pDominantTrackedRemoteNew->Buttons & ovrButton_Joystick) !=
-                    (pDominantTrackedRemoteOld->Buttons & ovrButton_Joystick)) {
+                if ((pDominantTrackedRemoteNew->Buttons & xrButton_Joystick) !=
+                    (pDominantTrackedRemoteOld->Buttons & xrButton_Joystick)) {
 
-                    using = (pDominantTrackedRemoteNew->Buttons & ovrButton_Joystick);
-                    sendButtonAction("+use", (pDominantTrackedRemoteNew->Buttons & ovrButton_Joystick));
+                    using = (pDominantTrackedRemoteNew->Buttons & xrButton_Joystick);
+                    sendButtonAction("+use", (pDominantTrackedRemoteNew->Buttons & xrButton_Joystick));
                 }
             }
             else
@@ -363,30 +362,30 @@ void HandleInput_OneController( ovrInputStateTrackedRemote *pDominantTrackedRemo
                 }
 
                 //Start of Jump logic - initialise timer
-                if (((pDominantTrackedRemoteNew->Buttons & ovrButton_Joystick) !=
-                     (pDominantTrackedRemoteOld->Buttons & ovrButton_Joystick)))
+                if (((pDominantTrackedRemoteNew->Buttons & xrButton_Joystick) !=
+                     (pDominantTrackedRemoteOld->Buttons & xrButton_Joystick)))
                 {
-                    if (pDominantTrackedRemoteNew->Buttons & ovrButton_Joystick)
+                    if (pDominantTrackedRemoteNew->Buttons & xrButton_Joystick)
                     {
-                        jumpTimer = GetTimeInMilliSeconds();
+                        jumpTimer = TBXR_GetTimeInMilliSeconds();
                     }
                 }
 
                 if (jumpMode == 0) {
 
                     //Jump Mode 0:  Jump -> {Duck}
-					sendButtonAction("+jump", pDominantTrackedRemoteNew->Buttons & ovrButton_Joystick);
+					sendButtonAction("+jump", pDominantTrackedRemoteNew->Buttons & xrButton_Joystick);
 
                     //We are in jump macro
                     if (jumpTimer != 0) {
-                        if (GetTimeInMilliSeconds() - jumpTimer > 250) {
+                        if (TBXR_GetTimeInMilliSeconds() - jumpTimer > 250) {
                             duckToggle = false; // Control of ducking now down to this
 
-                            ducked = (pDominantTrackedRemoteNew->Buttons & ovrButton_Joystick) ? DUCK_BUTTON : DUCK_NOTDUCKED;
-                            sendButtonAction("+duck", (pDominantTrackedRemoteNew->Buttons & ovrButton_Joystick));
+                            ducked = (pDominantTrackedRemoteNew->Buttons & xrButton_Joystick) ? DUCK_BUTTON : DUCK_NOTDUCKED;
+                            sendButtonAction("+duck", (pDominantTrackedRemoteNew->Buttons & xrButton_Joystick));
                         }
 
-                        if (!(pDominantTrackedRemoteNew->Buttons & ovrButton_Joystick)) {
+                        if (!(pDominantTrackedRemoteNew->Buttons & xrButton_Joystick)) {
                             jumpTimer = 0;
                         }
                     }
@@ -397,16 +396,16 @@ void HandleInput_OneController( ovrInputStateTrackedRemote *pDominantTrackedRemo
                         duckToggle = false; // Control of ducking now down to this
 
                         //Jump Mode 1:  Duck -> Jump
-                        ducked = (pDominantTrackedRemoteNew->Buttons & ovrButton_Joystick)
+                        ducked = (pDominantTrackedRemoteNew->Buttons & xrButton_Joystick)
                                  ? DUCK_BUTTON : DUCK_NOTDUCKED;
                         sendButtonAction("+duck", (pDominantTrackedRemoteNew->Buttons &
-                                                   ovrButton_Joystick));
+                                                   xrButton_Joystick));
 
-                        if (GetTimeInMilliSeconds() - jumpTimer > 250) {
-							sendButtonAction("+jump", pDominantTrackedRemoteNew->Buttons & ovrButton_Joystick);
+                        if (TBXR_GetTimeInMilliSeconds() - jumpTimer > 250) {
+							sendButtonAction("+jump", pDominantTrackedRemoteNew->Buttons & xrButton_Joystick);
 						}
 
-                        if (!(pDominantTrackedRemoteNew->Buttons & ovrButton_Joystick)) {
+                        if (!(pDominantTrackedRemoteNew->Buttons & xrButton_Joystick)) {
                             jumpTimer = 0;
                         }
                     }

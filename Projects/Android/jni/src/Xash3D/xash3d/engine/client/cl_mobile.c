@@ -36,7 +36,7 @@ static void pfnVibrate( float duration, int channel, float intensity )
 
 	// here goes platform-specific backends
 #ifdef __ANDROID__
-	Android_Vibrate( duration, channel, intensity );
+	TBXR_Vibrate( duration, channel, intensity );
 #endif
 }
 

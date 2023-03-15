@@ -19,7 +19,7 @@ GNU General Public License for more details.
 //
 // mobility interface implementation
 //
-void Android_Vibrate( float duration, int channel, float intensity );
+void TBXR_Vibrate( int duration, int channel, float intensity );
 void *Android_GetNativeObject( const char *obj );
 
 void Android_ShellExecute( const char *path, const char *parms );
@@ -28,7 +28,7 @@ void Android_ShellExecute( const char *path, const char *parms );
 // android_nosdl.c
 //
 void Android_SwapBuffers();
-void Android_GetScreenRes( int *width, int *height );
+void TBXR_GetScreenRes( int *width, int *height );
 void Android_Init( void );
 void Android_EnableTextInput( qboolean enable, qboolean force );
 void Android_RunEvents( void );

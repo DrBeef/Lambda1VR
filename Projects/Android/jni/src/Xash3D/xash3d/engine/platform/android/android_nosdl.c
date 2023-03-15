@@ -809,7 +809,7 @@ void Android_SwapBuffers()
 
 /*
 ========================
-Android_GetScreenRes
+TBXR_GetScreenRes
 
 Resolution got from last resize event
 ========================
