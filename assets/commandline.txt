@@ -1,1 +1,1 @@
-xash3d -log
+xash3d -game valve

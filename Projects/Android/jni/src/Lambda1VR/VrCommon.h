@@ -68,7 +68,6 @@ bool isMultiplayer();
 bool isScopeEngaged();
 bool isPlayerDead();
 
-
 float length(float x, float y);
 float nonLinearFilter(float in);
 bool between(float min, float val, float max);

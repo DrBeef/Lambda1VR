@@ -191,8 +191,8 @@ void HandleInput_Default( ovrInputStateTrackedRemote *pDominantTrackedRemoteNew,
 				float zxDist = length(x, z);
 
 				if (zxDist != 0.0f && z != 0.0f) {
-                    VectorSet(weaponangles[ADJUSTED], degrees(atanf(y / zxDist)), (forwardYaw+snapTurn) - degrees(atan2f(x, -z)), weaponangles[ADJUSTED][ROLL]);
-                    VectorSet(weaponangles[UNADJUSTED], degrees(atanf(y / zxDist)), (forwardYaw+snapTurn) - degrees(atan2f(x, -z)), weaponangles[UNADJUSTED][ROLL]);
+                     VectorSet(weaponangles[ADJUSTED], RAD2DEG(atanf(y / zxDist)), (forwardYaw+snapTurn) - RAD2DEG(atan2f(x, -z)), weaponangles[ADJUSTED][ROLL]);
+                     VectorSet(weaponangles[UNADJUSTED], RAD2DEG(atanf(y / zxDist)), (forwardYaw+snapTurn) - RAD2DEG(atan2f(x, -z)), weaponangles[UNADJUSTED][ROLL]);
 				}
 			}
 			else
@@ -413,12 +413,11 @@ void HandleInput_Default( ovrInputStateTrackedRemote *pDominantTrackedRemoteNew,
 			static bool weaponSwitched = false;
 			if (vr_snapturn_angle->value != 0) // if snap angle feature is enabled
 			{
-				if (between(-0.25f, pDominantTrackedRemoteNew->Joystick.x, 0.25f) &&
-					(between(0.75f, pDominantTrackedRemoteNew->Joystick.y, 1.0f) ||
-						between(-1.0f, pDominantTrackedRemoteNew->Joystick.y, -0.75f)))
+				if (between(0.6f, pDominantTrackedRemoteNew->Joystick.y, 1.0f) ||
+						between(-1.0f, pDominantTrackedRemoteNew->Joystick.y, -0.6f))
 				{
 					if (!weaponSwitched) {
-						if (between(0.75f, pDominantTrackedRemoteNew->Joystick.y, 1.0f))
+						if (between(0.6f, pDominantTrackedRemoteNew->Joystick.y, 1.0f))
 						{
 							sendButtonActionSimple("invprev");
 						}
@@ -435,27 +434,27 @@ void HandleInput_Default( ovrInputStateTrackedRemote *pDominantTrackedRemoteNew,
 			}
 			else // allow slot selection (columns of weapon hud)
 			{
-				if (between(0.75f, pDominantTrackedRemoteNew->Joystick.y, 1.0f) ||
-					between(-1.0f, pDominantTrackedRemoteNew->Joystick.y, -0.75f) ||
-					between(0.75f, pDominantTrackedRemoteNew->Joystick.x, 1.0f) ||
-					between(-1.0f, pDominantTrackedRemoteNew->Joystick.x, -0.75f))
+				if (between(0.6f, pDominantTrackedRemoteNew->Joystick.y, 1.0f) ||
+					between(-1.0f, pDominantTrackedRemoteNew->Joystick.y, -0.6f) ||
+					between(0.6f, pDominantTrackedRemoteNew->Joystick.x, 1.0f) ||
+					between(-1.0f, pDominantTrackedRemoteNew->Joystick.x, -0.6f))
 				{
 					if (!weaponSwitched) {
 						if (!weaponSwitched)
 						{
-							if (between(0.75f, pDominantTrackedRemoteNew->Joystick.y, 1.0f))
+							if (between(0.6f, pDominantTrackedRemoteNew->Joystick.y, 1.0f))
 							{
 								sendButtonActionSimple("invnext"); // in this mode is makes more sense to select the next item with Joystick down; this is the mouse wheel behaviour in hl
 							}
-							else if (between(-1.0f, pDominantTrackedRemoteNew->Joystick.y, -0.75f))
+							else if (between(-1.0f, pDominantTrackedRemoteNew->Joystick.y, -0.6f))
 							{
 								sendButtonActionSimple("invprev");
 							}
-							else if (between(0.75f, pDominantTrackedRemoteNew->Joystick.x, 1.0f))
+							else if (between(0.6f, pDominantTrackedRemoteNew->Joystick.x, 1.0f))
 							{
 								sendButtonActionSimple("invprevslot"); // not an original hl methode -> needs update from hlsdk-xash3d
 							}
-							else if (between(-1.0f, pDominantTrackedRemoteNew->Joystick.x, -0.75f))
+							else if (between(-1.0f, pDominantTrackedRemoteNew->Joystick.x, -0.6f))
 							{
 								sendButtonActionSimple("invnextslot");
 							}
@@ -519,16 +518,16 @@ void HandleInput_Default( ovrInputStateTrackedRemote *pDominantTrackedRemoteNew,
                       remote_movementForward);
             } else {
                 static bool scopeZoomed = false;
-                if (between(0.75f, pOffTrackedRemoteNew->Joystick.y, 1.0f) ||
-                    between(-1.0f, pOffTrackedRemoteNew->Joystick.y, -0.75f))
+                if (between(0.6f, pOffTrackedRemoteNew->Joystick.y, 1.0f) ||
+                    between(-1.0f, pOffTrackedRemoteNew->Joystick.y, -0.6f))
                 {
                     if (!scopeZoomed)
                     {
-                        if (between(0.75f, pOffTrackedRemoteNew->Joystick.y, 1.0f))
+                        if (between(0.6f, pOffTrackedRemoteNew->Joystick.y, 1.0f))
                         {
                             sendButtonActionSimple("impulse 104"); //zoom in
                         }
-                        else if (between(-1.0f, pOffTrackedRemoteNew->Joystick.y, -0.75f))
+                        else if (between(-1.0f, pOffTrackedRemoteNew->Joystick.y, -0.6f))
                         {
                             sendButtonActionSimple("impulse 105"); //zoom out
                         }

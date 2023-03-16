@@ -28,14 +28,6 @@
 //Let's go to the maximum!
 extern float SS_MULTIPLIER;
 
-float radians(float deg) {
-	return (deg * M_PI) / 180.0;
-}
-
-float degrees(float rad) {
-	return (rad * 180.0) / M_PI;
-}
-
 /* global arg_xxx structs */
 struct arg_dbl *ss;
 struct arg_int *cpu;
@@ -161,6 +153,8 @@ void setWorldPosition( float x, float y, float z )
 
 void VR_SetHMDOrientation(float pitch, float yaw, float roll)
 {
+	VectorSet(hmdorientation, pitch, yaw, roll);
+
 	if (!VR_UseScreenLayer())
 	{
 		playerYaw = yaw;
@@ -243,6 +237,34 @@ void VR_GetMove( float *forward, float *side, float *yaw, float *pitch, float *r
 float VR_GetScreenLayerDistance()
 {
 	return (4.5f);
+}
+
+bool VR_GetVRProjection(int eye, float zNear, float zFar, float* projection)
+{
+	if (strstr(gAppState.OpenXRHMD, "pico") != NULL)
+	{
+		XrMatrix4x4f_CreateProjectionFov(
+				&(gAppState.ProjectionMatrices[eye]), GRAPHICS_OPENGL_ES,
+				gAppState.Projections[eye].fov, zNear, zFar);
+	}
+
+	if (strstr(gAppState.OpenXRHMD, "meta") != NULL)
+	{
+		XrFovf fov = {};
+		for (int eye = 0; eye < ovrMaxNumEyes; eye++)
+		{
+			fov.angleLeft += gAppState.Projections[eye].fov.angleLeft / 2.0f;
+			fov.angleRight += gAppState.Projections[eye].fov.angleRight / 2.0f;
+			fov.angleUp += gAppState.Projections[eye].fov.angleUp / 2.0f;
+			fov.angleDown += gAppState.Projections[eye].fov.angleDown / 2.0f;
+		}
+		XrMatrix4x4f_CreateProjectionFov(
+				&(gAppState.ProjectionMatrices[eye]), GRAPHICS_OPENGL_ES,
+				fov, zNear, zFar);
+	}
+
+	memcpy(projection, gAppState.ProjectionMatrices[eye].m, 16 * sizeof(float));
+	return true;
 }
 
 void R_ChangeDisplaySettings( int width, int height, qboolean fullscreen );
@@ -447,75 +469,71 @@ void * AppThreadFunction( void * parm )
 	bool destroyed = false;
 	while (!destroyed)
 	{
-		TBXR_FrameSetup();
+		//We are now shutting down
+		if (runStatus == 0)
+		{
+			destroyed = true;
+		}
+		else
+		{
+			TBXR_FrameSetup();
 
-		//Call the game drawing code to populate the cylinder layer texture
-		//if we are now shutting down, drop out here
-		if (isHostAlive()) {
-
-			//Seed the random number generator the same for each eye to ensure electricity is drawn the same
-			int lSeed = rand();
-
-			//Set everything up
-			Host_BeginFrame();
-
-			// Render the eye images.
-			for (int eye = 0; eye < ovrMaxNumEyes; eye++)
+			//Call the game drawing code to populate the cylinder layer texture
+			//if we are now shutting down, drop out here
+			if (isHostAlive())
 			{
-				TBXR_prepareEyeBuffer(eye);
 
-				if (gAppState.FrameState.shouldRender)
+				//Seed the random number generator the same for each eye to ensure electricity is drawn the same
+				int lSeed = rand();
+
+				//Set everything up
+				Host_BeginFrame();
+
+				// Render the eye images.
+				for (int eye = 0; eye < ovrMaxNumEyes && isHostAlive(); eye++)
 				{
-				   if (isScopeEngaged()) {
-						//Now do the drawing for this eye - Force the set as it is a "read only" cvar
-						char buffer[5];
-						Q_snprintf(buffer, 5, "%i", eye+2);
-						Cvar_Set2("vr_stereo_side", buffer, true);
-					}
-					else
+					TBXR_prepareEyeBuffer(eye);
+
+					if (gAppState.FrameState.shouldRender)
 					{
-						//Now do the drawing for this eye - Force the set as it is a "read only" cvar
-						char buffer[5];
-						Q_snprintf(buffer, 5, "%i", eye);
-						Cvar_Set2("vr_stereo_side", buffer, true);
+						if (isScopeEngaged())
+						{
+							//Now do the drawing for this eye - Force the set as it is a "read only" cvar
+							char buffer[5];
+							Q_snprintf(buffer, 5, "%i", eye + 2);
+							Cvar_Set2("vr_stereo_side", buffer, true);
+						}
+						else
+						{
+							//Now do the drawing for this eye - Force the set as it is a "read only" cvar
+							char buffer[5];
+							Q_snprintf(buffer, 5, "%i", eye);
+							Cvar_Set2("vr_stereo_side", buffer, true);
+						}
+
+
+						//Sow the seed
+						COM_SetRandomSeed(lSeed);
+
+						Host_Frame();
 					}
 
-
-					//Sow the seed
-					COM_SetRandomSeed(lSeed);
-
-					Host_Frame();
+					TBXR_finishEyeBuffer(eye);
 				}
 
-				TBXR_finishEyeBuffer(eye);
+				Host_EndFrame();
+
+				TBXR_submitFrame();
 			}
-
-			Host_EndFrame();
-
-			TBXR_submitFrame();
-        }
-        else
-		{
-		    //We are now shutting down
-		    if (runStatus == 0)
-            {
-                //Give us half a second (36 frames)
-                shutdownCountdown = 36;
-                runStatus++;
-            } else	if (runStatus == 1)
-            {
-                if (--shutdownCountdown == 0) {
-                    runStatus++;
-                }
-            } else	if (runStatus == 2)
-            {
-                Host_Shutdown();
-                runStatus++;
-            } else if (runStatus == 3)
-            {
-				destroyed = true;
-            }
 		}
+	}
+
+	{
+		TBXR_LeaveVR();
+		//Ask Java to shut down
+		VR_Shutdown();
+
+//		exit(0); // in case Java doesn't do the job
 	}
 
 	return NULL;

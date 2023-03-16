@@ -15,6 +15,7 @@ GNU General Public License for more details.
 
 #ifndef XASH_DEDICATED
 
+#include <stdbool.h>
 #include "common.h"
 #include "client.h"
 #include "gl_local.h"
@@ -34,6 +35,9 @@ ref_instance_t	RI, prevRI;
 
 mleaf_t		*r_viewleaf, *r_oldviewleaf;
 mleaf_t		*r_viewleaf2, *r_oldviewleaf2;
+
+extern convar_t *vr_worldscale;
+extern convar_t *vr_stereo_side;
 
 static int R_RankForRenderMode( cl_entity_t *ent )
 {
@@ -625,6 +629,8 @@ void R_SetupFrustum( void )
 R_SetupProjectionMatrix
 =============
 */
+bool VR_GetVRProjection(int eye, float zNear, float zFar, float* projection);
+
 static void R_SetupProjectionMatrix( const ref_params_t *fd, matrix4x4 m )
 {
 	GLdouble	xMin, xMax, yMin, yMax, zNear, zFar;
@@ -642,13 +648,21 @@ static void R_SetupProjectionMatrix( const ref_params_t *fd, matrix4x4 m )
 	zNear = 4.0f;
 	zFar = max( 256.0f, RI.farClip );
 
-	yMax = zNear * tan( fd->fov_y * M_PI / 360.0 );
-	yMin = -yMax;
+	float vrProjection[16];
+	if (!VR_GetVRProjection(vr_stereo_side->value, zNear, zFar, vrProjection))
+	{
+		yMax = zNear * tan(fd->fov_y * M_PI / 360.0);
+		yMin = -yMax;
 
-	xMax = zNear * tan( fd->fov_x * M_PI / 360.0 );
-	xMin = -xMax;
+		xMax = zNear * tan(fd->fov_x * M_PI / 360.0);
+		xMin = -xMax;
 
-	Matrix4x4_CreateProjection( m, xMax, xMin, yMax, yMin, zNear, zFar );
+		Matrix4x4_CreateProjection(m, xMax, xMin, yMax, yMin, zNear, zFar);
+	}
+	else
+	{
+		Matrix4x4_FromArrayFloatGL(m, vrProjection);
+	}
 }
 
 #ifdef VR
@@ -657,8 +671,6 @@ static void R_SetupProjectionMatrix( const ref_params_t *fd, matrix4x4 m )
 R_SetupModelviewMatrix
 =============
 */
-extern convar_t *vr_worldscale;
-extern convar_t *vr_stereo_side;
 static void R_SetupModelviewMatrix( const ref_params_t *fd, matrix4x4 m )
 {
     Matrix4x4_CreateModelview( m );

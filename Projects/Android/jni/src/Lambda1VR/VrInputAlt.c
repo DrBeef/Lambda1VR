@@ -178,8 +178,8 @@ void HandleInput_Alt( ovrInputStateTrackedRemote *pDominantTrackedRemoteNew, ovr
 				float zxDist = length(x, z);
 
 				if (zxDist != 0.0f && z != 0.0f) {
-                    VectorSet(weaponangles[ADJUSTED], degrees(atanf(y / zxDist)), (cl.refdef.cl_viewangles[YAW] - hmdorientation[YAW]) - degrees(atan2f(x, -z)), weaponangles[ADJUSTED][ROLL]);
-                    VectorSet(weaponangles[UNADJUSTED], degrees(atanf(y / zxDist)), (cl.refdef.cl_viewangles[YAW] - hmdorientation[YAW]) - degrees(atan2f(x, -z)), weaponangles[UNADJUSTED][ROLL]);
+                    VectorSet(weaponangles[ADJUSTED], RAD2DEG(atanf(y / zxDist)), (cl.refdef.cl_viewangles[YAW] - hmdorientation[YAW]) - RAD2DEG(atan2f(x, -z)), weaponangles[ADJUSTED][ROLL]);
+                    VectorSet(weaponangles[UNADJUSTED], RAD2DEG(atanf(y / zxDist)), (cl.refdef.cl_viewangles[YAW] - hmdorientation[YAW]) - RAD2DEG(atan2f(x, -z)), weaponangles[UNADJUSTED][ROLL]);
 				}
 			}
 			else
