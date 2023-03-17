@@ -27,7 +27,7 @@ typedef struct usercmd_s
 	float		sidemove;		// Sideways velocity
 	float		upmove;		// Upward velocity
 	byte		lightlevel;	// Light level at spot where we are standing.
-	unsigned short	buttons;		// Attack and move buttons
+	int			buttons;		// Attack and move buttons
 	byte		impulse;		// Impulse command issued
 	byte		weaponselect;	// Current weapon id
 

@@ -63,6 +63,7 @@ extern vec3_t flashlightoffset;
 extern int ducked;
 
 extern bool player_moving;
+extern int  use_gesture_state;
 
 bool isMultiplayer();
 bool isScopeEngaged();
