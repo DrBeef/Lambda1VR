@@ -68,7 +68,9 @@ private:
     CMenuCheckBox	headTorch;
     CMenuCheckBox	handModels;
     CMenuCheckBox	quickCrouchJump;
+    CMenuCheckBox	useGesture;
     CMenuSlider	snapTurnAngle;
+    CMenuSlider useGestureBoundary;
 
     CMenuTable	controllerList;
     CMenuControllerModesModel controllerListModel;
@@ -117,6 +119,10 @@ void CMenuControls::_Init( void )
     headTorch.SetCoord( 320, 570 );
     headTorch.LinkCvar( "vr_headtorch" );
 
+    useGesture.SetNameAndStatus( "Gesture Triggered Use", "Toggles triggering of use action by gesture" );
+    useGesture.SetCoord( 720, 570 );
+    useGesture.LinkCvar( "vr_gesture_triggered_use" );
+
     snapTurnAngle.SetNameAndStatus( "Snap/Smooth Turn: %.1f degrees", "Controller turn angle, < 10 is smooth turning per frame" );
     snapTurnAngle.Setup( 0.0, 90.0, 1.0f );
     snapTurnAngle.onChanged = CMenuEditable::WriteCvarCb;
@@ -125,6 +131,14 @@ void CMenuControls::_Init( void )
     snapTurnAngle.SetDrawValue(true);
     snapTurnAngle.LinkCvar("vr_snapturn_angle");
 
+    useGestureBoundary.SetNameAndStatus( "Use Gesture Boundary", "Configures how far you need to reach to activate use gesture" );
+    useGestureBoundary.Setup( 0.2, 0.5, 0.01f );
+    useGestureBoundary.onChanged = CMenuEditable::WriteCvarCb;
+    useGestureBoundary.SetCoord( 320, 750 );
+    useGestureBoundary.SetSize( 520, 40 );
+    useGestureBoundary.SetDrawValue(true);
+    useGestureBoundary.LinkCvar("vr_use_gesture_boundary");
+
     AddItem( controllerList );
     AddItem( hmdWalkDirection );
     AddItem( quickCrouchJump );
@@ -132,6 +146,8 @@ void CMenuControls::_Init( void )
     AddItem( headTorch );
     AddItem( handModels );
     AddItem( snapTurnAngle );
+    AddItem( useGesture );
+    AddItem( useGestureBoundary );
 
 }
 
@@ -162,6 +178,8 @@ void CMenuControls::SetConfig( )
     headTorch.WriteCvar();
     handModels.WriteCvar();
     snapTurnAngle.WriteCvar();
+    useGesture.WriteCvar();
+    useGestureBoundary.WriteCvar();
 
     // We're done now, just close
     Hide();
