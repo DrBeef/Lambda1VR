@@ -37,7 +37,7 @@ extern float playerHeight;
 extern float playerYaw;
 
 extern bool showingScreenLayer;
-extern float vrFOV;
+extern int vrFOV;
 
 extern vec3_t worldPosition;
 

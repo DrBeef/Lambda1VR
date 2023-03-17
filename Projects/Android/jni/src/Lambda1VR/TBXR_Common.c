@@ -549,6 +549,7 @@ void ovrFramebuffer_SetNone() {
 }
 
 void ovrFramebuffer_Resolve(ovrFramebuffer* frameBuffer) {
+
     // Discard the depth buffer, so the tiler won't need to write it back out to memory.
     const GLenum depthAttachment[1] = {GL_DEPTH_ATTACHMENT};
     glInvalidateFramebuffer(GL_DRAW_FRAMEBUFFER, 1, depthAttachment);
@@ -1930,8 +1931,7 @@ void TBXR_submitFrame()
         fov.angleUp += gAppState.Projections[eye].fov.angleUp / 2.0f;
         fov.angleDown += gAppState.Projections[eye].fov.angleDown / 2.0f;
 	}
-	//vr.fov_x = (fabs(fov.angleLeft) + fabs(fov.angleRight)) * 180.0f / M_PI;
-	fov_y = (fabs(fov.angleUp) + fabs(fov.angleDown)) * 180.0f / M_PI;
+	vrFOV = (fabs(fov.angleLeft) + fabs(fov.angleRight)) * 180.0f / M_PI;
 
 
 	gAppState.LayerCount = 0;

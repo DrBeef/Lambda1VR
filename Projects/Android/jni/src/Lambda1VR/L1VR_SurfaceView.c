@@ -269,6 +269,17 @@ bool VR_GetVRProjection(int eye, float zNear, float zFar, float* projection)
 
 void R_ChangeDisplaySettings( int width, int height, qboolean fullscreen );
 
+int VR_SetRefreshRate(int refreshRate)
+{
+	if (strstr(gAppState.OpenXRHMD, "meta") != NULL)
+	{
+		OXR(gAppState.pfnRequestDisplayRefreshRate(gAppState.Session, (float) refreshRate));
+		return refreshRate;
+	}
+
+	return 0;
+}
+
 //All the stuff we want to do each frame specifically for this game
 void VR_FrameSetup()
 {
@@ -277,7 +288,13 @@ void VR_FrameSetup()
 	{
 		usingScreenLayer = VR_UseScreenLayer();
 		R_ChangeDisplaySettings(gAppState.Width, gAppState.Height, false);
-	}	
+
+		VR_SetRefreshRate(vr_refresh->value);
+	}
+
+	char buffer[32];
+	sprintf(buffer, "%d", vrFOV);
+	vr_hmd_fov_x = Cvar_Set2("vr_hmd_fov_x", buffer, true);
 }
 
 void VR_Shutdown()
@@ -312,7 +329,8 @@ convar_t	*vr_crowbar_pitchadjust;
 convar_t	*vr_weapon_recoil;
 convar_t	*vr_weapon_stabilised;
 convar_t	*vr_lasersight;
-convar_t	*vr_quest_fov;
+convar_t	*vr_hmd_fov_x;
+convar_t	*vr_hud_yoffset;
 convar_t	*vr_refresh;
 convar_t	*vr_control_scheme;
 convar_t	*vr_enable_crouching;
@@ -359,11 +377,16 @@ void VR_Init()
 	vr_weapon_stabilised = Cvar_Get( "vr_weapon_stabilised", "0", CVAR_READ_ONLY, "Whether user has engaged weapon stabilisation or not" );
     vr_lasersight = Cvar_Get( "vr_lasersight", "0", CVAR_ARCHIVE, "Enables laser-sight" );
 
-    char buffer[32];
-    sprintf(buffer, "%d", (int)vrFOV);
-    vr_quest_fov = Cvar_Get("vr_quest_fov", buffer, CVAR_LATCH, "FOV for Lambda1VR" );
+	if (strstr(gAppState.OpenXRHMD, "pico") != NULL)
+	{
+		vr_hud_yoffset = Cvar_Get("vr_hud_yoffset", "60", CVAR_ARCHIVE, "y offset for the HUD" );
+	}
+	else
+	{
+		vr_hud_yoffset = Cvar_Get("vr_hud_yoffset", "0", CVAR_ARCHIVE, "y offset for the HUD" );
+	}
 
-    vr_refresh = Cvar_Get("vr_refresh", "72", CVAR_ARCHIVE, "Refresh Rate" );
+	vr_refresh = Cvar_Get("vr_refresh", "72", CVAR_ARCHIVE, "Refresh Rate" );
 	vr_control_scheme = Cvar_Get( "vr_control_scheme", "0", CVAR_ARCHIVE, "Controller Layout scheme" );
 	vr_enable_crouching = Cvar_Get( "vr_enable_crouching", "0.85", CVAR_ARCHIVE, "To enable real-world crouching trigger, set this to a value that multiplied by the user's height will trigger crouch mechanic" );
     vr_height_adjust = Cvar_Get( "vr_height_adjust", "0.0", CVAR_ARCHIVE, "Additional height adjustment for in-game player (in metres)" );
@@ -482,7 +505,6 @@ void * AppThreadFunction( void * parm )
 			//if we are now shutting down, drop out here
 			if (isHostAlive())
 			{
-
 				//Seed the random number generator the same for each eye to ensure electricity is drawn the same
 				int lSeed = rand();
 
@@ -516,6 +538,61 @@ void * AppThreadFunction( void * parm )
 						COM_SetRandomSeed(lSeed);
 
 						Host_Frame();
+					}
+
+					//Hacky edge stuff that should really be done better
+					{
+						ovrRenderer *renderer = &gAppState.Renderer;
+						ovrFramebuffer *frameBuffer = &(renderer->FrameBuffer[eye]);
+
+						GL( glEnable( GL_SCISSOR_TEST ) );
+						GL( glViewport( 0, 0, frameBuffer->Width, frameBuffer->Height ) );
+
+						// Explicitly clear the border texels to black because OpenGL-ES does not support GL_CLAMP_TO_BORDER.
+						// Clear to fully opaque black.
+						GL( glClearColor( 0.0f, 0.0f, 0.0f, 1.0f ) );
+
+						//Glide comfort mask in and out
+						static float currentVLevel = 0.0f;
+
+						//Hack to surround scope sight with blackness
+						const float scopeSize = 0.75;
+						if (isScopeEngaged())
+						{
+							if (currentVLevel < scopeSize)
+								currentVLevel += scopeSize * 0.05;
+						}
+						else if (player_moving && vr_comfort_mask->value > 0.0f)
+						{
+							if (currentVLevel <  vr_comfort_mask->value)
+								currentVLevel += vr_comfort_mask->value * 0.05;
+						} else{
+							float v = (vr_comfort_mask->value == 0) ? scopeSize : vr_comfort_mask->value;
+							if (currentVLevel >  0.0f)
+								currentVLevel -= v * 0.05;
+						}
+
+						bool useMask = (currentVLevel > 0.0f && currentVLevel <= 1.0f);
+
+						float width = useMask ? (frameBuffer->Width / 2.0f) * currentVLevel : 1;
+						float height = useMask ? (frameBuffer->Height / 2.0f) * currentVLevel : 1;
+
+						// bottom
+						GL( glScissor( 0, 0, frameBuffer->Width, height ) );
+						GL( glClear( GL_COLOR_BUFFER_BIT ) );
+						// top
+						GL( glScissor( 0, frameBuffer->Height - height, frameBuffer->Width, height ) );
+						GL( glClear( GL_COLOR_BUFFER_BIT ) );
+						// left
+						GL( glScissor( 0, 0, width, frameBuffer->Height ) );
+						GL( glClear( GL_COLOR_BUFFER_BIT ) );
+						// right
+						GL( glScissor( frameBuffer->Width - width, 0, width, frameBuffer->Height ) );
+						GL( glClear( GL_COLOR_BUFFER_BIT ) );
+
+
+						GL( glScissor( 0, 0, 0, 0 ) );
+						GL( glDisable( GL_SCISSOR_TEST ) );
 					}
 
 					TBXR_finishEyeBuffer(eye);

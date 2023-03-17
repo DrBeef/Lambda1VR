@@ -23,7 +23,7 @@ float playerHeight;
 float playerYaw;
 
 bool showingScreenLayer;
-float vrFOV;
+int vrFOV;
 
 vec3_t worldPosition;
 

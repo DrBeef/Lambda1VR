@@ -41,6 +41,9 @@ GNU General Public License for more details.
 char			cl_textbuffer[MAX_TEXTCHANNELS][512];
 client_textmessage_t	cl_textmessage[MAX_TEXTCHANNELS];
 
+extern convar_t	*vr_hud_yoffset;
+
+
 static struct crosshair_s
 {
 	// crosshair members
@@ -1480,7 +1483,7 @@ pfnSPR_DrawAdditive
 static void GAME_EXPORT pfnSPR_DrawAdditive( int frame, int x, int y, const wrect_t *prc )
 {
 	GL_SetRenderMode( kRenderTransAdd );
-	SPR_DrawGeneric( frame, x, y, -1, -1, prc );
+	SPR_DrawGeneric( frame, x, y - vr_hud_yoffset->value, -1, -1, prc );
 }
 
 /*

@@ -630,6 +630,7 @@ R_SetupProjectionMatrix
 =============
 */
 bool VR_GetVRProjection(int eye, float zNear, float zFar, float* projection);
+bool isScopeEngaged();
 
 static void R_SetupProjectionMatrix( const ref_params_t *fd, matrix4x4 m )
 {
@@ -649,7 +650,8 @@ static void R_SetupProjectionMatrix( const ref_params_t *fd, matrix4x4 m )
 	zFar = max( 256.0f, RI.farClip );
 
 	float vrProjection[16];
-	if (!VR_GetVRProjection(vr_stereo_side->value, zNear, zFar, vrProjection))
+	if (isScopeEngaged() ||
+		!VR_GetVRProjection(vr_stereo_side->value, zNear, zFar, vrProjection))
 	{
 		yMax = zNear * tan(fd->fov_y * M_PI / 360.0);
 		yMin = -yMax;
