@@ -193,16 +193,8 @@ void CMenuBackgroundBitmap::Draw()
 	p.x = p.y = 0;
 
 	// work out scaling factors
-	if( ScreenWidth * s_BackgroundImageSize.h > ScreenHeight * s_BackgroundImageSize.w )
-	{
-		xScale = ScreenWidth / s_BackgroundImageSize.w;
-		yScale = xScale;
-	}
-	else
-	{
-		yScale = ScreenHeight / s_BackgroundImageSize.h;
-		xScale = yScale;
-	}
+	xScale = ScreenWidth / s_BackgroundImageSize.w;
+	yScale = ScreenHeight / s_BackgroundImageSize.h;
 #endif
 
 	DrawBackgroundLayout( p, xScale, yScale );
