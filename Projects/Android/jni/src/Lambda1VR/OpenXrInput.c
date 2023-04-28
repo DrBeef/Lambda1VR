@@ -16,7 +16,7 @@ XrResult CheckXrResult(XrResult res, const char* originator) {
 #define SIDE_COUNT 2
 
 
-XrActionSet actionSet;
+XrActionSet actionSet = NULL;
 XrAction grabAction = 0;
 XrAction poseAction = 0;
 XrAction vibrateAction = 0;
@@ -63,11 +63,13 @@ XrActionStateBoolean GetActionStateBoolean(XrAction action, int hand) {
     XrActionStateGetInfo getInfo = {};
     getInfo.type = XR_TYPE_ACTION_STATE_GET_INFO;
     getInfo.action = action;
+    getInfo.next = NULL;
     if (hand >= 0)
         getInfo.subactionPath = handSubactionPath[hand];
 
     XrActionStateBoolean state = {};
     state.type = XR_TYPE_ACTION_STATE_BOOLEAN;
+    state.next = NULL;
     CHECK_XRCMD(xrGetActionStateBoolean(gAppState.Session, &getInfo, &state));
     return state;
 }
@@ -76,11 +78,13 @@ XrActionStateFloat GetActionStateFloat(XrAction action, int hand) {
     XrActionStateGetInfo getInfo = {};
     getInfo.type = XR_TYPE_ACTION_STATE_GET_INFO;
     getInfo.action = action;
+    getInfo.next = NULL;
     if (hand >= 0)
         getInfo.subactionPath = handSubactionPath[hand];
 
     XrActionStateFloat state = {};
     state.type = XR_TYPE_ACTION_STATE_FLOAT;
+    state.next = NULL;
     CHECK_XRCMD(xrGetActionStateFloat(gAppState.Session, &getInfo, &state));
     return state;
 }
@@ -89,11 +93,13 @@ XrActionStateVector2f GetActionStateVector2(XrAction action, int hand) {
     XrActionStateGetInfo getInfo = {};
     getInfo.type = XR_TYPE_ACTION_STATE_GET_INFO;
     getInfo.action = action;
+    getInfo.next = NULL;
     if (hand >= 0)
         getInfo.subactionPath = handSubactionPath[hand];
 
     XrActionStateVector2f state = {};
     state.type = XR_TYPE_ACTION_STATE_VECTOR2F;
+    state.next = NULL;
     CHECK_XRCMD(xrGetActionStateVector2f(gAppState.Session, &getInfo, &state));
     return state;
 }
@@ -131,6 +137,7 @@ void TBXR_InitActions( void )
         strcpy(actionSetInfo.actionSetName, "gameplay");
         strcpy(actionSetInfo.localizedActionSetName, "Gameplay");
         actionSetInfo.priority = 0;
+        actionSetInfo.next = NULL;
         CHECK_XRCMD(xrCreateActionSet(gAppState.Instance, &actionSetInfo, &actionSet));
     }
 
@@ -324,6 +331,7 @@ void TBXR_InitActions( void )
         suggestedBindings.interactionProfile = picoMixedRealityInteractionProfilePath;
         suggestedBindings.suggestedBindings = bindings;
         suggestedBindings.countSuggestedBindings = currBinding;
+        suggestedBindings.next = NULL;
         result = xrSuggestInteractionProfileBindings(gAppState.Instance, &suggestedBindings);
     }
 
@@ -375,6 +383,7 @@ void TBXR_InitActions( void )
         suggestedBindings.interactionProfile = touchControllerInteractionProfilePath;
         suggestedBindings.suggestedBindings = bindings;
         suggestedBindings.countSuggestedBindings = currBinding;
+        suggestedBindings.next = NULL;
         result = xrSuggestInteractionProfileBindings(gAppState.Instance, &suggestedBindings);
     }
 
@@ -391,25 +400,31 @@ void TBXR_InitActions( void )
     actionSpaceInfo.subactionPath = handSubactionPath[SIDE_LEFT];
     CHECK_XRCMD(xrCreateActionSpace(gAppState.Session, &actionSpaceInfo, &aimSpace[SIDE_LEFT]));
     actionSpaceInfo.subactionPath = handSubactionPath[SIDE_RIGHT];
+    actionSpaceInfo.next = NULL;
     CHECK_XRCMD(xrCreateActionSpace(gAppState.Session, &actionSpaceInfo, &aimSpace[SIDE_RIGHT]));
 
     XrSessionActionSetsAttachInfo attachInfo = {};
     attachInfo.type = XR_TYPE_SESSION_ACTION_SETS_ATTACH_INFO;
     attachInfo.countActionSets = 1;
     attachInfo.actionSets = &actionSet;
+    attachInfo.next = NULL;
     CHECK_XRCMD(xrAttachSessionActionSets(gAppState.Session, &attachInfo));
 }
 
 void TBXR_SyncActions( void )
 {
-    XrActiveActionSet activeActionSet = {};
-    activeActionSet.actionSet = actionSet;
-    activeActionSet.subactionPath = XR_NULL_PATH;
-    XrActionsSyncInfo syncInfo;
-    syncInfo.type = XR_TYPE_ACTIONS_SYNC_INFO;
-    syncInfo.countActiveActionSets = 1;
-    syncInfo.activeActionSets = &activeActionSet;
-    CHECK_XRCMD(xrSyncActions(gAppState.Session, &syncInfo));
+    if (actionSet)
+    {
+        XrActiveActionSet activeActionSet = {};
+        activeActionSet.actionSet = actionSet;
+        activeActionSet.subactionPath = XR_NULL_PATH;
+        XrActionsSyncInfo syncInfo;
+        syncInfo.type = XR_TYPE_ACTIONS_SYNC_INFO;
+        syncInfo.countActiveActionSets = 1;
+        syncInfo.activeActionSets = &activeActionSet;
+        syncInfo.next = NULL;
+        CHECK_XRCMD(xrSyncActions(gAppState.Session, &syncInfo));
+    }
 }
 
 void TBXR_UpdateControllers( )
