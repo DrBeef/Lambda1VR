@@ -155,7 +155,7 @@ void VR_SetHMDOrientation(float pitch, float yaw, float roll)
 {
 	VectorSet(hmdorientation, pitch, yaw, roll);
 
-	if (!VR_UseScreenLayer())
+	if (!VR_UseScreenLayer() || playerYaw == -999.0)
 	{
 		playerYaw = yaw;
 	}
@@ -351,7 +351,7 @@ void initialize_gl4es();
 void VR_Init()
 {
 	//Initialise all our variables
-	playerYaw = 0.0f;
+	playerYaw = -999.0f; // ensure we get the first player yaw once available
 	showingScreenLayer = false;
 	remote_movementSideways = 0.0f;
 	remote_movementForward = 0.0f;
