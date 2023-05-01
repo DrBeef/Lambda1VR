@@ -297,10 +297,6 @@ void VR_FrameSetup()
 	vr_hmd_fov_x = Cvar_Set2("vr_hmd_fov_x", buffer, true);
 }
 
-void VR_Shutdown()
-{
-}
-
 static inline bool isHostAlive()
 {
 	return (host.state != HOST_SHUTDOWN &&
@@ -372,7 +368,7 @@ void VR_Init()
 	vr_snapturn_angle = Cvar_Get( "vr_snapturn_angle", "45", CVAR_ARCHIVE, "Sets the angle for snap-turn, set to < 10.0 to enable smooth turning" );
 	vr_reloadtimeoutms = Cvar_Get( "vr_reloadtimeoutms", "200", CVAR_ARCHIVE, "How quickly the grip trigger needs to be release to initiate a reload" );
 	vr_positional_factor = Cvar_Get( "vr_positional_factor", "3000", CVAR_ARCHIVE, "Number that makes positional tracking work" );
-    vr_walkdirection = Cvar_Get( "vr_walkdirection", "0", CVAR_ARCHIVE, "1 - Use HMD for direction, 0 - Use off-hand controller for direction" );
+    vr_walkdirection = Cvar_Get( "vr_walkdirection", "1", CVAR_ARCHIVE, "1 - Use HMD for direction, 0 - Use off-hand controller for direction" );
 	vr_weapon_pitchadjust = Cvar_Get( "vr_weapon_pitchadjust", "-20.0", CVAR_ARCHIVE, "gun pitch angle adjust" );
 	vr_crowbar_pitchadjust = Cvar_Get( "vr_crowbar_pitchadjust", "-25.0", CVAR_ARCHIVE, "crowbar pitch angle adjust" );
     vr_weapon_recoil = Cvar_Get( "vr_weapon_recoil", "0", CVAR_ARCHIVE, "Enables weapon recoil in VR, default is disabled, warning could make you sick" );
@@ -382,13 +378,14 @@ void VR_Init()
 	if (strstr(gAppState.OpenXRHMD, "pico") != NULL)
 	{
 		vr_hud_yoffset = Cvar_Get("vr_hud_yoffset", "60", CVAR_ARCHIVE, "y offset for the HUD" );
+		vr_refresh = Cvar_Get("vr_refresh", "72", CVAR_ARCHIVE, "Refresh Rate");
 	}
-	else
+	else // Meta / Quest / Default
 	{
 		vr_hud_yoffset = Cvar_Get("vr_hud_yoffset", "0", CVAR_ARCHIVE, "y offset for the HUD" );
+		vr_refresh = Cvar_Get("vr_refresh", "80", CVAR_ARCHIVE, "Refresh Rate");
 	}
 
-	vr_refresh = Cvar_Get("vr_refresh", "72", CVAR_ARCHIVE, "Refresh Rate" );
 	vr_control_scheme = Cvar_Get( "vr_control_scheme", "0", CVAR_ARCHIVE, "Controller Layout scheme" );
 	vr_enable_crouching = Cvar_Get( "vr_enable_crouching", "0.85", CVAR_ARCHIVE, "To enable real-world crouching trigger, set this to a value that multiplied by the user's height will trigger crouch mechanic" );
     vr_height_adjust = Cvar_Get( "vr_height_adjust", "0.0", CVAR_ARCHIVE, "Additional height adjustment for in-game player (in metres)" );
@@ -610,11 +607,15 @@ void * AppThreadFunction( void * parm )
 	}
 
 	{
+	    //Make sure we actually shutdown
+	    Host_Shutdown( );
+
 		TBXR_LeaveVR();
+
 		//Ask Java to shut down
 		VR_Shutdown();
 
-//		exit(0); // in case Java doesn't do the job
+		exit(0); // in case Java doesn't do the job
 	}
 
 	return NULL;
@@ -628,6 +629,11 @@ Activity lifecycle
 ================================================================================
 */
 
+
+jmethodID android_shutdown;
+static JavaVM *jVM;
+static jobject jniCallbackObj=0;
+
 int JNI_OnLoad(JavaVM* vm, void* reserved)
 {
 	JNIEnv *env;
@@ -638,6 +644,23 @@ int JNI_OnLoad(JavaVM* vm, void* reserved)
 	}
 
 	return JNI_VERSION_1_4;
+}
+
+void jni_shutdown()
+{
+	ALOGV("Calling: jni_shutdown");
+	JNIEnv *env;
+	jobject tmp;
+	if (((*jVM)->GetEnv(jVM, (void**) &env, JNI_VERSION_1_4))<0)
+	{
+		(*jVM)->AttachCurrentThread( jVM, &env, NULL );
+	}
+	return (*env)->CallVoidMethod(env, jniCallbackObj, android_shutdown);
+}
+
+void VR_Shutdown()
+{
+    jni_shutdown();
 }
 
 JNIEXPORT jlong JNICALL Java_com_drbeef_lambda1vr_GLES3JNILib_onCreate( JNIEnv * env, jclass activityClass, jobject activity,
@@ -694,9 +717,13 @@ JNIEXPORT jlong JNICALL Java_com_drbeef_lambda1vr_GLES3JNILib_onCreate( JNIEnv *
 }
 
 
-JNIEXPORT void JNICALL Java_com_drbeef_lambda1vr_GLES3JNILib_onStart( JNIEnv * env, jobject obj, jlong handle)
+JNIEXPORT void JNICALL Java_com_drbeef_lambda1vr_GLES3JNILib_onStart( JNIEnv * env, jobject obj, jlong handle, jobject obj1)
 {
 	ALOGV( "    GLES3JNILib::onStart()" );
+
+	jniCallbackObj = (jobject)((*env)->NewGlobalRef(env, obj1));
+	jclass callbackClass = (*env)->GetObjectClass(env, jniCallbackObj);
+	android_shutdown = (*env)->GetMethodID(env, callbackClass,"shutdown","()V");
 
 	ovrAppThread * appThread = (ovrAppThread *)((size_t)handle);
 	surfaceMessage message;

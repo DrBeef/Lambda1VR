@@ -62,3 +62,6 @@ Projects/Android/jni/SupportLibs/liboggvorbis/libs/mips/libvorbis.so
 Projects/Android/jni/SupportLibs/liboggvorbis/libs/x86/libogg.so
 Projects/Android/jni/SupportLibs/liboggvorbis/libs/x86/libvorbis-jni.so
 Projects/Android/jni/SupportLibs/liboggvorbis/libs/x86/libvorbis.so
+build/intermediates/lint-cache/maven.google/com/android/support/group-index.xml
+build/intermediates/lint-cache/maven.google/master-index.xml
+build/intermediates/lint-cache/sdk-registry.xml/sdk-registry.xml
