@@ -543,8 +543,9 @@ void HandleInput_Default( ovrInputStateTrackedRemote *pDominantTrackedRemoteNew,
                 float dist = length(joystickX,
 									joystickY);
                 float nlf = nonLinearFilter(dist);
-                float x = nlf * joystickX;
-                float y = nlf * joystickY;
+    			dist = (dist > 1.0f) ? dist : 1.0f;
+                float x = nlf * (joystickX / dist);
+                float y = nlf * (joystickY / dist);
 
                 player_moving = (fabs(x) + fabs(y)) > 0.01f;
 
