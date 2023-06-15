@@ -211,8 +211,8 @@ void HandleInput_Default( ovrInputStateTrackedRemote *pDominantTrackedRemoteNew,
 			if (vr_gesture_triggered_use->integer) {
 				bool gestureUseAllowed = !vr_weapon_stabilised->value;
 				// Off-hand gesture
-				float xOffset = hmdPosition[0] - pOffTracking->Pose.position.x;
-				float zOffset = hmdPosition[2] - pOffTracking->Pose.position.z;
+				float xOffset = hmdPosition[0] - pOffTracking->HeadPose.Pose.Position.x;
+				float zOffset = hmdPosition[2] - pOffTracking->HeadPose.Pose.Position.z;
 				float distanceToBody = sqrtf((xOffset * xOffset) + (zOffset * zOffset));
 				if (gestureUseAllowed && (distanceToBody > vr_use_gesture_boundary->value)) {
 					if (!(use_gesture_state & VR_USE_GESTURE_OFF_HAND)) {
@@ -226,8 +226,8 @@ void HandleInput_Default( ovrInputStateTrackedRemote *pDominantTrackedRemoteNew,
 					use_gesture_state &= ~VR_USE_GESTURE_OFF_HAND;
 				}
 				// Weapon-hand gesture
-				xOffset = hmdPosition[0] - pDominantTracking->Pose.position.x;
-				zOffset = hmdPosition[2] - pDominantTracking->Pose.position.z;
+				xOffset = hmdPosition[0] - pDominantTracking->HeadPose.Pose.Position.x;
+				zOffset = hmdPosition[2] - pDominantTracking->HeadPose.Pose.Position.z;
 				distanceToBody = sqrtf((xOffset * xOffset) + (zOffset * zOffset));
 				if (gestureUseAllowed && (distanceToBody > vr_use_gesture_boundary->value)) {
 					if (!(use_gesture_state & VR_USE_GESTURE_WEAPON_HAND)) {
