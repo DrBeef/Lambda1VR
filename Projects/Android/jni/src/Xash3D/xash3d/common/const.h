@@ -676,7 +676,6 @@
 #define IN_RELOAD			(1U << 13)
 #define IN_ALT1			(1U << 14)
 #define IN_SCORE			(1U << 15)   // Used by client.dll for when scoreboard is held down
-#define IN_USE2			(1U << 16)
 
 // Break Model Defines
 #define BREAK_TYPEMASK		0x4F
@@ -703,10 +702,6 @@
 #define TE_BOUNCE_NULL		0
 #define TE_BOUNCE_SHELL		1
 #define TE_BOUNCE_SHOTSHELL		2
-
-// VR use gesture flags
-#define VR_USE_GESTURE_OFF_HAND      1
-#define VR_USE_GESTURE_WEAPON_HAND   2
 
 // Rendering constants
 enum 

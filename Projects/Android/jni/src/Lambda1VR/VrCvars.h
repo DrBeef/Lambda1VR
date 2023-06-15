@@ -27,8 +27,6 @@ extern convar_t	*vr_controller_tracking_haptic;
 extern convar_t	*vr_highlight_actionables;
 extern convar_t	*vr_headtorch;
 extern convar_t	*vr_quick_crouchjump;
-extern convar_t *vr_gesture_triggered_use;
-extern convar_t *vr_use_gesture_boundary;
 
 //Used and updated continuously during rendering
 extern convar_t	*vr_stereo_side;

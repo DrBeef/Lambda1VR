@@ -42,7 +42,6 @@ vec3_t flashlightoffset;
 int ducked;
 
 bool player_moving;
-int use_gesture_state;
 
 bool stabiliseScope;
 char * g_pszBackpackWeapon;
