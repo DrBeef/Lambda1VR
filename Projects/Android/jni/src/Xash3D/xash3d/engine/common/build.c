@@ -139,7 +139,7 @@ Q_buildcommit will identify this build as release or "notset"
 */
 const char *Q_buildcommit( void )
 {
-	return "Lambda1VR-v1.6.2";
+	return "Lambda1VR-v1.6.3";
 }
 
 /*
