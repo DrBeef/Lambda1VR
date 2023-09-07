@@ -66,6 +66,7 @@ private:
     CMenuCheckBox	hmdWalkDirection;
     CMenuCheckBox	mirrorWeapons;
     CMenuCheckBox	headTorch;
+    CMenuCheckBox	reverseTorch;
     CMenuCheckBox	handModels;
     CMenuCheckBox	quickCrouchJump;
     CMenuCheckBox	useGesture;
@@ -119,6 +120,10 @@ void CMenuControls::_Init( void )
     headTorch.SetCoord( 320, 570 );
     headTorch.LinkCvar( "vr_headtorch" );
 
+    reverseTorch.SetNameAndStatus( "Reverse Torch Direction", "Check to reverse torch direction" );
+    reverseTorch.SetCoord( 320, 640 );
+    reverseTorch.LinkCvar( "vr_reversetorch" );
+
     useGesture.SetNameAndStatus( "Gesture Triggered Use", "Toggles triggering of use action by gesture" );
     useGesture.SetCoord( 720, 570 );
     useGesture.LinkCvar( "vr_gesture_triggered_use" );
@@ -126,7 +131,7 @@ void CMenuControls::_Init( void )
     snapTurnAngle.SetNameAndStatus( "Snap/Smooth Turn: %.1f degrees", "Controller turn angle, < 10 is smooth turning per frame" );
     snapTurnAngle.Setup( 0.0, 90.0, 1.0f );
     snapTurnAngle.onChanged = CMenuEditable::WriteCvarCb;
-    snapTurnAngle.SetCoord( 320, 660 );
+    snapTurnAngle.SetCoord( 320, 750 );
     snapTurnAngle.SetSize( 520, 40 );
     snapTurnAngle.SetDrawValue(true);
     snapTurnAngle.LinkCvar("vr_snapturn_angle");
@@ -134,7 +139,7 @@ void CMenuControls::_Init( void )
     useGestureBoundary.SetNameAndStatus( "Use Gesture Boundary", "Configures how far you need to reach to activate use gesture" );
     useGestureBoundary.Setup( 0.2, 0.5, 0.01f );
     useGestureBoundary.onChanged = CMenuEditable::WriteCvarCb;
-    useGestureBoundary.SetCoord( 320, 750 );
+    useGestureBoundary.SetCoord( 320, 840 );
     useGestureBoundary.SetSize( 520, 40 );
     useGestureBoundary.SetDrawValue(true);
     useGestureBoundary.LinkCvar("vr_use_gesture_boundary");
@@ -144,6 +149,7 @@ void CMenuControls::_Init( void )
     AddItem( quickCrouchJump );
     AddItem( mirrorWeapons );
     AddItem( headTorch );
+    AddItem( reverseTorch );
     AddItem( handModels );
     AddItem( snapTurnAngle );
     AddItem( useGesture );
@@ -176,6 +182,7 @@ void CMenuControls::SetConfig( )
     quickCrouchJump.WriteCvar();
     mirrorWeapons.WriteCvar();
     headTorch.WriteCvar();
+    reverseTorch.WriteCvar();
     handModels.WriteCvar();
     snapTurnAngle.WriteCvar();
     useGesture.WriteCvar();

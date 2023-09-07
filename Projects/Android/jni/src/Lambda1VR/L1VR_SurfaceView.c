@@ -155,7 +155,7 @@ void VR_SetHMDOrientation(float pitch, float yaw, float roll)
 {
 	VectorSet(hmdorientation, pitch, yaw, roll);
 
-	if (!VR_UseScreenLayer())
+	if (!VR_UseScreenLayer() || playerYaw == -999.0)
 	{
 		playerYaw = yaw;
 	}
@@ -297,10 +297,6 @@ void VR_FrameSetup()
 	vr_hmd_fov_x = Cvar_Set2("vr_hmd_fov_x", buffer, true);
 }
 
-void VR_Shutdown()
-{
-}
-
 static inline bool isHostAlive()
 {
 	return (host.state != HOST_SHUTDOWN &&
@@ -344,6 +340,7 @@ convar_t	*vr_controller_ladders;
 convar_t	*vr_controller_tracking_haptic;
 convar_t	*vr_highlight_actionables;
 convar_t	*vr_headtorch;
+convar_t	*vr_reversetorch;
 convar_t	*vr_quick_crouchjump;
 convar_t	*vr_stereo_side;
 convar_t	*vr_gesture_triggered_use;
@@ -355,7 +352,7 @@ void initialize_gl4es();
 void VR_Init()
 {
 	//Initialise all our variables
-	playerYaw = 0.0f;
+	playerYaw = -999.0f; // ensure we get the first player yaw once available
 	showingScreenLayer = false;
 	remote_movementSideways = 0.0f;
 	remote_movementForward = 0.0f;
@@ -372,7 +369,7 @@ void VR_Init()
 	vr_snapturn_angle = Cvar_Get( "vr_snapturn_angle", "45", CVAR_ARCHIVE, "Sets the angle for snap-turn, set to < 10.0 to enable smooth turning" );
 	vr_reloadtimeoutms = Cvar_Get( "vr_reloadtimeoutms", "200", CVAR_ARCHIVE, "How quickly the grip trigger needs to be release to initiate a reload" );
 	vr_positional_factor = Cvar_Get( "vr_positional_factor", "3000", CVAR_ARCHIVE, "Number that makes positional tracking work" );
-    vr_walkdirection = Cvar_Get( "vr_walkdirection", "0", CVAR_ARCHIVE, "1 - Use HMD for direction, 0 - Use off-hand controller for direction" );
+    vr_walkdirection = Cvar_Get( "vr_walkdirection", "1", CVAR_ARCHIVE, "1 - Use HMD for direction, 0 - Use off-hand controller for direction" );
 	vr_weapon_pitchadjust = Cvar_Get( "vr_weapon_pitchadjust", "-20.0", CVAR_ARCHIVE, "gun pitch angle adjust" );
 	vr_crowbar_pitchadjust = Cvar_Get( "vr_crowbar_pitchadjust", "-25.0", CVAR_ARCHIVE, "crowbar pitch angle adjust" );
     vr_weapon_recoil = Cvar_Get( "vr_weapon_recoil", "0", CVAR_ARCHIVE, "Enables weapon recoil in VR, default is disabled, warning could make you sick" );
@@ -382,13 +379,14 @@ void VR_Init()
 	if (strstr(gAppState.OpenXRHMD, "pico") != NULL)
 	{
 		vr_hud_yoffset = Cvar_Get("vr_hud_yoffset", "60", CVAR_ARCHIVE, "y offset for the HUD" );
+		vr_refresh = Cvar_Get("vr_refresh", "72", CVAR_ARCHIVE, "Refresh Rate");
 	}
-	else
+	else // Meta / Quest / Default
 	{
 		vr_hud_yoffset = Cvar_Get("vr_hud_yoffset", "0", CVAR_ARCHIVE, "y offset for the HUD" );
+		vr_refresh = Cvar_Get("vr_refresh", "80", CVAR_ARCHIVE, "Refresh Rate");
 	}
 
-	vr_refresh = Cvar_Get("vr_refresh", "72", CVAR_ARCHIVE, "Refresh Rate" );
 	vr_control_scheme = Cvar_Get( "vr_control_scheme", "0", CVAR_ARCHIVE, "Controller Layout scheme" );
 	vr_enable_crouching = Cvar_Get( "vr_enable_crouching", "0.85", CVAR_ARCHIVE, "To enable real-world crouching trigger, set this to a value that multiplied by the user's height will trigger crouch mechanic" );
     vr_height_adjust = Cvar_Get( "vr_height_adjust", "0.0", CVAR_ARCHIVE, "Additional height adjustment for in-game player (in metres)" );
@@ -401,6 +399,7 @@ void VR_Init()
 	vr_controller_tracking_haptic = Cvar_Get( "vr_controller_tracking_haptic", "1", CVAR_ARCHIVE, "Set to 0 to disable haptic blip when dominant controller loses tracking" );
 	vr_highlight_actionables = Cvar_Get( "vr_highlight_actionables", "1", CVAR_ARCHIVE, "Set to 0 to disable highlighting of actionable objects/entities" );
 	vr_headtorch = Cvar_Get( "vr_headtorch", "0", CVAR_ARCHIVE, "Set to 1 to enable head-torch flashlight mode" );
+	vr_reversetorch = Cvar_Get( "vr_reversetorch", "0", CVAR_ARCHIVE, "Set to 1 to enable reverse-direction flashlight mode" );
     vr_quick_crouchjump = Cvar_Get( "vr_quick_crouchjump", "1", CVAR_ARCHIVE, "Set to 0 to disable quick crouch-jump mode (double clicking jump button triggers duck)" );
     vr_gesture_triggered_use = Cvar_Get( "vr_gesture_triggered_use", "0", CVAR_ARCHIVE, "Set to 0 to disable use gesture, 1 to enable" );
     vr_use_gesture_boundary = Cvar_Get( "vr_use_gesture_boundary", "0.35", CVAR_ARCHIVE, "Use gesture boundary" );
@@ -610,11 +609,15 @@ void * AppThreadFunction( void * parm )
 	}
 
 	{
+	    //Make sure we actually shutdown
+	    Host_Shutdown( );
+
 		TBXR_LeaveVR();
+
 		//Ask Java to shut down
 		VR_Shutdown();
 
-//		exit(0); // in case Java doesn't do the job
+		exit(0); // in case Java doesn't do the job
 	}
 
 	return NULL;
@@ -628,6 +631,11 @@ Activity lifecycle
 ================================================================================
 */
 
+
+jmethodID android_shutdown;
+static JavaVM *jVM;
+static jobject jniCallbackObj=0;
+
 int JNI_OnLoad(JavaVM* vm, void* reserved)
 {
 	JNIEnv *env;
@@ -638,6 +646,23 @@ int JNI_OnLoad(JavaVM* vm, void* reserved)
 	}
 
 	return JNI_VERSION_1_4;
+}
+
+void jni_shutdown()
+{
+	ALOGV("Calling: jni_shutdown");
+	JNIEnv *env;
+	jobject tmp;
+	if (((*jVM)->GetEnv(jVM, (void**) &env, JNI_VERSION_1_4))<0)
+	{
+		(*jVM)->AttachCurrentThread( jVM, &env, NULL );
+	}
+	return (*env)->CallVoidMethod(env, jniCallbackObj, android_shutdown);
+}
+
+void VR_Shutdown()
+{
+    jni_shutdown();
 }
 
 JNIEXPORT jlong JNICALL Java_com_drbeef_lambda1vr_GLES3JNILib_onCreate( JNIEnv * env, jclass activityClass, jobject activity,
@@ -694,9 +719,13 @@ JNIEXPORT jlong JNICALL Java_com_drbeef_lambda1vr_GLES3JNILib_onCreate( JNIEnv *
 }
 
 
-JNIEXPORT void JNICALL Java_com_drbeef_lambda1vr_GLES3JNILib_onStart( JNIEnv * env, jobject obj, jlong handle)
+JNIEXPORT void JNICALL Java_com_drbeef_lambda1vr_GLES3JNILib_onStart( JNIEnv * env, jobject obj, jlong handle, jobject obj1)
 {
 	ALOGV( "    GLES3JNILib::onStart()" );
+
+	jniCallbackObj = (jobject)((*env)->NewGlobalRef(env, obj1));
+	jclass callbackClass = (*env)->GetObjectClass(env, jniCallbackObj);
+	android_shutdown = (*env)->GetMethodID(env, callbackClass,"shutdown","()V");
 
 	ovrAppThread * appThread = (ovrAppThread *)((size_t)handle);
 	surfaceMessage message;

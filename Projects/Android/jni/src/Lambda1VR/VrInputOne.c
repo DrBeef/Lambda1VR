@@ -173,10 +173,19 @@ void HandleInput_OneController( ovrInputStateTrackedRemote *pDominantTrackedRemo
             QuatToYawPitchRoll(pOffTracking->Pose.orientation, rotation, offhandangles);
             rotation[PITCH] = 15.0f;
             QuatToYawPitchRoll(pOffTracking->Pose.orientation, rotation, flashlightangles);
+            rotation[PITCH] = 25.0f;
+            vec3_t inverseflashlightangles;
+            QuatToYawPitchRoll(pOffTracking->Pose.orientation, rotation, inverseflashlightangles);
+            if (vr_reversetorch->integer)
+            {
+                VectorNegate(inverseflashlightangles, flashlightangles);
+                flashlightangles[YAW] *= -1.0f;
+                flashlightangles[YAW] += 180.f;
+            }
         }
 
         flashlightangles[YAW] += (cl.refdef.cl_viewangles[YAW] - hmdorientation[YAW]);
-        offhandangles[YAW] = flashlightangles[YAW];
+        offhandangles[YAW] += (cl.refdef.cl_viewangles[YAW] - hmdorientation[YAW]);
 
         controllerYawHeading = 0.0f;
 

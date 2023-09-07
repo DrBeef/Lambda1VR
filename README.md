@@ -32,9 +32,9 @@ The original half-life can be purchased on Steam:  https://store.steampowered.co
 
 Before attempting to start Lambda1VR you need to do the following:
 
-- Create a folder on your Quest called "xash"
+- Install and start the application once until it shows the menu screen. At this point exit and you will find that a "xash" folder has been created on your headset. 
 - Locate the install of half-life on your PC, if installed from Steam then it will be somewhere like C:/Program Files (x86)/Steam/steamApps/common/HalfLife/
-- Copy the entire folder "valve" to the newly created "xash" folder on the Quest (This will take a long time)
+- Copy the content of the "valve" folder to the newly created "xash/valve" folder on the Quest (This will take a long time)
 - (optional) Copy the contents of the valve_hd folder into the valve folder now on your Quest (this gives you some nicer models). If you are a Mac user please read this post, otherwise you will get a crash: https://www.reddit.com/r/Lambda1VR/comments/cls57m/mac_running_halflife_with_hd_assets_on_quest/
 
 
@@ -162,7 +162,7 @@ I would like to thank the following teams and individual for making this possibl
 * Max Vollmer for their 2017 Half-Life VR mod, of which I used and modified the 6DoF weapons code for this mod, the original code for which can be seen here: https://github.com/maxvollmer/Half-Life-VR
 * The SideQuest team - For making it easy for people to install this
 * https://github.com/formicsapien for the weapon models that were used in the first couple of releases
-* Please go to https://www.lambda1vr.com/modifications.html for a full list of credits for weapon models used in the current version
+* Please go to https://www.lambda1vr.com/credits.html for a full list of credits for weapon models used in the current version
 
 
 ## Notice of Non-Affiliation and Disclaimers

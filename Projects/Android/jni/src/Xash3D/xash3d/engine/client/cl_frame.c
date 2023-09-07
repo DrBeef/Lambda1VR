@@ -1301,6 +1301,7 @@ Emits all entities, particles, and lights to the refresh
 */
 extern convar_t	*vr_flashlight_model;
 extern convar_t	*vr_headtorch;
+extern convar_t	*vr_reversetorch;
 void CL_AddEntities( void )
 {
 	if( cls.state != ca_active )

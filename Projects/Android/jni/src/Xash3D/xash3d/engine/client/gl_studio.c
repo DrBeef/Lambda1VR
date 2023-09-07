@@ -3883,6 +3883,7 @@ R_DrawFlashlightModel
 */
 extern convar_t	*vr_flashlight_model;
 extern convar_t	*vr_headtorch;
+extern convar_t	*vr_reversetorch;
 void R_DrawFlashlightModel( void )
 {
     if( RI.refdef.onlyClientDraw || r_drawviewmodel->integer == 0 || bScopeEngaged())
@@ -3899,7 +3900,7 @@ void R_DrawFlashlightModel( void )
     if( cl.frame.client.flags & FL_HAS_FLASHLIGHT  &&
         cl.refdef.weapon.flags != 1 && // Make sure weapon isn't being stabilised
         vr_flashlight_model->integer &&
-        vr_headtorch->value == 0.0f) {
+        !vr_headtorch->integer) {
 
         clgame.flashlightent.model = Mod_ForName("models/v_torch.mdl", false);
         if (!clgame.flashlightent.model) {
