@@ -58,9 +58,10 @@ import static android.system.Os.setenv;
 
 	private static final String TAG = "Lambda1VR";
 
-	private int permissionCount = 0;
+	private boolean permissionsGranted = false;
 	private static final int READ_EXTERNAL_STORAGE_PERMISSION_ID = 1;
 	private static final int WRITE_EXTERNAL_STORAGE_PERMISSION_ID = 2;
+
 
 	String commandLineParams;
 
@@ -105,15 +106,8 @@ import static android.system.Os.setenv;
 					GLES3JNIActivity.this,
 					new String[] {Manifest.permission.WRITE_EXTERNAL_STORAGE},
 					WRITE_EXTERNAL_STORAGE_PERMISSION_ID);
-		}
-		else
-		{
-			permissionCount++;
-		}
-
-		if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
-				!= PackageManager.PERMISSION_GRANTED)
-		{
+		} else if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
+				!= PackageManager.PERMISSION_GRANTED){
 			ActivityCompat.requestPermissions(
 					GLES3JNIActivity.this,
 					new String[] {Manifest.permission.READ_EXTERNAL_STORAGE},
@@ -121,10 +115,10 @@ import static android.system.Os.setenv;
 		}
 		else
 		{
-			permissionCount++;
+			permissionsGranted = true;
 		}
 
-		if (permissionCount == 2) {
+		if (permissionsGranted) {
 			// Permissions have already been granted.
 			create();
 		}
@@ -134,21 +128,13 @@ import static android.system.Os.setenv;
 	@Override
 	public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] results) {
 		if (requestCode == READ_EXTERNAL_STORAGE_PERMISSION_ID) {
-			if (results.length > 0 && results[0] == PackageManager.PERMISSION_GRANTED) {
-				permissionCount++;
-			}
-			else
-			{
+			if (results.length > 0 && results[0] != PackageManager.PERMISSION_GRANTED) {
 				System.exit(0);
 			}
 		}
 
 		if (requestCode == WRITE_EXTERNAL_STORAGE_PERMISSION_ID) {
-			if (results.length > 0 && results[0] == PackageManager.PERMISSION_GRANTED) {
-				permissionCount++;
-			}
-			else
-			{
+			if (results.length > 0 && results[0] != PackageManager.PERMISSION_GRANTED) {
 				System.exit(0);
 			}
 		}
